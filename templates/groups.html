@@ -1,40 +1,65 @@
 {{define "body"}}
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-    <div class="row">
-        <h1 class="page-header">
-            Users &amp; Groups
-        </h1>
+<div class="p-6 space-y-6">
+    <!-- Groups Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-orbitron font-bold text-white mb-2">
+                USERS & GROUPS
+            </h1>
+            <p class="text-cyan-400 font-mono text-sm uppercase tracking-wider">
+                Manage your user groups effectively
+            </p>
+        </div>
+        <button type="button" class="inline-flex items-center px-4 py-2 border border-cyan-500 text-sm font-mono font-semibold rounded-md text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+            <i class="fa fa-plus mr-2"></i> New Group
+        </button>
     </div>
-    <div id="flashes" class="row"></div>
-    <div class="row">
-        <button type="button" class="btn btn-primary" onclick="edit(-1)" data-toggle="modal" data-backdrop="static"
-            data-target="#modal">
-            <i class="fa fa-plus"></i> New Group</button>
-    </div>
-    &nbsp;
-    <div id="loading">
-        <i class="fa fa-spinner fa-spin fa-4x"></i>
-    </div>
-    <div id="emptyMessage" class="row" style="display:none;">
-        <div class="alert alert-info">
-            No groups created yet. Let's create one!
+
+    <!-- Loading State -->
+    <div id="loading" class="flex items-center justify-center py-20">
+        <div class="text-center">
+            <div class="relative">
+                <i class="fa fa-spinner fa-spin text-4xl text-cyan-400"></i>
+                <div class="absolute inset-0 bg-cyan-400/20 blur-lg rounded-full animate-pulse"></div>
+            </div>
+            <p class="text-cyan-300 font-mono text-sm mt-4 uppercase tracking-wide">Loading Groups...</p>
         </div>
     </div>
-    <div class="row">
-        <table id="groupTable" class="table" style="display:none;">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th># of Members</th>
-                    <th>Modified Date</th>
-                    <th class="col-md-2 no-sort"></th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+
+    <!-- Empty State -->
+    <div id="emptyMessage" style="display:none;" class="text-center py-20">
+        <div class="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-xl p-8 border border-cyan-500/30">
+            <div class="mb-6">
+                <i class="fas fa-users text-5xl text-cyan-400 mb-4"></i>
+                <h3 class="text-xl font-orbitron font-bold text-white mb-2">No Groups Found</h3>
+                <p class="text-cyan-300 font-mono text-sm">Start by creating your first group.</p>
+            </div>
+            <button type="button" class="inline-flex items-center px-6 py-3 border border-cyan-500 text-sm font-mono font-semibold rounded-lg text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+                <i class="fas fa-plus mr-2"></i> Create Group
+            </button>
+        </div>
+    </div>
+
+    <!-- Groups Table -->
+    <div id="groupTableContainer" style="display:none;" class="space-y-6">
+        <div class="overflow-x-auto">
+            <table id="groupTable" class="w-full">
+                <thead>
+                    <tr class="border-b border-cyan-500/30">
+                        <th class="text-left py-3 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Name</th>
+                        <th class="text-left py-3 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider"># of Members</th>
+                        <th class="text-left py-3 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Modified Date</th>
+                        <th class="text-center py-3 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider no-sort">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700/50">
+                    <!-- Dynamic content will be populated here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
 <!-- Modal -->
 <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
     <div class="modal-dialog" role="document">
@@ -49,12 +74,10 @@
                 <div class="row" id="modal.flashes"></div>
                 <label class="control-label" for="name">Name:</label>
                 <div class="form-group">
-                    <input type="text" class="form-control" ng-model="group.name" placeholder="Group name" id="name"
-                        autofocus />
+                    <input type="text" class="form-control" ng-model="group.name" placeholder="Group name" id="name" autofocus />
                 </div>
                 <div class="form-group">
-                    <span class="btn btn-danger btn-file" data-toggle="tooltip" data-placement="right"
-                        title="Supports CSV files" id="fileUpload">
+                    <span class="btn btn-danger btn-file" data-toggle="tooltip" data-placement="right" title="Supports CSV files" id="fileUpload">
                         <i class="fa fa-plus"></i> Bulk Import Users
                         <input type="file" id="csvupload" multiple>
                     </span>

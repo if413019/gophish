@@ -1,47 +1,279 @@
 {{define "nav"}}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-            <ul class="nav nav-sidebar">
-                <li>
-                    <a href="/">Dashboard</a>
-                </li>
-                <li>
-                    <a href="/campaigns">Campaigns</a>
-                </li>
-                <li>
-                    <a href="/groups">Users &amp; Groups</a>
-                </li>
-                <li> <a href="/templates">Email Templates</a>
-                </li>
-                <li>
-                    <a href="/landing_pages">Landing Pages</a>
-                </li>
-                <li>
-                    <a href="/sending_profiles">Sending Profiles</a>
-                </li>
-                <li>
-                    <a href="/settings">Account Settings</span></a>
-                </li>
-                {{if .ModifySystem}}
-                <li>
-                    <a href="/users">User Management<span class="nav-badge badge pull-right">Admin</span></a>
-                </li>
-                <li>
-                    <a href="/webhooks">Webhooks<span class="nav-badge badge pull-right">Admin</span></a>
-                </li>
-                {{end}}
-                <li>
-                    <hr>
-                </li>
-                <li>
-                    <a href="https://docs.getgophish.com/user-guide/">User Guide</a>
-                </li>
-                <li>
-                    <a href="https://docs.getgophish.com/api-documentation/">API Documentation</a>
-                </li>
-            </ul>
+<div class="space-y-0.5 px-2">
+    <!-- Core Features Section -->
+    <div class="space-y-0.5">
+        <!-- Dashboard -->
+        <a href="/" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-cyan-300 hover:text-cyan-200 hover:bg-cyan-500/10 transition-all duration-200 border border-transparent hover:border-cyan-500/30" data-nav-item="/">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-cyan-500 to-blue-600 text-white group-hover:shadow-md group-hover:shadow-cyan-500/25 transition-all duration-200 relative">
+                <i class="fas fa-chart-line text-xs relative z-10"></i>
+            </div>
+            <span class="font-medium">DASHBOARD</span>
+            <div class="ml-auto w-1.5 h-1.5 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping"></div>
+        </a>
+
+        <!-- Campaigns -->
+        <a href="/campaigns" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-green-300 hover:text-green-200 hover:bg-green-500/10 transition-all duration-200 border border-transparent hover:border-green-500/30" data-nav-item="/campaigns">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-green-500 to-emerald-600 text-white group-hover:shadow-md group-hover:shadow-green-500/25 transition-all duration-200 relative">
+                <i class="fas fa-rocket text-xs relative z-10"></i>
+            </div>
+            <span class="font-medium">CAMPAIGNS</span>
+            <div class="ml-auto w-1.5 h-1.5 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping"></div>
+        </a>
+
+        <!-- Users & Groups -->
+        <a href="/groups" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-blue-300 hover:text-blue-200 hover:bg-blue-500/10 transition-all duration-200 border border-transparent hover:border-blue-500/30" data-nav-item="/groups">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-blue-500 to-indigo-600 text-white group-hover:shadow-md group-hover:shadow-blue-500/25 transition-all duration-200 relative">
+                <i class="fas fa-users text-xs relative z-10"></i>
+            </div>
+            <span class="font-medium">TARGETS</span>
+            <div class="ml-auto w-1.5 h-1.5 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping"></div>
+        </a>
+
+        <!-- Email Templates -->
+        <a href="/templates" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-purple-300 hover:text-purple-200 hover:bg-purple-500/10 transition-all duration-200 border border-transparent hover:border-purple-500/30" data-nav-item="/templates">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-purple-500 to-pink-600 text-white group-hover:shadow-md group-hover:shadow-purple-500/25 transition-all duration-200 relative">
+                <i class="fas fa-envelope-open-text text-xs relative z-10"></i>
+            </div>
+            <span class="font-medium">PAYLOADS</span>
+            <div class="ml-auto w-1.5 h-1.5 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping"></div>
+        </a>
+
+        <!-- Landing Pages -->
+        <a href="/landing_pages" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-orange-300 hover:text-orange-200 hover:bg-orange-500/10 transition-all duration-200 border border-transparent hover:border-orange-500/30" data-nav-item="/landing_pages">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-orange-500 to-red-600 text-white group-hover:shadow-md group-hover:shadow-orange-500/25 transition-all duration-200 relative">
+                <i class="fas fa-spider text-xs relative z-10"></i>
+            </div>
+            <span class="font-medium">LURES</span>
+            <div class="ml-auto w-1.5 h-1.5 bg-orange-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping"></div>
+        </a>
+
+        <!-- Sending Profiles -->
+        <a href="/sending_profiles" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-teal-300 hover:text-teal-200 hover:bg-teal-500/10 transition-all duration-200 border border-transparent hover:border-teal-500/30" data-nav-item="/sending_profiles">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-teal-500 to-cyan-600 text-white group-hover:shadow-md group-hover:shadow-teal-500/25 transition-all duration-200 relative">
+                <i class="fas fa-satellite-dish text-xs relative z-10"></i>
+            </div>
+            <span class="font-medium">RELAYS</span>
+            <div class="ml-auto w-1.5 h-1.5 bg-teal-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping"></div>
+        </a>
+    </div>
+
+    <!-- Compact Cyber Divider -->
+    <div class="relative my-3">
+        <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-cyan-500/30"></div>
+        </div>
+        <div class="relative flex justify-center text-xs">
+            <span class="bg-black px-2 text-cyan-400 font-mono font-semibold uppercase tracking-wide text-xs">ADV</span>
         </div>
     </div>
+
+    <!-- Compact Advanced Features Section -->
+    <div class="space-y-0.5">
+        <!-- E-Learning (Future Feature) -->
+        <div class="group flex items-center px-2 py-1.5 text-xs font-mono rounded-md text-gray-500 cursor-not-allowed opacity-30">
+            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded-sm bg-gradient-to-br from-gray-600 to-gray-700 text-gray-400">
+                <i class="fas fa-brain text-xs"></i>
+            </div>
+            <span class="font-medium text-xs">NEURAL</span>
+            <span class="ml-auto text-xs px-1 text-yellow-500">INIT</span>
+        </div>
+
+        <!-- Multi-Channel (Future Feature) -->
+        <div class="group flex items-center px-2 py-1.5 text-xs font-mono rounded-md text-gray-500 cursor-not-allowed opacity-30">
+            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded-sm bg-gradient-to-br from-gray-600 to-gray-700 text-gray-400">
+                <i class="fas fa-satellite text-xs"></i>
+            </div>
+            <span class="font-medium text-xs">MULTI-VEC</span>
+            <span class="ml-auto text-xs px-1 text-purple-500">PRO</span>
+        </div>
+
+        <!-- AI Generator (Future Feature) -->
+        <div class="group flex items-center px-2 py-1.5 text-xs font-mono rounded-md text-gray-500 cursor-not-allowed opacity-30">
+            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded-sm bg-gradient-to-br from-gray-600 to-gray-700 text-gray-400">
+                <i class="fas fa-robot text-xs"></i>
+            </div>
+            <span class="font-medium text-xs">AI-FORGE</span>
+            <span class="ml-auto text-xs px-1 text-cyan-500">AI</span>
+        </div>
+    </div>
+
+    <!-- Compact Cyber Divider -->
+    <div class="relative my-3">
+        <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-cyan-500/30"></div>
+        </div>
+        <div class="relative flex justify-center text-xs">
+            <span class="bg-black px-2 text-cyan-400 font-mono font-semibold uppercase tracking-wide text-xs">CFG</span>
+        </div>
+    </div>
+
+    <!-- Compact Settings Section -->
+    <div class="space-y-0.5">
+        <!-- Account Settings -->
+        <a href="/settings" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-gray-300 hover:text-gray-200 hover:bg-gray-500/10 transition-all duration-200 border border-transparent hover:border-gray-500/30" data-nav-item="/settings">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-gray-500 to-gray-600 text-white group-hover:shadow-md group-hover:shadow-gray-500/25 transition-all duration-200">
+                <i class="fas fa-cogs text-xs"></i>
+            </div>
+            <span class="font-medium">SETTINGS</span>
+            <div class="ml-auto w-1.5 h-1.5 bg-gray-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping"></div>
+        </a>
+
+        {{if .ModifySystem}}
+        <!-- Admin Section -->
+        <a href="/users" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-red-300 hover:text-red-200 hover:bg-red-500/10 transition-all duration-200 border border-transparent hover:border-red-500/30" data-nav-item="/users">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-red-500 to-pink-600 text-white group-hover:shadow-md group-hover:shadow-red-500/25 transition-all duration-200">
+                <i class="fas fa-user-shield text-xs"></i>
+            </div>
+            <span class="font-medium">USERS</span>
+            <span class="ml-auto text-xs px-1 text-red-400">ROOT</span>
+        </a>
+
+        <a href="/webhooks" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-red-300 hover:text-red-200 hover:bg-red-500/10 transition-all duration-200 border border-transparent hover:border-red-500/30" data-nav-item="/webhooks">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-red-500 to-pink-600 text-white group-hover:shadow-md group-hover:shadow-red-500/25 transition-all duration-200">
+                <i class="fas fa-link text-xs"></i>
+            </div>
+            <span class="font-medium">HOOKS</span>
+            <span class="ml-auto text-xs px-1 text-red-400">ROOT</span>
+        </a>
+        {{end}}
+    </div>
+
+    <!-- Compact Cyber Divider -->
+    <div class="relative my-3">
+        <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-cyan-500/30"></div>
+        </div>
+        <div class="relative flex justify-center text-xs">
+            <span class="bg-black px-2 text-cyan-400 font-mono font-semibold uppercase tracking-wide text-xs">DOCS</span>
+        </div>
+    </div>
+
+    <!-- Compact Help Section -->
+    <div class="space-y-0.5">
+        <a href="https://docs.phi-shin.com" target="_blank" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-blue-300 hover:text-blue-200 hover:bg-blue-500/10 transition-all duration-200 border border-transparent hover:border-blue-500/30">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-blue-500 to-indigo-600 text-white group-hover:shadow-md group-hover:shadow-blue-500/25 transition-all duration-200">
+                <i class="fas fa-file-code text-xs"></i>
+            </div>
+            <span class="font-medium">DOCS</span>
+            <i class="fas fa-external-link-alt ml-auto text-xs text-blue-400 group-hover:text-blue-300"></i>
+        </a>
+
+        <a href="https://docs.phi-shin.com/api" target="_blank" class="group flex items-center px-2 py-2 text-xs font-mono rounded-md text-emerald-300 hover:text-emerald-200 hover:bg-emerald-500/10 transition-all duration-200 border border-transparent hover:border-emerald-500/30">
+            <div class="flex items-center justify-center w-6 h-6 mr-2 rounded-sm bg-gradient-to-br from-emerald-500 to-teal-600 text-white group-hover:shadow-md group-hover:shadow-emerald-500/25 transition-all duration-200">
+                <i class="fas fa-terminal text-xs"></i>
+            </div>
+            <span class="font-medium">API</span>
+            <i class="fas fa-external-link-alt ml-auto text-xs text-emerald-400 group-hover:text-emerald-300"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Cyber Active state script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get current path
+        const currentPath = window.location.pathname;
+        
+        // Find all navigation links
+        const navLinks = document.querySelectorAll('[data-nav-item]');
+        
+        // Remove active classes and add to current page
+        navLinks.forEach(link => {
+            const linkPath = link.getAttribute('data-nav-item');
+            
+            // Check if this is the active page
+            if (linkPath === currentPath ||
+                (currentPath !== '/' && linkPath !== '/' && currentPath.startsWith(linkPath))) {
+                
+                // Add cyber active state
+                link.classList.add('bg-cyan-500/20', 'border-cyan-400', 'text-cyan-200');
+                link.classList.remove('border-transparent');
+                
+                // Add glowing effect to icon
+                const iconContainer = link.querySelector('div');
+                if (iconContainer) {
+                    iconContainer.classList.add('shadow-lg', 'shadow-cyan-500/50', 'scale-110');
+                    const pulseDiv = iconContainer.querySelector('.animate-pulse');
+                    if (pulseDiv) {
+                        pulseDiv.classList.remove('animate-pulse');
+                        pulseDiv.classList.add('animate-ping');
+                    }
+                }
+                
+                // Make ping dot visible
+                const pingDot = link.querySelector('.animate-ping');
+                if (pingDot) {
+                    pingDot.classList.remove('opacity-0');
+                    pingDot.classList.add('opacity-100');
+                }
+                
+                // Update text to be brighter
+                const textSpan = link.querySelector('span');
+                if (textSpan) {
+                    textSpan.classList.add('font-bold', 'text-cyan-100');
+                }
+            }
+        });
+    });
+</script>
+{{end}}
+
+{{define "mobile-nav"}}
+<div class="space-y-1">
+    <!-- Dashboard -->
+    <a href="/" class="group flex items-center px-3 py-2 text-base font-medium rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-ocean-50 hover:to-indigo-50 transition-all duration-200">
+        <div class="flex items-center justify-center w-10 h-10 mr-4 rounded-lg bg-gradient-to-br from-ocean-500 to-indigo-600 text-white">
+            <i class="fas fa-chart-line text-sm"></i>
+        </div>
+        <span class="font-medium">Dashboard</span>
+    </a>
+
+    <!-- Campaigns -->
+    <a href="/campaigns" class="group flex items-center px-3 py-2 text-base font-medium rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-ocean-50 hover:to-indigo-50 transition-all duration-200">
+        <div class="flex items-center justify-center w-10 h-10 mr-4 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+            <i class="fas fa-paper-plane text-sm"></i>
+        </div>
+        <span class="font-medium">Campaigns</span>
+    </a>
+
+    <!-- Users & Groups -->
+    <a href="/groups" class="group flex items-center px-3 py-2 text-base font-medium rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-ocean-50 hover:to-indigo-50 transition-all duration-200">
+        <div class="flex items-center justify-center w-10 h-10 mr-4 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 text-white">
+            <i class="fas fa-users text-sm"></i>
+        </div>
+        <span class="font-medium">Users &amp; Groups</span>
+    </a>
+
+    <!-- Email Templates -->
+    <a href="/templates" class="group flex items-center px-3 py-2 text-base font-medium rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-ocean-50 hover:to-indigo-50 transition-all duration-200">
+        <div class="flex items-center justify-center w-10 h-10 mr-4 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 text-white">
+            <i class="fas fa-envelope text-sm"></i>
+        </div>
+        <span class="font-medium">Email Templates</span>
+    </a>
+
+    <!-- Landing Pages -->
+    <a href="/landing_pages" class="group flex items-center px-3 py-2 text-base font-medium rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-ocean-50 hover:to-indigo-50 transition-all duration-200">
+        <div class="flex items-center justify-center w-10 h-10 mr-4 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 text-white">
+            <i class="fas fa-globe text-sm"></i>
+        </div>
+        <span class="font-medium">Landing Pages</span>
+    </a>
+
+    <!-- Sending Profiles -->
+    <a href="/sending_profiles" class="group flex items-center px-3 py-2 text-base font-medium rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-ocean-50 hover:to-indigo-50 transition-all duration-200">
+        <div class="flex items-center justify-center w-10 h-10 mr-4 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 text-white">
+            <i class="fas fa-server text-sm"></i>
+        </div>
+        <span class="font-medium">Sending Profiles</span>
+    </a>
+
+    <!-- Account Settings -->
+    <a href="/settings" class="group flex items-center px-3 py-2 text-base font-medium rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-ocean-50 hover:to-indigo-50 transition-all duration-200">
+        <div class="flex items-center justify-center w-10 h-10 mr-4 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 text-white">
+            <i class="fas fa-cog text-sm"></i>
+        </div>
+        <span class="font-medium">Account Settings</span>
+    </a>
 </div>
 {{end}}

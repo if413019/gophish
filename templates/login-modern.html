@@ -1,0 +1,236 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="phi.shin - Advanced Phishing Simulation Platform">
+    <meta name="author" content="phi.shin Team">
+    <link rel="shortcut icon" href="/images/favicon.ico">
+
+    <title>phi.shin - {{ .Title }}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- TW-Elements CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/tw-elements.min.css" />
+    
+    <!-- Custom phi.shin styles -->
+    <link href="/css/phishin-modern.css" rel="stylesheet" type="text/css">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        // Configure Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            500: '#667eea',
+                            600: '#5a67d8',
+                            700: '#4c51bf',
+                        },
+                        secondary: {
+                            500: '#764ba2',
+                            600: '#6b46c1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="h-full font-sans antialiased">
+    <div class="min-h-full flex">
+        <!-- Left side - Login Form -->
+        <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+            <div class="mx-auto w-full max-w-sm lg:w-96">
+                <div>
+                    <!-- Logo -->
+                    <img class="h-16 w-auto" src="/images/phishin_logo.svg" alt="phi.shin">
+                    <h2 class="mt-6 text-3xl font-bold text-gray-900">
+                        Welcome back
+                    </h2>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Sign in to your phi.shin account
+                    </p>
+                </div>
+
+                <div class="mt-8">
+                    <div class="mt-6">
+                        {{template "flashes" .Flashes}}
+                        
+                        <form class="space-y-6" action="" method="POST">
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700">
+                                    Username
+                                </label>
+                                <div class="mt-1">
+                                    <input id="username" name="username" type="text" autocomplete="username" required 
+                                           class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                           placeholder="Enter your username">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700">
+                                    Password
+                                </label>
+                                <div class="mt-1">
+                                    <input id="password" name="password" type="password" autocomplete="current-password" required 
+                                           class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                           placeholder="Enter your password">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input id="remember-me" name="remember-me" type="checkbox" 
+                                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+                                        Remember me
+                                    </label>
+                                </div>
+
+                                <div class="text-sm">
+                                    <a href="/reset_password" class="font-medium text-indigo-600 hover:text-indigo-500">
+                                        Forgot your password?
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div>
+                                <input type="hidden" name="csrf_token" value="{{.Token}}" />
+                                <button type="submit" 
+                                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                        <i class="fas fa-lock h-5 w-5 text-indigo-500 group-hover:text-indigo-400"></i>
+                                    </span>
+                                    Sign in
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-8 text-center">
+                    <p class="text-xs text-gray-500">
+                        phi.shin - Advanced Phishing Simulation Platform
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1">
+                        真のシミュレーション (True Simulation)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right side - Background -->
+        <div class="hidden lg:block relative w-0 flex-1">
+            <div class="absolute inset-0 h-full w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800">
+                <div class="absolute inset-0 bg-black opacity-20"></div>
+                
+                <!-- Decorative content -->
+                <div class="relative h-full flex items-center justify-center p-12">
+                    <div class="text-center text-white">
+                        <div class="mb-8">
+                            <i class="fas fa-shield-alt text-6xl opacity-80"></i>
+                        </div>
+                        <h1 class="text-4xl font-bold mb-4">
+                            Advanced Security Training
+                        </h1>
+                        <p class="text-xl opacity-90 mb-8">
+                            Comprehensive phishing simulation platform with AI-powered campaigns and integrated learning
+                        </p>
+                        
+                        <!-- Feature highlights -->
+                        <div class="space-y-4 text-left max-w-md">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Multi-channel phishing simulations</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>AI-powered content generation</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Integrated e-learning platform</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Real-time analytics & reporting</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Animated background elements -->
+                <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                    <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-white opacity-5 rounded-full animate-pulse"></div>
+                    <div class="absolute top-3/4 right-1/4 w-32 h-32 bg-white opacity-5 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                    <div class="absolute top-1/2 left-1/2 w-48 h-48 bg-white opacity-5 rounded-full animate-pulse" style="animation-delay: 2s;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script>
+    
+    <!-- Login form enhancements -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add form validation feedback
+            const form = document.querySelector('form');
+            const inputs = form.querySelectorAll('input[required]');
+            
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value.trim() === '') {
+                        this.classList.add('border-red-300', 'focus:border-red-500', 'focus:ring-red-500');
+                        this.classList.remove('border-gray-300', 'focus:border-indigo-500', 'focus:ring-indigo-500');
+                    } else {
+                        this.classList.remove('border-red-300', 'focus:border-red-500', 'focus:ring-red-500');
+                        this.classList.add('border-gray-300', 'focus:border-indigo-500', 'focus:ring-indigo-500');
+                    }
+                });
+            });
+
+            // Add loading state to submit button
+            form.addEventListener('submit', function() {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Signing in...';
+                submitBtn.disabled = true;
+                
+                // Re-enable after 5 seconds in case of error
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 5000);
+            });
+
+            // Auto-focus username field
+            document.getElementById('username').focus();
+        });
+    </script>
+</body>
+
+</html>
+{{ end }}

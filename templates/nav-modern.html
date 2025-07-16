@@ -1,0 +1,180 @@
+{{define "nav"}}
+<div class="space-y-1">
+    <!-- Dashboard -->
+    <a href="/" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-chart-line text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+        Dashboard
+    </a>
+
+    <!-- Campaigns -->
+    <a href="/campaigns" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-paper-plane text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+        Campaigns
+    </a>
+
+    <!-- Users & Groups -->
+    <a href="/groups" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-users text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+        Users &amp; Groups
+    </a>
+
+    <!-- Email Templates -->
+    <a href="/templates" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-envelope text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+        Email Templates
+    </a>
+
+    <!-- Landing Pages -->
+    <a href="/landing_pages" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-globe text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+        Landing Pages
+    </a>
+
+    <!-- Sending Profiles -->
+    <a href="/sending_profiles" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-server text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+        Sending Profiles
+    </a>
+
+    <!-- Divider -->
+    <div class="border-t border-gray-200 my-4"></div>
+
+    <!-- Advanced Features Section -->
+    <div class="space-y-1">
+        <h3 class="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Advanced</h3>
+        
+        <!-- E-Learning -->
+        <a href="/courses" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <i class="fas fa-graduation-cap text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+            E-Learning
+            <span class="ml-auto inline-block py-0.5 px-2 text-xs rounded-full bg-indigo-100 text-indigo-600">New</span>
+        </a>
+
+        <!-- Multi-Channel -->
+        <a href="/channels" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <i class="fas fa-broadcast-tower text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+            Multi-Channel
+            <span class="ml-auto inline-block py-0.5 px-2 text-xs rounded-full bg-indigo-100 text-indigo-600">Pro</span>
+        </a>
+
+        <!-- AI Generator -->
+        <a href="/ai-generator" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <i class="fas fa-robot text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+            AI Generator
+            <span class="ml-auto inline-block py-0.5 px-2 text-xs rounded-full bg-purple-100 text-purple-600">AI</span>
+        </a>
+    </div>
+
+    <!-- Divider -->
+    <div class="border-t border-gray-200 my-4"></div>
+
+    <!-- Settings Section -->
+    <div class="space-y-1">
+        <h3 class="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Settings</h3>
+        
+        <!-- Account Settings -->
+        <a href="/settings" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <i class="fas fa-cog text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+            Account Settings
+        </a>
+
+        {{if .ModifySystem}}
+        <!-- Admin Section -->
+        <a href="/users" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <i class="fas fa-user-shield text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+            User Management
+            <span class="ml-auto inline-block py-0.5 px-2 text-xs rounded-full bg-red-100 text-red-600">Admin</span>
+        </a>
+
+        <a href="/webhooks" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <i class="fas fa-webhook text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+            Webhooks
+            <span class="ml-auto inline-block py-0.5 px-2 text-xs rounded-full bg-red-100 text-red-600">Admin</span>
+        </a>
+
+        <!-- License Management -->
+        <a href="/license" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <i class="fas fa-key text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-5 w-5"></i>
+            License
+            <span class="ml-auto inline-block py-0.5 px-2 text-xs rounded-full bg-red-100 text-red-600">Admin</span>
+        </a>
+        {{end}}
+    </div>
+</div>
+
+<!-- Active state script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get current path
+        const currentPath = window.location.pathname;
+        
+        // Find all navigation links
+        const navLinks = document.querySelectorAll('nav a');
+        
+        // Remove active classes and add to current page
+        navLinks.forEach(link => {
+            link.classList.remove('bg-indigo-50', 'border-indigo-500', 'text-indigo-700');
+            link.classList.add('text-gray-700', 'hover:text-gray-900', 'hover:bg-gray-50');
+            
+            if (link.getAttribute('href') === currentPath || 
+                (currentPath !== '/' && link.getAttribute('href') !== '/' && currentPath.startsWith(link.getAttribute('href')))) {
+                link.classList.remove('text-gray-700', 'hover:text-gray-900', 'hover:bg-gray-50');
+                link.classList.add('bg-indigo-50', 'border-r-2', 'border-indigo-500', 'text-indigo-700');
+                
+                // Also update the icon color
+                const icon = link.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('text-gray-400', 'group-hover:text-gray-500');
+                    icon.classList.add('text-indigo-600');
+                }
+            }
+        });
+    });
+</script>
+{{end}}
+
+{{define "mobile-nav"}}
+<div class="space-y-1">
+    <!-- Dashboard -->
+    <a href="/" class="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-chart-line text-gray-400 group-hover:text-gray-500 mr-4 flex-shrink-0 h-6 w-6"></i>
+        Dashboard
+    </a>
+
+    <!-- Campaigns -->
+    <a href="/campaigns" class="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-paper-plane text-gray-400 group-hover:text-gray-500 mr-4 flex-shrink-0 h-6 w-6"></i>
+        Campaigns
+    </a>
+
+    <!-- Users & Groups -->
+    <a href="/groups" class="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-users text-gray-400 group-hover:text-gray-500 mr-4 flex-shrink-0 h-6 w-6"></i>
+        Users &amp; Groups
+    </a>
+
+    <!-- Email Templates -->
+    <a href="/templates" class="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-envelope text-gray-400 group-hover:text-gray-500 mr-4 flex-shrink-0 h-6 w-6"></i>
+        Email Templates
+    </a>
+
+    <!-- Landing Pages -->
+    <a href="/landing_pages" class="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-globe text-gray-400 group-hover:text-gray-500 mr-4 flex-shrink-0 h-6 w-6"></i>
+        Landing Pages
+    </a>
+
+    <!-- Sending Profiles -->
+    <a href="/sending_profiles" class="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-server text-gray-400 group-hover:text-gray-500 mr-4 flex-shrink-0 h-6 w-6"></i>
+        Sending Profiles
+    </a>
+
+    <!-- Account Settings -->
+    <a href="/settings" class="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+        <i class="fas fa-cog text-gray-400 group-hover:text-gray-500 mr-4 flex-shrink-0 h-6 w-6"></i>
+        Account Settings
+    </a>
+</div>
+{{end}}

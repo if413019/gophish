@@ -1,70 +1,294 @@
 {{define "body"}}
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-    <h1 class="page-header">
-        Dashboard
-    </h1>
-    <div id="loading">
-        <i class="fa fa-spinner fa-spin fa-4x"></i>
-    </div>
-    {{template "flashes" .Flashes}}
-    <div id="emptyMessage" style="display:none;">
-        <div class="alert alert-info">
-            No campaigns created yet. Let's create one!
+<div class="p-6 space-y-6">
+    <!-- Cyber Dashboard Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-orbitron font-bold text-white mb-2">
+                COMMAND CENTER
+            </h1>
+            <p class="text-cyan-400 font-mono text-sm uppercase tracking-wider">
+                Simulation Operations Dashboard
+            </p>
         </div>
-    </div>
-    <div id="dashboard" style="display:none;">
-        <div class="row">
-            <div id="overview_chart" style="height:200px;" class="col-lg-12 col-md-12 col-sm-12 col-xs-12"></div>
-        </div>
-        <div class="row">
-            <div style="height:200px;" class="col-lg-1 col-md-1"></div>
-            <div id="sent_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="opened_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="clicked_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="submitted_data_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="email_reported_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div style="height:200px;" class="col-lg-1 col-md-1"></div>
-        </div>
-        <div class="row">
-            <h2>Recent Campaigns</h2>
-        </div>
-        <div class="row">
-            <a href="/campaigns">
-                <button type="button" class="btn btn-primary">View All</button>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span class="text-green-400 font-mono text-xs uppercase">ACTIVE</span>
+            </div>
+            <a href="/campaigns" class="inline-flex items-center px-4 py-2 border border-cyan-500 text-sm font-mono font-semibold rounded-md text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200">
+                <i class="fas fa-rocket mr-2"></i>
+                LAUNCH CAMPAIGN
             </a>
         </div>
-        &nbsp;&nbsp;
-        <div class="row">
-            <table id="campaignTable" class="table">
-                <thead>
-                    <tr>
-                        <th class="col-md-2 col-sm-2">Name</th>
-                        <th class="col-md-2 col-sm-2">Created Date</th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-envelope-o"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-envelope-open-o"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-mouse-pointer"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-exclamation-circle"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-bullhorn"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">Status</th>
-                        <th class="col-md-2 col-sm-2 no-sort"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="flex items-center justify-center py-20">
+        <div class="text-center">
+            <div class="relative">
+                <i class="fa fa-spinner fa-spin text-4xl text-cyan-400"></i>
+                <div class="absolute inset-0 bg-cyan-400/20 blur-lg rounded-full animate-pulse"></div>
+            </div>
+            <p class="text-cyan-300 font-mono text-sm mt-4 uppercase tracking-wide">Initializing Systems...</p>
+        </div>
+    </div>
+
+    {{template "flashes" .Flashes}}
+
+    <!-- Empty State -->
+    <div id="emptyMessage" style="display:none;" class="text-center py-20">
+        <div class="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-xl p-8 border border-cyan-500/30">
+            <div class="mb-6">
+                <i class="fas fa-rocket text-5xl text-cyan-400 mb-4"></i>
+                <h3 class="text-xl font-orbitron font-bold text-white mb-2">Ready to Launch</h3>
+                <p class="text-cyan-300 font-mono text-sm">No active campaigns detected. Initialize your first simulation.</p>
+            </div>
+            <a href="/campaigns" class="inline-flex items-center px-6 py-3 border border-cyan-500 text-sm font-mono font-semibold rounded-lg text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200">
+                <i class="fas fa-plus mr-2"></i>
+                CREATE CAMPAIGN
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" style="display:none;" class="space-y-6">
+        <!-- Overview Chart -->
+        <div class="bg-gradient-to-br from-gray-900 to-black rounded-xl border border-cyan-500/30 p-6 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-lg font-orbitron font-bold text-white">MISSION OVERVIEW</h2>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+                        <span class="text-cyan-400 font-mono text-xs">REAL-TIME</span>
+                    </div>
+                </div>
+                <div id="overview_chart" style="height:250px;" class="w-full"></div>
+            </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <!-- Sent Metrics -->
+            <div class="bg-gradient-to-br from-gray-900 to-black rounded-lg border border-green-500/30 p-4 relative group hover:border-green-400/50 transition-all duration-200">
+                <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent rounded-lg"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-md flex items-center justify-center">
+                            <i class="fas fa-paper-plane text-white text-sm"></i>
+                        </div>
+                        <span class="text-xs font-mono text-green-400 uppercase">Sent</span>
+                    </div>
+                    <div id="sent_chart" style="height:120px;" class="w-full"></div>
+                </div>
+            </div>
+
+            <!-- Opened Metrics -->
+            <div class="bg-gradient-to-br from-gray-900 to-black rounded-lg border border-blue-500/30 p-4 relative group hover:border-blue-400/50 transition-all duration-200">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-lg"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-md flex items-center justify-center">
+                            <i class="fas fa-envelope-open text-white text-sm"></i>
+                        </div>
+                        <span class="text-xs font-mono text-blue-400 uppercase">Opened</span>
+                    </div>
+                    <div id="opened_chart" style="height:120px;" class="w-full"></div>
+                </div>
+            </div>
+
+            <!-- Clicked Metrics -->
+            <div class="bg-gradient-to-br from-gray-900 to-black rounded-lg border border-purple-500/30 p-4 relative group hover:border-purple-400/50 transition-all duration-200">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-lg"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-md flex items-center justify-center">
+                            <i class="fas fa-mouse-pointer text-white text-sm"></i>
+                        </div>
+                        <span class="text-xs font-mono text-purple-400 uppercase">Clicked</span>
+                    </div>
+                    <div id="clicked_chart" style="height:120px;" class="w-full"></div>
+                </div>
+            </div>
+
+            <!-- Submitted Data -->
+            <div class="bg-gradient-to-br from-gray-900 to-black rounded-lg border border-orange-500/30 p-4 relative group hover:border-orange-400/50 transition-all duration-200">
+                <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-lg"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-md flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                        </div>
+                        <span class="text-xs font-mono text-orange-400 uppercase">Captured</span>
+                    </div>
+                    <div id="submitted_data_chart" style="height:120px;" class="w-full"></div>
+                </div>
+            </div>
+
+            <!-- Reported Emails -->
+            <div class="bg-gradient-to-br from-gray-900 to-black rounded-lg border border-red-500/30 p-4 relative group hover:border-red-400/50 transition-all duration-200">
+                <div class="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent rounded-lg"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-600 rounded-md flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-white text-sm"></i>
+                        </div>
+                        <span class="text-xs font-mono text-red-400 uppercase">Reported</span>
+                    </div>
+                    <div id="email_reported_chart" style="height:120px;" class="w-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Campaigns Section -->
+        <div class="bg-gradient-to-br from-gray-900 to-black rounded-xl border border-cyan-500/30 p-6 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-lg font-orbitron font-bold text-white">RECENT OPERATIONS</h2>
+                    <a href="/campaigns" class="inline-flex items-center px-3 py-1 border border-cyan-500/50 text-xs font-mono rounded-md text-cyan-400 hover:bg-cyan-500/10 transition-all duration-200">
+                        <span>VIEW ALL</span>
+                        <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                </div>
+
+                <!-- Cyber Table -->
+                <div class="overflow-x-auto">
+                    <table id="campaignTable" class="w-full">
+                        <thead>
+                            <tr class="border-b border-cyan-500/30">
+                                <th class="text-left py-3 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Operation</th>
+                                <th class="text-left py-3 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Initiated</th>
+                                <th class="text-center py-3 px-2 text-cyan-400" title="Sent">
+                                    <i class="fas fa-paper-plane"></i>
+                                </th>
+                                <th class="text-center py-3 px-2 text-cyan-400" title="Opened">
+                                    <i class="fas fa-envelope-open"></i>
+                                </th>
+                                <th class="text-center py-3 px-2 text-cyan-400" title="Clicked">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                </th>
+                                <th class="text-center py-3 px-2 text-cyan-400" title="Data Submitted">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </th>
+                                <th class="text-center py-3 px-2 text-cyan-400" title="Reported">
+                                    <i class="fas fa-shield-alt"></i>
+                                </th>
+                                <th class="text-center py-3 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Status</th>
+                                <th class="text-center py-3 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider no-sort">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700/50">
+                            <!-- Dynamic content will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-{{end}} {{define "scripts"}}
+
+<!-- Custom Dashboard Styles -->
+<style>
+    /* Cyber table styling */
+    #campaignTable tbody tr {
+        transition: all 0.2s ease;
+    }
+    
+    #campaignTable tbody tr:hover {
+        background: rgba(6, 182, 212, 0.05);
+        border-left: 2px solid #06b6d4;
+    }
+    
+    #campaignTable tbody td {
+        padding: 12px 16px;
+        font-family: 'Inter', monospace;
+        font-size: 0.875rem;
+        color: #a1a1aa;
+    }
+    
+    /* Chart container styling */
+    .chartist-tooltip {
+        background: rgba(0, 0, 0, 0.9) !important;
+        border: 1px solid #06b6d4 !important;
+        color: #06b6d4 !important;
+        font-family: 'Inter', monospace !important;
+        font-size: 12px !important;
+    }
+    
+    /* Status badges */
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: 'Inter', monospace;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .status-active {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .status-completed {
+        background: rgba(99, 102, 241, 0.2);
+        color: #6366f1;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    
+    .status-queued {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+</style>
+{{end}}
+
+{{define "scripts"}}
 <script src="/js/dist/app/dashboard.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced loading state with cyber effects
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        // Add some cyber loading effects
+        const spinner = loadingElement.querySelector('.fa-spinner');
+        if (spinner) {
+            // Add glowing effect
+            spinner.style.filter = 'drop-shadow(0 0 10px #06b6d4)';
+        }
+    }
+    
+    // Cyber table enhancements
+    const table = document.getElementById('campaignTable');
+    if (table) {
+        // Add cyber styling to table rows when they're populated
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    // Style new table rows
+                    const rows = table.querySelectorAll('tbody tr');
+                    rows.forEach(function(row) {
+                        // Add hover effects and status badge styling
+                        const statusCell = row.querySelector('td:nth-last-child(2)');
+                        if (statusCell) {
+                            const status = statusCell.textContent.toLowerCase().trim();
+                            statusCell.innerHTML = `<span class="status-badge status-${status}">${statusCell.textContent}</span>`;
+                        }
+                    });
+                }
+            });
+        });
+        
+        observer.observe(table.querySelector('tbody'), {
+            childList: true,
+            subtree: true
+        });
+    }
+});
+</script>
 {{end}}

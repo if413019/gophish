@@ -1,0 +1,381 @@
+{{define "body"}}
+<div class="p-6">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="md:flex md:items-center md:justify-between">
+            <div class="flex-1 min-w-0">
+                <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                    Dashboard
+                </h1>
+                <p class="mt-1 text-sm text-gray-500">
+                    Welcome back! Here's an overview of your security training campaigns.
+                </p>
+            </div>
+            <div class="mt-4 flex md:mt-0 md:ml-4">
+                <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i class="fas fa-download -ml-1 mr-2 h-4 w-4"></i>
+                    Export Report
+                </button>
+                <button type="button" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i class="fas fa-plus -ml-1 mr-2 h-4 w-4"></i>
+                    New Campaign
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <!-- Total Campaigns -->
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-paper-plane text-white text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Campaigns</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">
+                                    {{.Stats.TotalCampaigns}}
+                                </div>
+                                <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                                    <i class="fas fa-arrow-up text-xs mr-1"></i>
+                                    12%
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Targets -->
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-users text-white text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Targets</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">
+                                    {{.Stats.TotalTargets}}
+                                </div>
+                                <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                                    <i class="fas fa-arrow-up text-xs mr-1"></i>
+                                    8%
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Rate -->
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-bullseye text-white text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Phish Success Rate</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">
+                                    {{.Stats.SuccessRate}}%
+                                </div>
+                                <div class="ml-2 flex items-baseline text-sm font-semibold text-red-600">
+                                    <i class="fas fa-arrow-down text-xs mr-1"></i>
+                                    3%
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Completion -->
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-white text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Training Completion</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">
+                                    {{.Stats.TrainingCompletion}}%
+                                </div>
+                                <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                                    <i class="fas fa-arrow-up text-xs mr-1"></i>
+                                    15%
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Campaign Results Chart -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+            <div class="px-6 py-5 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Campaign Results</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                    Overview of phishing simulation results over time
+                </p>
+            </div>
+            <div class="px-6 py-5">
+                <canvas id="campaignResultsChart" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- Security Awareness Trends -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+            <div class="px-6 py-5 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Security Awareness Trends</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                    Employee security awareness improvement over time
+                </p>
+            </div>
+            <div class="px-6 py-5">
+                <canvas id="awarenessChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- Recent Campaigns -->
+        <div class="xl:col-span-2">
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+                <div class="px-6 py-5 border-b border-gray-200">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Campaigns</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                        Latest phishing simulation campaigns and their status
+                    </p>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    {{range .RecentCampaigns}}
+                    <div class="px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+                                        <i class="fas fa-envelope text-white text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{.Name}}</div>
+                                    <div class="text-sm text-gray-500">{{.Stats.Total}} targets • Created {{.CreatedDate | date}}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                {{if eq .Status "Completed"}}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    {{.Status}}
+                                </span>
+                                {{else if eq .Status "In progress"}}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{.Status}}
+                                </span>
+                                {{else}}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{.Status}}
+                                </span>
+                                {{end}}
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+                <div class="px-6 py-3 bg-gray-50 text-right">
+                    <a href="/campaigns" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                        View all campaigns <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & System Status -->
+        <div class="space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+                <div class="px-6 py-5 border-b border-gray-200">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Quick Actions</h3>
+                </div>
+                <div class="px-6 py-5 space-y-3">
+                    <a href="/campaigns" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-indigo-100 rounded-md flex items-center justify-center">
+                                <i class="fas fa-rocket text-indigo-600 text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-sm font-medium text-gray-900">Launch Campaign</div>
+                            <div class="text-sm text-gray-500">Start a new phishing simulation</div>
+                        </div>
+                    </a>
+                    
+                    <a href="/groups" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600 text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-sm font-medium text-gray-900">Manage Groups</div>
+                            <div class="text-sm text-gray-500">Add or edit target groups</div>
+                        </div>
+                    </a>
+                    
+                    <a href="/templates" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
+                                <i class="fas fa-edit text-purple-600 text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-sm font-medium text-gray-900">Create Template</div>
+                            <div class="text-sm text-gray-500">Design email templates</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+                <div class="px-6 py-5 border-b border-gray-200">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">System Status</h3>
+                </div>
+                <div class="px-6 py-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                            <span class="text-sm text-gray-900">Email Service</span>
+                        </div>
+                        <span class="text-sm text-green-600 font-medium">Operational</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                            <span class="text-sm text-gray-900">Database</span>
+                        </div>
+                        <span class="text-sm text-green-600 font-medium">Operational</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-yellow-400 rounded-full mr-3"></div>
+                            <span class="text-sm text-gray-900">Multi-Channel</span>
+                        </div>
+                        <span class="text-sm text-yellow-600 font-medium">Limited</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                            <span class="text-sm text-gray-900">AI Generator</span>
+                        </div>
+                        <span class="text-sm text-green-600 font-medium">Available</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Campaign Results Chart
+    const ctx1 = document.getElementById('campaignResultsChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Sent',
+                data: [120, 150, 180, 140, 200, 190],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Clicked',
+                data: [30, 45, 50, 35, 60, 55],
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Submitted',
+                data: [15, 20, 25, 18, 30, 28],
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Security Awareness Chart
+    const ctx2 = document.getElementById('awarenessChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed Training', 'Pending', 'Failed'],
+            datasets: [{
+                data: [65, 25, 10],
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+});
+</script>
+{{end}}
+
+{{define "scripts"}}
+{{end}}
