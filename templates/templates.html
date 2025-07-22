@@ -1,136 +1,266 @@
 {{define "body"}}
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-    <div class="row">
-        <h1 class="page-header">
-            Email Templates
-        </h1>
+<div class="p-6 space-y-6">
+    <!-- Email Templates Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-orbitron font-bold text-white mb-2">
+                EMAIL TEMPLATES
+            </h1>
+            <p class="text-cyan-400 font-mono text-sm uppercase tracking-wider">
+                Create and manage email templates for your campaigns
+            </p>
+        </div>
+        <button type="button" class="inline-flex items-center px-4 py-2 border border-cyan-500 text-sm font-mono font-semibold rounded-md text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+            <i class="fa fa-plus mr-2"></i> New Template
+        </button>
     </div>
+    
+    <!-- Flash Messages -->
     <div id="flashes" class="row"></div>
-    <div class="row">
-        <button type="button" class="btn btn-primary" onclick="edit(-1)" data-toggle="modal" data-backdrop="static"
-            data-target="#modal"><i class="fa fa-plus"></i> New Template</button>
-    </div>
-    &nbsp;
-    <div id="loading">
-        <i class="fa fa-spinner fa-spin fa-4x"></i>
-    </div>
-    <div id="emptyMessage" class="row" style="display:none;">
-        <div class="alert alert-info">
-            No templates yet. Let's create one!
+
+    <!-- Loading State -->
+    <div id="loading" class="flex items-center justify-center py-20">
+        <div class="text-center">
+            <div class="relative">
+                <i class="fa fa-spinner fa-spin text-4xl text-cyan-400"></i>
+                <div class="absolute inset-0 bg-cyan-400/20 blur-lg rounded-full animate-pulse"></div>
+            </div>
+            <p class="text-cyan-300 font-mono text-sm mt-4 uppercase tracking-wide">Loading Email Templates...</p>
         </div>
     </div>
-    <div class="row">
-        <table id="templateTable" class="table" style="display:none;">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Modified Date</th>
-                    <th class="col-md-2 no-sort"></th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+
+    <!-- Empty State -->
+    <div id="emptyMessage" style="display:none;" class="text-center py-20">
+        <div class="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-xl p-8 border border-cyan-500/30">
+            <div class="mb-6">
+                <i class="fas fa-envelope text-5xl text-cyan-400 mb-4"></i>
+                <h3 class="text-xl font-orbitron font-bold text-white mb-2">No Email Templates Found</h3>
+                <p class="text-cyan-300 font-mono text-sm">Start by creating your first email template.</p>
+            </div>
+            <button type="button" class="inline-flex items-center px-6 py-3 border border-cyan-500 text-sm font-mono font-semibold rounded-lg text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+                <i class="fas fa-plus mr-2"></i> Create Email Template
+            </button>
+        </div>
     </div>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- New Template Modal -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="dismiss()"><span
-                        aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="templateModalLabel">New Template</h4>
+
+    <!-- Email Templates Table -->
+    <div class="row">
+        <!-- DataTables Controls -->
+        <div class="flex items-center justify-between mb-4" style="display:none;" id="templateTableControls">
+            <div class="flex items-center space-x-2">
+                <label class="text-cyan-300 font-mono text-sm">Show</label>
+                <select class="bg-gray-800 border border-cyan-500/30 text-cyan-300 px-2 py-1 rounded font-mono text-sm focus:border-cyan-400">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <label class="text-cyan-300 font-mono text-sm">entries</label>
             </div>
-            <div class="modal-body">
-                <div class="row" id="modal.flashes"></div>
-                <label class="control-label" for="name">Name:</label>
-                <div class="form-group">
-                    <input type="text" class="form-control" ng-model="template.name" placeholder="Template name" id="name"
-                        autofocus />
-                </div>
-                <div class="form-group">
-                    <button class="btn btn-danger" data-toggle="modal" data-backdrop="static" data-target="#importEmailModal"><i
-                            class="fa fa-envelope"></i>
-                        Import Email</button>
-                </div>
-                <label class="control-label" for="envelope-sender">Envelope Sender: <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="This sender is shown to the user by most email clients. Defaults to the SMTP From as defined in the Sending Profile."></i></label>
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="First Last <test@example.com>" id="envelope-sender" />
-                </div>
-                <label class="control-label" for="subject">Subject:</label>
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Email Subject" id="subject" />
-                </div>
-                <!-- Nav tabs -->
-                <ul class="nav nav-tabs" role="tablist">
-                    <li class="active" role="text"><a href="#text" aria-controls="text" role="tab" data-toggle="tab">Text</a></li>
-                    <li role="html"><a href="#html" aria-controls="html" role="tab" data-toggle="tab">HTML</a></li>
-                </ul>
-                <!-- Tab panes -->
-                <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="text">
-                        <textarea rows="10" id="text_editor" class="gophish-editor form-control" placeholder="Plaintext"></textarea>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="html">
-                        <textarea id="html_editor"></textarea>
-                    </div>
-                </div>
-                <div class="checkbox checkbox-primary">
-                    <input id="use_tracker_checkbox" type="checkbox" checked>
-                    <label for="use_tracker_checkbox">Add Tracking Image</label>
-                </div>
-                <span class="btn btn-danger btn-file"><i class="fa fa-plus"></i> Add Files
-                    <input id="attachmentUpload" type="file" onchange="attach(this.files)" multiple>
-                </span>
-                <br />
-                <br />
-                <table id="attachmentsTable" class="table">
-                    <thead>
-                        <tr>
-                            <th class="col-md-1 no-sort"></th>
-                            <th class="col-md-10">Name</th>
-                            <th class="col-md-1 no-sort"></th>
-                            <th class="datatable_hidden no-sort">Content</th>
-                            <th class="datatable_hidden no-sort">Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-                <hr>
+            <div class="flex items-center space-x-2">
+                <label class="text-cyan-300 font-mono text-sm">Search:</label>
+                <input type="text" class="bg-gray-800 border border-cyan-500/30 text-cyan-100 px-3 py-1 rounded font-mono text-sm focus:border-cyan-400 focus:outline-none" placeholder="Search templates...">
             </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default" onclick="dismiss()">Cancel</button>
-                <button type="button" class="btn btn-primary" id="modalSubmit">Save Template</button>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table id="templateTable" class="w-full table" style="display:none;">
+                <thead>
+                    <tr class="border-b border-cyan-500/30">
+                        <th class="text-left py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Name</th>
+                        <th class="text-left py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Modified Date</th>
+                        <th class="text-center py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider col-md-2 no-sort">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700/50">
+                    <!-- Table rows will be populated here with the following styling -->
+                    <!-- Each row should have: class="hover:bg-gray-800/50 transition-colors" -->
+                    <!-- Each cell should have: class="py-4 px-4 text-cyan-100 font-mono text-sm" -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- DataTables Pagination -->
+        <div class="flex items-center justify-between mt-4" style="display:none;" id="templateTablePagination">
+            <div class="text-cyan-300 font-mono text-sm">
+                Showing <span id="entriesStart">1</span> to <span id="entriesEnd">10</span> of <span id="entriesTotal">0</span> entries
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="px-3 py-1 bg-gray-800 border border-cyan-500/30 text-cyan-300 rounded font-mono text-sm hover:bg-cyan-500/10 disabled:opacity-50" id="prevPage">Previous</button>
+                <div class="flex space-x-1" id="pageNumbers">
+                    <button class="px-3 py-1 bg-cyan-600 border border-cyan-500 text-white rounded font-mono text-sm">1</button>
+                </div>
+                <button class="px-3 py-1 bg-gray-800 border border-cyan-500/30 text-cyan-300 rounded font-mono text-sm hover:bg-cyan-500/10 disabled:opacity-50" id="nextPage">Next</button>
             </div>
         </div>
     </div>
 </div>
-<!-- Modal -->
-<div class="modal fade" id="importEmailModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- New Email Modal -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="importEmailModalLabel">Import Email</h4>
+
+<!-- Main Template Modal -->
+<div class="modal hidden" id="modal" tabindex="-1" role="dialog" aria-labelledby="templateModalLabel">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content bg-gray-900 border border-cyan-500/20 shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+            <!-- Header -->
+            <div class="modal-header bg-gray-800/90 border-b border-cyan-500/20 px-4 py-3 flex items-center justify-between">
+                <h4 class="modal-title text-cyan-300 font-mono text-base font-medium" id="templateModalLabel">New Template</h4>
+                <button type="button" class="close text-cyan-400 hover:text-cyan-300 transition-colors" data-dismiss="modal" aria-label="Close" onclick="dismiss()">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
             </div>
-            <div class="modal-body">
+            
+            <!-- Body -->
+            <div class="modal-body bg-gray-900 px-4 py-4 overflow-y-auto flex-1 min-h-0">
                 <div class="row" id="modal.flashes"></div>
-                <label class="control-label" for="email">Email Content:</label>
-                <div class="form-group">
-                    <textarea rows="10" id="email_content" class="gophish-editor form-control" placeholder="Raw Email Source"></textarea>
+                
+                <!-- Template Name Section -->
+                <div class="mb-4">
+                    <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="name">Template Name</label>
+                    <input type="text" class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" ng-model="template.name" placeholder="Enter template name" id="name" autofocus />
                 </div>
-                <div class="checkbox checkbox-primary">
-                    <input id="convert_links_checkbox" type="checkbox" checked>
-                    <label for="convert_links_checkbox">Change Links to Point to Landing Page</label>
+                
+                <!-- Import Email Section -->
+                <div class="mb-4 p-3 bg-gray-800/30 rounded border border-cyan-500/20">
+                    <h5 class="text-cyan-300 font-mono text-xs font-medium mb-2">Import Email</h5>
+                    <button class="inline-flex items-center px-3 py-1.5 bg-cyan-600/20 border border-cyan-500/30 rounded text-cyan-300 hover:bg-cyan-600/30 transition-colors cursor-pointer font-mono text-xs" data-toggle="modal" data-backdrop="static" data-target="#importEmailModal">
+                        <i class="fa fa-envelope mr-1.5"></i> Import Email
+                    </button>
+                </div>
+                
+                <!-- Envelope Sender Section -->
+                <div class="mb-4">
+                    <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="envelope-sender">
+                        Envelope Sender
+                        <i class="fa fa-question-circle text-cyan-400/70 ml-1 cursor-help" data-toggle="tooltip" data-placement="right" title="This sender is shown to the user by most email clients. Defaults to the SMTP From as defined in the Sending Profile."></i>
+                    </label>
+                    <input type="text" class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" placeholder="First Last <test@example.com>" id="envelope-sender" />
+                </div>
+                
+                <!-- Subject Section -->
+                <div class="mb-4">
+                    <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="subject">Email Subject</label>
+                    <input type="text" class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" placeholder="Email Subject" id="subject" />
+                </div>
+                
+                <!-- Email Content Section -->
+                <div class="mb-4">
+                    <h5 class="text-cyan-300 font-mono text-xs font-medium mb-2">Email Content</h5>
+                    <!-- Nav tabs -->
+                    <ul class="flex border-b border-cyan-500/30 mb-4" role="tablist">
+                        <li class="mr-2" role="presentation">
+                            <a class="inline-block py-2 px-4 text-cyan-300 hover:text-cyan-100 font-mono text-xs bg-cyan-600/20 border-b-2 border-cyan-500 rounded-t-md transition-colors active" href="#text" aria-controls="text" role="tab" data-toggle="tab">Text</a>
+                        </li>
+                        <li class="mr-2" role="presentation">
+                            <a class="inline-block py-2 px-4 text-cyan-400/70 hover:text-cyan-100 font-mono text-xs hover:bg-cyan-600/10 border-b-2 border-transparent rounded-t-md transition-colors" href="#html" aria-controls="html" role="tab" data-toggle="tab">HTML</a>
+                        </li>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="text">
+                            <div class="bg-gray-800/50 border border-cyan-500/30 rounded overflow-hidden">
+                                <textarea rows="10" id="text_editor" class="gophish-editor w-full p-3 bg-transparent border-none text-cyan-100 placeholder-gray-400 focus:outline-none resize-none font-mono text-xs" placeholder="Enter plaintext email content here..."></textarea>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="html">
+                            <div class="bg-gray-800/50 border border-cyan-500/30 rounded overflow-hidden">
+                                <textarea id="html_editor" class="w-full h-64 p-3 bg-transparent border-none text-cyan-100 placeholder-gray-400 focus:outline-none resize-none font-mono text-xs" placeholder="Enter HTML email content here..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tracking Options Section -->
+                <div class="mb-4 p-3 bg-gray-800/30 rounded border border-cyan-500/20">
+                    <h5 class="text-cyan-300 font-mono text-xs font-medium mb-3">Tracking Options</h5>
+                    <div class="flex items-start space-x-3">
+                        <input id="use_tracker_checkbox" type="checkbox" checked class="mt-0.5 w-4 h-4 text-cyan-600 bg-gray-800 border-cyan-500/30 rounded focus:ring-cyan-500 focus:ring-2">
+                        <div class="flex-1">
+                            <label for="use_tracker_checkbox" class="text-cyan-300 font-mono text-xs font-medium">
+                                Add Tracking Image
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Attachments Section -->
+                <div class="mb-4 p-3 bg-gray-800/30 rounded border border-cyan-500/20">
+                    <h5 class="text-cyan-300 font-mono text-xs font-medium mb-2">Attachments</h5>
+                    <span class="btn btn-danger btn-file inline-flex items-center px-3 py-1.5 bg-cyan-600/20 border border-cyan-500/30 rounded text-cyan-300 hover:bg-cyan-600/30 transition-colors cursor-pointer font-mono text-xs">
+                        <i class="fa fa-plus mr-1.5"></i> Add Files
+                        <input id="attachmentUpload" type="file" onchange="attach(this.files)" multiple>
+                    </span>
+                    
+                    <div class="mt-4 bg-gray-800/50 border border-cyan-500/30 rounded overflow-hidden">
+                        <table id="attachmentsTable" class="w-full table">
+                            <thead>
+                                <tr class="border-b border-cyan-500/20">
+                                    <th class="text-center py-2 px-2 text-cyan-300 font-mono text-xs font-medium col-md-1 no-sort w-8"></th>
+                                    <th class="text-left py-2 px-2 text-cyan-300 font-mono text-xs font-medium col-md-10">Name</th>
+                                    <th class="text-center py-2 px-2 text-cyan-300 font-mono text-xs font-medium col-md-1 no-sort w-8"></th>
+                                    <th class="datatable_hidden no-sort">Content</th>
+                                    <th class="datatable_hidden no-sort">Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
-                <button type="button" class="btn btn-primary" id="modalSubmit" onclick="importEmail()">Import</button>
+            
+            <!-- Footer -->
+            <div class="modal-footer bg-gray-800/90 border-t border-cyan-500/20 px-4 py-3 flex justify-end space-x-2">
+                <button type="button" class="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded text-gray-300 font-mono text-xs transition-colors" data-dismiss="modal" onclick="dismiss()">
+                    Cancel
+                </button>
+                <button type="button" class="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 border border-cyan-500 rounded text-white font-mono text-xs transition-colors" id="modalSubmit">
+                    Save Template
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Email Modal -->
+<div class="modal hidden" id="importEmailModal" tabindex="-1" role="dialog" aria-labelledby="importEmailModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content bg-gray-900 border border-cyan-500/20 shadow-2xl rounded-lg">
+            <!-- Header -->
+            <div class="modal-header bg-gray-800/90 border-b border-cyan-500/20 px-4 py-3 flex items-center justify-between">
+                <h4 class="modal-title text-cyan-300 font-mono text-base font-medium" id="importEmailModalLabel">Import Email</h4>
+                <button type="button" class="close text-cyan-400 hover:text-cyan-300 transition-colors" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            
+            <!-- Body -->
+            <div class="modal-body bg-gray-900 px-4 py-4">
+                <div class="row" id="modal.flashes"></div>
+                
+                <div class="mb-4">
+                    <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="email_content">Email Content</label>
+                    <div class="bg-gray-800/50 border border-cyan-500/30 rounded overflow-hidden">
+                        <textarea rows="10" id="email_content" class="gophish-editor w-full p-3 bg-transparent border-none text-cyan-100 placeholder-gray-400 focus:outline-none resize-none font-mono text-xs" placeholder="Paste raw email source here..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <input id="convert_links_checkbox" type="checkbox" checked class="mt-0.5 w-4 h-4 text-cyan-600 bg-gray-800 border-cyan-500/30 rounded focus:ring-cyan-500 focus:ring-2">
+                    <div class="flex-1">
+                        <label for="convert_links_checkbox" class="text-cyan-300 font-mono text-xs font-medium">
+                            Change Links to Point to Landing Page
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="modal-footer bg-gray-800/90 border-t border-cyan-500/20 px-4 py-3 flex justify-end space-x-2">
+                <button type="button" class="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded text-gray-300 font-mono text-xs transition-colors" data-dismiss="modal">
+                    Cancel
+                </button>
+                <button type="button" class="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 border border-cyan-500 rounded text-white font-mono text-xs transition-colors" id="modalSubmit" onclick="importEmail()">
+                    Import
+                </button>
             </div>
         </div>
     </div>
@@ -141,4 +271,366 @@
 <script src="/js/src/vendor/ckeditor/adapters/jquery.js"></script>
 <script src="/js/dist/app/autocomplete.min.js"></script>
 <script src="/js/dist/app/templates.min.js"></script>
+<style>
+/* Email Templates Modern Styling */
+.dataTables_length {
+    display: inline-block !important;
+    float: left !important;
+    margin-right: 20px !important;
+}
+
+.dataTables_filter {
+    display: inline-block !important;
+    float: right !important;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    display: inline-block !important;
+    vertical-align: top !important;
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    color: #e5e7eb !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.875rem !important;
+}
+
+.dataTables_wrapper .dataTables_length select:focus,
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #06b6d4 !important;
+    outline: none !important;
+}
+
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+    color: #a5f3fc !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.875rem !important;
+    font-weight: normal !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    color: #a5f3fc !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.875rem !important;
+    float: left !important;
+    margin-top: 1rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    float: right !important;
+    margin-top: 1rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    color: #a5f3fc !important;
+    padding: 4px 12px !important;
+    margin: 0 2px !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.875rem !important;
+    display: inline-block !important;
+    float: none !important;
+    vertical-align: middle !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paging_simple_numbers {
+    display: inline-block !important;
+    white-space: nowrap !important;
+}
+
+#templateTable_paginate {
+    white-space: nowrap !important;
+}
+
+#templateTable_paginate .paginate_button {
+    display: inline-block !important;
+    float: none !important;
+    vertical-align: middle !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    border-color: #06b6d4 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background-color: #0891b2 !important;
+    border-color: #06b6d4 !important;
+    color: #ffffff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+.dataTables_wrapper:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Modal System */
+.modal {
+    z-index: 1050 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    outline: 0 !important;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+}
+
+.modal-dialog {
+    z-index: 1051 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    width: 90% !important;
+    max-width: 900px !important;
+    pointer-events: none !important;
+}
+
+.modal.fade .modal-dialog {
+    transform: translate(-50%, -50%) scale(0.9) !important;
+    opacity: 0 !important;
+    transition: all 0.3s ease !important;
+}
+
+.modal.fade.show .modal-dialog {
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1 !important;
+}
+
+.modal-content {
+    position: relative !important;
+    background-color: #111827 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    border-radius: 6px !important;
+    outline: 0 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+    pointer-events: auto !important;
+}
+
+.modal-header {
+    background-color: #1f2937 !important;
+    border-bottom: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+.modal-body {
+    background-color: #111827 !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    max-height: calc(90vh - 120px) !important;
+}
+
+.modal-footer {
+    background-color: #1f2937 !important;
+    border-top: 1px solid rgba(6, 182, 212, 0.3) !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 10 !important;
+}
+
+/* Tab styling */
+.nav-tabs {
+    border-bottom: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+.nav-tabs > li > a {
+    background-color: transparent !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    color: #a5f3fc !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li > a:hover {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    border-color: #06b6d4 !important;
+    color: #ffffff !important;
+}
+
+/* CKEditor styling */
+.cke_chrome {
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    background-color: #1f2937 !important;
+}
+
+.cke_top {
+    background-color: #374151 !important;
+    border-bottom: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+.cke_toolbox {
+    background-color: #374151 !important;
+}
+
+.cke_button {
+    background-color: transparent !important;
+    color: #e5e7eb !important;
+}
+
+.cke_button:hover {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    color: #ffffff !important;
+}
+
+.cke_button_icon {
+    filter: invert(1) brightness(0.9) !important;
+}
+
+.cke_button_label {
+    color: #e5e7eb !important;
+}
+
+.cke_contents {
+    background-color: #111827 !important;
+}
+
+.cke_wysiwyg_frame {
+    background-color: #ffffff !important;
+}
+
+/* CKEditor text area and content styling */
+.cke_editable {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+    font-family: Arial, sans-serif !important;
+}
+
+.cke_source {
+    background-color: #1f2937 !important;
+    color: #e5e7eb !important;
+    font-family: 'Courier New', monospace !important;
+    border: none !important;
+}
+
+/* CKEditor dropdown and menu styling */
+.cke_combo_button {
+    color: #e5e7eb !important;
+    background-color: transparent !important;
+}
+
+.cke_combo_arrow {
+    filter: invert(1) brightness(0.9) !important;
+}
+
+.cke_combo_text {
+    color: #e5e7eb !important;
+}
+
+.cke_panel {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+.cke_menu {
+    background-color: #1f2937 !important;
+}
+
+.cke_menuitem a {
+    background-color: #1f2937 !important;
+    color: #e5e7eb !important;
+}
+
+.cke_menuitem a:hover {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Fix CKEditor toolbar separators */
+.cke_toolbar_separator {
+    background-color: rgba(6, 182, 212, 0.3) !important;
+}
+
+/* CKEditor dialog styling */
+.cke_dialog {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+.cke_dialog_title {
+    background-color: #374151 !important;
+    color: #e5e7eb !important;
+}
+
+.cke_dialog_contents {
+    background-color: #1f2937 !important;
+}
+
+.cke_dialog_tab {
+    background-color: #374151 !important;
+    color: #e5e7eb !important;
+}
+
+.cke_dialog_tab:hover,
+.cke_dialog_tab_selected {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Fix toolbar button text visibility */
+.cke_toolbar_start,
+.cke_toolbar_end {
+    display: none !important;
+}
+
+.cke_button_off:hover,
+.cke_button_on {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+}
+
+/* Ensure combo box text is visible */
+.cke_combo_off .cke_combo_text,
+.cke_combo_on .cke_combo_text {
+    color: #e5e7eb !important;
+}
+
+/* Attachments table styling */
+#attachmentsTable tbody tr {
+    border-bottom: 1px solid rgba(6, 182, 212, 0.1) !important;
+}
+
+#attachmentsTable tbody td {
+    padding: 6px 8px !important;
+    color: #e5e7eb !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+    vertical-align: middle !important;
+}
+
+#attachmentsTable tbody tr:hover {
+    background-color: rgba(6, 182, 212, 0.05) !important;
+}
+</style>
 {{end}}
