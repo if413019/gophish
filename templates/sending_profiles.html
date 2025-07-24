@@ -1,492 +1,144 @@
 {{define "body"}}
-<!-- Main Content Container -->
-<div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-    <!-- Header Section -->
-    <div class="border-b border-cyan-800/30 bg-slate-900/50 backdrop-blur-sm">
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <div class="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
-                    <h1 class="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                        Sending Profiles
-                    </h1>
-                </div>
-                <button type="button" 
-                        class="group relative inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-cyan-600 to-blue-600 border border-transparent rounded-lg shadow-lg hover:from-cyan-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 focus:ring-offset-slate-900 transform hover:scale-105 transition-all duration-200"
-                        onclick="edit(-1)" 
-                        data-toggle="modal" 
-                        data-backdrop="static"
-                        data-target="#modal">
-                    <i class="fa fa-plus mr-2 text-cyan-300 group-hover:text-white transition-colors duration-200"></i>
-                    <span class="bg-gradient-to-r from-white to-cyan-100 bg-clip-text text-transparent group-hover:from-white group-hover:to-white transition-all duration-200">New Profile</span>
-                </button>
-            </div>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        Sending Profiles
+    </h1>
+    <div id="flashes" class="row"></div>
+    <div class="row">
+        <button type="button" class="btn btn-primary" onclick="edit(-1)" data-toggle="modal" data-backdrop="static"
+            data-target="#modal"><i class="fa fa-plus"></i> New Profile</button>
+    </div>
+    &nbsp;
+    <div id="loading">
+        <i class="fa fa-spinner fa-spin fa-4x"></i>
+    </div>
+    <div id="emptyMessage" class="row" style="display:none;">
+        <div class="alert alert-info">
+            No profiles created yet. Let's create one!
         </div>
     </div>
-
-    <!-- Flash Messages -->
-    <div id="flashes" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4"></div>
-
-    <!-- Loading State -->
-    <div id="loading" class="flex items-center justify-center py-20">
-        <div class="text-center">
-            <i class="fa fa-spinner fa-spin text-5xl text-cyan-400 mb-4"></i>
-            <p class="text-slate-400 text-lg">Loading sending profiles...</p>
-        </div>
-    </div>
-
-    <!-- Empty State -->
-    <div id="emptyMessage" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8" style="display:none;">
-        <div class="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border border-cyan-700/30 rounded-xl p-8 text-center backdrop-blur-sm">
-            <div class="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fa fa-envelope text-white text-2xl"></i>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-2">No Sending Profiles Yet</h3>
-            <p class="text-slate-300 mb-6">Create your first sending profile to start managing email configurations.</p>
-            <button type="button" 
-                    class="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-cyan-600 to-blue-600 border border-transparent rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-200"
-                    onclick="edit(-1)" 
-                    data-toggle="modal" 
-                    data-backdrop="static"
-                    data-target="#modal">
-                <i class="fa fa-plus mr-2"></i>
-                Create First Profile
-            </button>
-        </div>
-    </div>
-
-    <!-- Profiles Table -->
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
-        <div class="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden shadow-2xl" style="display:none;" id="profileTableContainer">
-            <table id="profileTable" class="w-full">
-                <thead class="bg-gradient-to-r from-slate-800 to-slate-700">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-cyan-300 uppercase tracking-wider border-b border-slate-600">
-                            <div class="flex items-center space-x-2">
-                                <i class="fa fa-tag text-cyan-400"></i>
-                                <span>Name</span>
-                            </div>
-                        </th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-cyan-300 uppercase tracking-wider border-b border-slate-600">
-                            <div class="flex items-center space-x-2">
-                                <i class="fa fa-cogs text-cyan-400"></i>
-                                <span>Interface Type</span>
-                            </div>
-                        </th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-cyan-300 uppercase tracking-wider border-b border-slate-600">
-                            <div class="flex items-center space-x-2">
-                                <i class="fa fa-clock-o text-cyan-400"></i>
-                                <span>Last Modified</span>
-                            </div>
-                        </th>
-                        <th class="px-6 py-4 text-right text-xs font-medium text-cyan-300 uppercase tracking-wider border-b border-slate-600 no-sort">
-                            <span>Actions</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-slate-900/30 divide-y divide-slate-700/50">
-                    <!-- Table rows will be populated by JavaScript -->
-                </tbody>
-            </table>
-        </div>
+    <div class="row">
+        <table id="profileTable" class="table" style="display:none;">
+            <thead>
+                <tr>
+                    <th class="col-md-4">Name</th>
+                    <th>Interface Type</th>
+                    <th>Last Modified Date</th>
+                    <th class="col-md-2 no-sort"></th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
 </div>
-
-<!-- Profile Modal -->
+<!-- Modal -->
 <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content bg-slate-900 border border-slate-700 shadow-2xl">
-            <!-- Modal Header -->
-            <div class="modal-header bg-gradient-to-r from-slate-800 to-slate-700 border-b border-slate-600">
-                <button type="button" 
-                        class="close text-slate-400 hover:text-white transition-colors duration-200 text-2xl leading-none" 
-                        data-dismiss="modal" 
-                        aria-label="Close" 
-                        onclick="dismiss()">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title text-xl font-semibold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent" id="profileModalLabel">
-                    New Sending Profile
-                </h4>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <!-- New Template Modal -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="dismiss()"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="profileModalLabel">New Sending Profile</h4>
             </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body p-6 bg-slate-900">
-                <div id="modal.flashes" class="mb-4"></div>
-                
-                <form class="space-y-6">
-                    <!-- Profile Basic Info -->
-                    <div class="space-y-4">
-                        <div class="form-group">
-                            <label class="block text-sm font-medium text-slate-300 mb-2" for="name">
-                                <i class="fa fa-tag text-cyan-400 mr-2"></i>Profile Name
-                            </label>
-                            <input type="text" 
-                                   class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                   placeholder="Enter profile name" 
-                                   id="name" 
-                                   autofocus />
-                        </div>
-
-                        <div class="form-group">
-                            <label class="block text-sm font-medium text-slate-300 mb-2" for="interface_type">
-                                <i class="fa fa-cogs text-cyan-400 mr-2"></i>Interface Type
-                            </label>
-                            <input type="text" 
-                                   class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-400 cursor-not-allowed" 
-                                   value="SMTP" 
-                                   id="interface_type" 
-                                   disabled />
-                        </div>
-
-                        <div class="form-group">
-                            <label class="block text-sm font-medium text-slate-300 mb-2" for="from">
-                                <i class="fa fa-envelope text-cyan-400 mr-2"></i>SMTP From
-                                <i class="fa fa-question-circle text-slate-400 ml-2 cursor-help" 
-                                   data-toggle="tooltip" 
-                                   data-placement="right" 
-                                   title="Set this to an email address from your sending domain to bypass SPF-checks. You can set the Envelope Sender in Email Templates. The Envelope Sender is shown to the user."></i>
-                            </label>
-                            <input type="text" 
-                                   class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                   placeholder="test@example.com" 
-                                   id="from" 
-                                   required />
-                        </div>
-
-                        <div class="form-group">
-                            <label class="block text-sm font-medium text-slate-300 mb-2" for="host">
-                                <i class="fa fa-server text-cyan-400 mr-2"></i>Host
-                            </label>
-                            <input type="text" 
-                                   class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                   placeholder="smtp.example.com:25" 
-                                   id="host" 
-                                   required />
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="form-group">
-                                <label class="block text-sm font-medium text-slate-300 mb-2" for="username">
-                                    <i class="fa fa-user text-cyan-400 mr-2"></i>Username
-                                </label>
-                                <input type="text" 
-                                       class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                       placeholder="Username" 
-                                       id="username" />
-                            </div>
-
-                            <div class="form-group">
-                                <label class="block text-sm font-medium text-slate-300 mb-2" for="password">
-                                    <i class="fa fa-lock text-cyan-400 mr-2"></i>Password
-                                </label>
-                                <input type="password" 
-                                       class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                       placeholder="Password" 
-                                       id="password" />
-                            </div>
-                        </div>
-
-                        <!-- Security Options -->
-                        <div class="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-                            <div class="flex items-center">
-                                <input id="ignore_cert_errors" 
-                                       type="checkbox" 
-                                       checked 
-                                       class="h-4 w-4 text-cyan-600 bg-slate-700 border-slate-600 rounded focus:ring-cyan-500 focus:ring-2">
-                                <label for="ignore_cert_errors" class="ml-3 text-sm font-medium text-slate-300 flex items-center">
-                                    Ignore Certificate Errors
-                                    <i class="fa fa-question-circle text-slate-400 ml-2 cursor-help" 
-                                       data-toggle="tooltip" 
-                                       data-placement="right" 
-                                       title="Ignore common certificate errors such as self-signed certs (exposes you to MiTM attacks - use carefully!)"></i>
-                                </label>
-                            </div>
+            <div class="modal-body">
+                <div class="row" id="modal.flashes"></div>
+                <form>
+                    <div class="form-group">
+                        <label class="control-label" for="name">Name:</label>
+                        <input type="text" class="form-control" placeholder="Profile name" id="name" autofocus />
+                        <label class="control-label" for="interface_type">Interface Type:</label>
+                        <input type="text" class="form-control" value="SMTP" id="interface_type" disabled />
+                        <label class="control-label" for="from">SMTP From: <i class="fa fa-question-circle"
+                                data-toggle="tooltip" data-placement="right" title="Set this to an email address from your sending domain to bypass SPF-checks. You can set the Envelope Sender in Email Templates. The Envelope Sender is shown to the user."></i></label>
+                        <input type="text" class="form-control" placeholder="test@example.com" id="from"
+                            required />
+                        <label class="control-label" for="host">Host:</label>
+                        <input type="text" class="form-control" placeholder="smtp.example.com:25" id="host" required />
+                        <label class="control-label" for="username">Username:</label>
+                        <input type="text" class="form-control" placeholder="Username" id="username" />
+                        <label class="control-label" for="password">Password:</label>
+                        <input type="password" class="form-control" placeholder="Password" id="password" />
+                        <div class="checkbox checkbox-primary">
+                            <input id="ignore_cert_errors" type="checkbox" checked>
+                            <label for="ignore_cert_errors">Ignore Certificate Errors <i class="fa fa-question-circle"
+                                    data-toggle="tooltip" data-placement="right" title="Ignore common certificate errors such as self-signed certs (exposes you to MiTM attacks - use carefully!)"></i></label>
                         </div>
                     </div>
-
-                    <!-- Email Headers Section -->
-                    <fieldset class="border-t border-slate-700 pt-6">
-                        <legend class="text-lg font-medium text-slate-200 mb-4">
-                            <i class="fa fa-list-alt text-cyan-400 mr-2"></i>Email Headers
-                        </legend>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-                            <div class="md:col-span-2">
-                                <input type="text" 
-                                       class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                       name="headerKey" 
-                                       id="headerKey" 
-                                       placeholder="X-Custom-Header">
-                            </div>
-                            <div class="md:col-span-2">
-                                <input type="text" 
-                                       class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                       name="headerValue" 
-                                       id="headerValue" 
-                                       placeholder='{{.URL}}-gophish'>
-                            </div>
-                            <div>
-                                <button id="addCustomHeader" 
-                                        class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg hover:from-red-500 hover:to-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all duration-200 font-medium" 
-                                        type="button">
-                                    <i class="fa fa-plus mr-2"></i>Add Header
-                                </button>
-                            </div>
+                    <fieldset class="form-group">
+                        <label class="control-label input-group">Email Headers:</label>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="headerKey" id="headerKey" placeholder="X-Custom-Header">
                         </div>
-
-                        <!-- Headers Table -->
-                        <div class="bg-slate-800/30 rounded-lg border border-slate-700 overflow-hidden">
-                            <table id="headersTable" class="w-full">
-                                <thead class="bg-slate-800">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-cyan-300 uppercase tracking-wider">Header</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-cyan-300 uppercase tracking-wider">Value</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-cyan-300 uppercase tracking-wider no-sort">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-slate-900/30 divide-y divide-slate-700">
-                                    <!-- Headers will be populated by JavaScript -->
-                                </tbody>
-                            </table>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="headerValue" id="headerValue" placeholder='{{"{{"}}.URL{{"}}"}}-gophish'>
+                        </div>
+                        <div class="col-md-2">
+                            <button id="addCustomHeader" class="btn btn-danger btn-headers" type="button"><i class="fa fa-plus"></i> Add
+                                Custom Header</button>
                         </div>
                     </fieldset>
-
-                    <!-- Test Email Button -->
-                    <div class="border-t border-slate-700 pt-6">
-                        <button type="button" 
-                                data-toggle="modal" 
-                                data-backdrop="static" 
-                                data-target="#sendTestEmailModal"
-                                class="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg hover:from-green-500 hover:to-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-slate-900 transition-all duration-200">
-                            <i class="fa fa-envelope mr-2"></i>Send Test Email
-                        </button>
-                    </div>
+                    <table id="headersTable" class="table table-hover table-striped table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Header</th>
+                                <th>Value</th>
+                                <th class="no-sort"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <button type="button" data-toggle="modal" data-backdrop="static" data-target="#sendTestEmailModal"
+                        class="btn btn-primary"><i class="fa fa-envelope"></i> Send Test Email</button>
                 </form>
             </div>
-
-            <!-- Modal Footer -->
-            <div class="modal-footer bg-slate-800 border-t border-slate-700 px-6 py-4">
-                <div class="flex justify-end space-x-4">
-                    <button type="button" 
-                            data-dismiss="modal" 
-                            class="px-6 py-3 text-sm font-medium text-slate-300 bg-slate-700 border border-slate-600 rounded-lg hover:bg-slate-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 focus:ring-offset-slate-900 transition-all duration-200" 
-                            onclick="dismiss()">
-                        Cancel
-                    </button>
-                    <button type="button" 
-                            class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-cyan-600 to-blue-600 border border-transparent rounded-lg hover:from-cyan-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 focus:ring-offset-slate-900 transition-all duration-200" 
-                            id="modalSubmit">
-                        Save Profile
-                    </button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default" onclick="dismiss()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="modalSubmit">Save Profile</button>
             </div>
         </div>
     </div>
 </div>
-
 <!-- Send Test Email Modal -->
 <div class="modal" id="sendTestEmailModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
     <div class="modal-dialog" role="document">
-        <div class="modal-content bg-slate-900 border border-slate-700 shadow-2xl">
-            <!-- Test Email Modal Header -->
-            <div class="modal-header bg-gradient-to-r from-slate-800 to-slate-700 border-b border-slate-600">
-                <button type="button" 
-                        class="close text-slate-400 hover:text-white transition-colors duration-200 text-2xl leading-none" 
-                        data-dismiss="modal" 
-                        aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title text-xl font-semibold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent" id="sendTestEmailModalTitle">
-                    Send Test Email
-                </h4>
+        <div class="modal-content">
+            <!-- New Email Modal -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="sendTestEmailModalTitle">Send Test Email</h4>
             </div>
-
-            <!-- Test Email Modal Body -->
-            <div class="modal-body p-6 bg-slate-900">
-                <div id="sendTestEmailModal.flashes" class="mb-4"></div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-4">
-                            <i class="fa fa-user text-cyan-400 mr-2"></i>Send Test Email to:
-                        </label>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <input type="text" 
-                                       class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                       placeholder="First Name" 
-                                       name="to_first_name">
-                            </div>
-                            <div>
-                                <input type="text" 
-                                       class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                       placeholder="Last Name" 
-                                       name="to_last_name">
-                            </div>
-                            <div>
-                                <input type="email" 
-                                       class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                       placeholder="Email Address" 
-                                       name="to_email" 
-                                       required>
-                            </div>
-                            <div>
-                                <input type="text" 
-                                       class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200" 
-                                       placeholder="Position" 
-                                       name="to_position">
-                            </div>
-                        </div>
+            <div class="modal-body">
+                <div class="row" id="sendTestEmailModal.flashes"></div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label class="control-label" for="to">Send Test Email to:</label>
+                    </div>
+                    <br>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" placeholder="First Name" name="to_first_name">
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" placeholder="Last Name" name="to_last_name">
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="email" class="form-control" placeholder="Email" name="to_email" required>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" placeholder="Position" name="to_position">
                     </div>
                 </div>
             </div>
-
-            <!-- Test Email Modal Footer -->
-            <div class="modal-footer bg-slate-800 border-t border-slate-700 px-6 py-4">
-                <div class="flex justify-end space-x-4">
-                    <button type="button" 
-                            data-dismiss="modal" 
-                            class="px-6 py-3 text-sm font-medium text-slate-300 bg-slate-700 border border-slate-600 rounded-lg hover:bg-slate-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 focus:ring-offset-slate-900 transition-all duration-200">
-                        Cancel
-                    </button>
-                    <button type="button" 
-                            class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg hover:from-green-500 hover:to-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-slate-900 transition-all duration-200" 
-                            id="sendTestModalSubmit" 
-                            onclick="sendTestEmail()">
-                        <i class="fa fa-envelope mr-2"></i>Send
-                    </button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
+                <button type="button" class="btn btn-primary" id="sendTestModalSubmit" onclick="sendTestEmail()"><i
+                        class="fa fa-envelope"></i> Send</button>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Custom Styles for DataTables and Modal Integration -->
-<style>
-/* DataTable Styling */
-#profileTable_wrapper {
-    background: transparent;
-}
-
-#profileTable_wrapper .dataTables_length,
-#profileTable_wrapper .dataTables_filter,
-#profileTable_wrapper .dataTables_info,
-#profileTable_wrapper .dataTables_paginate {
-    color: #94a3b8;
-    margin: 1rem 0;
-}
-
-#profileTable_wrapper .dataTables_length select,
-#profileTable_wrapper .dataTables_filter input {
-    background-color: #1e293b;
-    border: 1px solid #475569;
-    color: #f1f5f9;
-    border-radius: 0.5rem;
-    padding: 0.5rem;
-}
-
-#profileTable_wrapper .dataTables_paginate .paginate_button {
-    background: #374151;
-    border: 1px solid #4b5563;
-    color: #d1d5db !important;
-    border-radius: 0.375rem;
-    margin: 0 0.125rem;
-    padding: 0.5rem 0.75rem;
-}
-
-#profileTable_wrapper .dataTables_paginate .paginate_button:hover {
-    background: #4b5563;
-    border-color: #6b7280;
-    color: #f9fafb !important;
-}
-
-#profileTable_wrapper .dataTables_paginate .paginate_button.current {
-    background: linear-gradient(to right, #0891b2, #1d4ed8);
-    border-color: #0891b2;
-    color: #ffffff !important;
-}
-
-/* Profile table row styling */
-#profileTable tbody tr {
-    border-bottom: 1px solid #334155;
-    transition: all 0.2s ease;
-}
-
-#profileTable tbody tr:hover {
-    background-color: rgba(30, 41, 59, 0.5);
-}
-
-#profileTable tbody td {
-    padding: 1rem 1.5rem;
-    color: #e2e8f0;
-    vertical-align: middle;
-}
-
-/* Action buttons in table */
-.table-actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-}
-
-.table-actions .btn {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
-    border-radius: 0.375rem;
-    transition: all 0.2s ease;
-}
-
-/* Make sure table container is visible when populated */
-#profileTableContainer.show {
-    display: block !important;
-}
-
-/* Tooltip styling for dark theme */
-.tooltip-inner {
-    background-color: #1e293b;
-    color: #f1f5f9;
-    border: 1px solid #475569;
-}
-
-.tooltip.top .tooltip-arrow {
-    border-top-color: #475569;
-}
-
-.tooltip.bottom .tooltip-arrow {
-    border-bottom-color: #475569;
-}
-
-.tooltip.left .tooltip-arrow {
-    border-left-color: #475569;
-}
-
-.tooltip.right .tooltip-arrow {
-    border-right-color: #475569;
-}
-</style>
-
-{{end}}
-
-{{define "scripts"}}
+{{end}} {{define "scripts"}}
 <script src="/js/dist/app/sending_profiles.min.js"></script>
-<script>
-// Additional JavaScript for modern UI enhancements
-$(document).ready(function() {
-    // Initialize tooltips
-    $('[data-toggle="tooltip"]').tooltip();
-    
-    // Enhance table visibility
-    $('#profileTable').on('draw.dt', function() {
-        $('#profileTableContainer').addClass('show');
-    });
-    
-    // Custom styling for DataTable elements
-    setTimeout(function() {
-        $('#profileTable_wrapper .dataTables_length label').addClass('text-slate-300');
-        $('#profileTable_wrapper .dataTables_filter label').addClass('text-slate-300');
-    }, 100);
-});
-</script>
 {{end}}
