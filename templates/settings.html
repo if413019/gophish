@@ -175,7 +175,11 @@
                 <br />
 
                 <div class="row">
-                    <label for="folder" class="col-sm-2 control-label form-label" data-toggle="tooltip" title="How often to check for new emails. 30 seconds minimum.">Polling frequency:</label>
+                    <label for="folder" class="col-sm-2 control-label form-label">Polling frequency: 
+                        <span class="tooltip-trigger relative inline-block ml-1" data-tooltip="How often to check for new emails. 30 seconds minimum.">
+                            <i class="fa fa-question-circle text-cyan-400/70 cursor-help hover:text-cyan-300 transition-colors"></i>
+                        </span>
+                    </label>
                         <div class="col-md-6">
                             <input type="number" id="imapfreq" name="imapfreq" placeholder="Leave blank for default of every 60 seconds."
                                 class="form-control" />
@@ -184,7 +188,11 @@
                     <br />
         
                 <div class="row">
-                    <label for="restrictdomain" class="col-sm-2 control-label form-label" data-toggle="tooltip" title="Only check emails reported from the supplied domain.">Restrict to domain:</label>
+                    <label for="restrictdomain" class="col-sm-2 control-label form-label">Restrict to domain: 
+                        <span class="tooltip-trigger relative inline-block ml-1" data-tooltip="Only check emails reported from the supplied domain.">
+                            <i class="fa fa-question-circle text-cyan-400/70 cursor-help hover:text-cyan-300 transition-colors"></i>
+                        </span>
+                    </label>
                     <div class="col-md-6">
                         <input type="text" id="restrictdomain" name="restrictdomain" placeholder="e.g. widgets.com. Leave blank for all domains."
                             class="form-control" />
@@ -193,7 +201,11 @@
                 <br />
 
                 <div class="row">
-                    <label for="ignorecerterrors" class="col-sm-2 control-label form-label" data-toggle="tooltip" title="Ignore common certificate errors such as self-signed certs (exposes you to MiTM attacks - use carefully!)">Ignore Certificate Errors:</label>
+                    <label for="ignorecerterrors" class="col-sm-2 control-label form-label">Ignore Certificate Errors: 
+                        <span class="tooltip-trigger relative inline-block ml-1" data-tooltip="Ignore common certificate errors such as self-signed certs (exposes you to MiTM attacks - use carefully!)">
+                            <i class="fa fa-question-circle text-cyan-400/70 cursor-help hover:text-cyan-300 transition-colors"></i>
+                        </span>
+                    </label>
                     <div class="col-md-6">
                         <div class="checkbox checkbox-primary">
                             <input id="ignorecerterrors" type="checkbox">
@@ -204,7 +216,11 @@
                 <br />
 
                 <div class="row">
-                    <label for="deletecampaign" class="col-sm-2 control-label form-label" data-toggle="tooltip" title="Delete campaign emails after they've been reported.">Delete campaigns emails:</label>
+                    <label for="deletecampaign" class="col-sm-2 control-label form-label">Delete campaigns emails: 
+                        <span class="tooltip-trigger relative inline-block ml-1" data-tooltip="Delete campaign emails after they've been reported.">
+                            <i class="fa fa-question-circle text-cyan-400/70 cursor-help hover:text-cyan-300 transition-colors"></i>
+                        </span>
+                    </label>
                     <div class="col-md-6">
                         <div class="checkbox checkbox-primary">
                             <input id="deletecampaign" type="checkbox">
@@ -247,3 +263,126 @@
 <script src="/js/dist/app/passwords.min.js"></script>
 <script src="/js/dist/app/settings.min.js"></script>
 {{end}}
+    <!-- Floating Tooltip System -->
+    <div id="floating-tooltip" class="fixed z-50 invisible opacity-0 transition-all duration-200 ease-in-out pointer-events-none">
+        <div class="bg-gray-800 text-white text-sm rounded-lg px-3 py-2 shadow-lg border border-gray-600 max-w-xs">
+            <div id="tooltip-content"></div>
+            <div id="tooltip-arrow" class="absolute w-2 h-2 bg-gray-800 border border-gray-600 transform rotate-45"></div>
+        </div>
+    </div>
+
+    <script>
+    class FloatingTooltip {
+        constructor() {
+            this.tooltip = document.getElementById('floating-tooltip');
+            this.content = document.getElementById('tooltip-content');
+            this.arrow = document.getElementById('tooltip-arrow');
+            this.currentTrigger = null;
+            this.hideTimeout = null;
+            
+            this.init();
+        }
+        
+        init() {
+            // Add event listeners to all tooltip triggers
+            document.querySelectorAll('.tooltip-trigger').forEach(trigger => {
+                trigger.addEventListener('mouseenter', (e) => this.show(e.target));
+                trigger.addEventListener('mouseleave', () => this.hide());
+            });
+            
+            // Hide tooltip on scroll or window resize
+            window.addEventListener('scroll', () => this.hide(), true);
+            window.addEventListener('resize', () => this.hide());
+            
+            // Hide tooltip on click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.tooltip-trigger')) {
+                    this.hide();
+                }
+            });
+        }
+        
+        show(trigger) {
+            clearTimeout(this.hideTimeout);
+            
+            const tooltipText = trigger.getAttribute('data-tooltip');
+            if (!tooltipText) return;
+            
+            this.currentTrigger = trigger;
+            this.content.textContent = tooltipText;
+            
+            // Make tooltip visible but still transparent for positioning
+            this.tooltip.style.visibility = 'visible';
+            this.tooltip.classList.remove('opacity-0');
+            this.tooltip.classList.add('opacity-100');
+            
+            // Position the tooltip
+            this.position(trigger);
+        }
+        
+        hide() {
+            this.hideTimeout = setTimeout(() => {
+                this.tooltip.classList.remove('opacity-100');
+                this.tooltip.classList.add('opacity-0');
+                
+                setTimeout(() => {
+                    this.tooltip.style.visibility = 'invisible';
+                    this.currentTrigger = null;
+                }, 200);
+            }, 100);
+        }
+        
+        position(trigger) {
+            const triggerRect = trigger.getBoundingClientRect();
+            const tooltipRect = this.tooltip.getBoundingClientRect();
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const scrollX = window.pageXOffset;
+            const scrollY = window.pageYOffset;
+            
+            let left, top, arrowLeft, arrowTop;
+            
+            // Default: show above the trigger
+            left = triggerRect.left + (triggerRect.width / 2) - (tooltipRect.width / 2);
+            top = triggerRect.top - tooltipRect.height - 10;
+            
+            // Arrow positioning (bottom of tooltip, pointing down)
+            arrowLeft = (tooltipRect.width / 2) - 4;
+            arrowTop = tooltipRect.height - 1;
+            this.arrow.style.borderTopColor = '#374151';
+            this.arrow.style.borderRightColor = 'transparent';
+            this.arrow.style.borderBottomColor = 'transparent';
+            this.arrow.style.borderLeftColor = 'transparent';
+            
+            // Adjust if tooltip would go off-screen
+            if (left < 10) {
+                left = 10;
+                arrowLeft = triggerRect.left + (triggerRect.width / 2) - left - 4;
+            } else if (left + tooltipRect.width > windowWidth - 10) {
+                left = windowWidth - tooltipRect.width - 10;
+                arrowLeft = triggerRect.left + (triggerRect.width / 2) - left - 4;
+            }
+            
+            // If tooltip would go above viewport, show below instead
+            if (top < 10) {
+                top = triggerRect.bottom + 10;
+                arrowTop = -4;
+                this.arrow.style.borderTopColor = 'transparent';
+                this.arrow.style.borderRightColor = 'transparent';
+                this.arrow.style.borderBottomColor = '#374151';
+                this.arrow.style.borderLeftColor = 'transparent';
+            }
+            
+            // Apply positions
+            this.tooltip.style.left = (left + scrollX) + 'px';
+            this.tooltip.style.top = (top + scrollY) + 'px';
+            this.arrow.style.left = arrowLeft + 'px';
+            this.arrow.style.top = arrowTop + 'px';
+        }
+    }
+    
+    // Initialize tooltip system when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        new FloatingTooltip();
+    });
+    </script>

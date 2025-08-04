@@ -1,179 +1,647 @@
 {{define "body"}}
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-    <div class="row">
-        <h1 class="page-header">
-            Campaigns
-        </h1>
+<div class="p-6 space-y-6">
+    <!-- Campaigns Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-orbitron font-bold text-white mb-2">
+                CAMPAIGNS
+            </h1>
+            <p class="text-cyan-400 font-mono text-sm uppercase tracking-wider">
+                Manage your phishing campaigns
+            </p>
+        </div>
+        <button type="button" class="inline-flex items-center px-4 py-2 border border-cyan-500 text-sm font-mono font-semibold rounded-md text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200" data-toggle="modal" data-backdrop="static" data-target="#modal" onclick="edit('new')">
+            <i class="fa fa-plus mr-2"></i> New Campaign
+        </button>
     </div>
+    
+    <!-- Flash Messages -->
     <div id="flashes" class="row"></div>
-    <div class="row">
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-backdrop="static" data-target="#modal"
-            onclick="edit('new')">
-            <i class="fa fa-plus"></i> New Campaign</button>
-    </div>
-    &nbsp;
 
-    <ul class="nav nav-tabs" role="tablist">
-        <li class="active" role="activeCampaigns"><a href="#activeCampaigns" aria-controls="activeCampaigns" role="tab"
-                data-toggle="tab">Active Campaigns</a></li>
-        <li role="archivedCampaigns"><a href="#archivedCampaigns" aria-controls="archivedCampaigns" role="tab"
-                data-toggle="tab">Archived Campaigns</a></li>
-    </ul>
-    </br>
+    <!-- Tabs Navigation -->
+    <div class="border-b border-cyan-500/30">
+        <nav class="-mb-px flex space-x-8" role="tablist">
+            <a href="#activeCampaigns" class="tab-link active whitespace-nowrap py-2 px-4 border-b-2 border-cyan-500 font-mono text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors" aria-controls="activeCampaigns" role="tab" data-toggle="tab">
+                <i class="fas fa-play-circle mr-2"></i>Active Campaigns
+            </a>
+            <a href="#archivedCampaigns" class="tab-link whitespace-nowrap py-2 px-4 border-b-2 border-transparent font-mono text-sm font-medium text-gray-400 hover:text-cyan-300 hover:border-cyan-300/50 transition-colors" aria-controls="archivedCampaigns" role="tab" data-toggle="tab">
+                <i class="fas fa-archive mr-2"></i>Archived Campaigns
+            </a>
+        </nav>
+    </div>
+
+    <!-- Tab Content -->
     <div class="tab-content">
+        <!-- Active Campaigns Tab -->
         <div role="tabpanel" class="tab-pane active" id="activeCampaigns">
-            <div id="flashes" class="row"></div>
-            &nbsp;
-            <div id="loading">
-                <i class="fa fa-spinner fa-spin fa-4x"></i>
-            </div>
-            <div id="emptyMessage" class="row" style="display:none;">
-                <div class="alert alert-info">
-                    No campaigns created yet. Let's create one!
+            <!-- Loading State -->
+            <div id="loading" class="flex items-center justify-center py-20">
+                <div class="text-center">
+                    <div class="relative">
+                        <i class="fa fa-spinner fa-spin text-4xl text-cyan-400"></i>
+                        <div class="absolute inset-0 bg-cyan-400/20 blur-lg rounded-full animate-pulse"></div>
+                    </div>
+                    <p class="text-cyan-300 font-mono text-sm mt-4 uppercase tracking-wide">Loading Campaigns...</p>
                 </div>
             </div>
-            <div class="row">
-                <table id="campaignTable" class="table" style="display:none;">
+
+            <!-- Empty State -->
+            <div id="emptyMessage" style="display:none;" class="text-center py-20">
+                <div class="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-xl p-8 border border-cyan-500/30">
+                    <div class="mb-6">
+                        <i class="fas fa-bullhorn text-5xl text-cyan-400 mb-4"></i>
+                        <h3 class="text-xl font-orbitron font-bold text-white mb-2">No Active Campaigns</h3>
+                        <p class="text-cyan-300 font-mono text-sm">Start by creating your first campaign.</p>
+                    </div>
+                    <button type="button" class="inline-flex items-center px-6 py-3 border border-cyan-500 text-sm font-mono font-semibold rounded-lg text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200" data-toggle="modal" data-backdrop="static" data-target="#modal" onclick="edit('new')">
+                        <i class="fas fa-plus mr-2"></i> Create Campaign
+                    </button>
+                </div>
+            </div>
+
+            <!-- Campaigns Table -->
+            <div class="overflow-x-auto">
+                <table id="campaignTable" class="w-full table" style="display:none;">
                     <thead>
-                        <tr>
-                            <th class="col-md-3">Name</th>
-                            <th class="col-md-4">Created Date</th>
-                            <th class="col-md-2">Status</th>
-                            <th class="col-md-3 no-sort"></th>
+                        <tr class="border-b border-cyan-500/30">
+                            <th class="text-left py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Name</th>
+                            <th class="text-left py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Created Date</th>
+                            <th class="text-left py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Status</th>
+                            <th class="text-center py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider no-sort">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-gray-700/50">
+                        <!-- Table rows will be populated here -->
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- Archived Campaigns Tab -->
         <div role="tabpanel" class="tab-pane" id="archivedCampaigns">
-            </br>
-            <div id="emptyMessage" class="row" style="display:none;">
-                </br>
-                <div class="alert alert-info">
-                    No archived campaigns.
+            <!-- Empty State for Archived -->
+            <div id="emptyMessage" style="display:none;" class="text-center py-20">
+                <div class="bg-gradient-to-br from-gray-500/10 to-gray-600/10 rounded-xl p-8 border border-gray-500/30">
+                    <div class="mb-6">
+                        <i class="fas fa-archive text-5xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-orbitron font-bold text-white mb-2">No Archived Campaigns</h3>
+                        <p class="text-gray-300 font-mono text-sm">Archived campaigns will appear here.</p>
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <table id="campaignTableArchive" class="table" style="display:none;">
+
+            <!-- Archived Campaigns Table -->
+            <div class="overflow-x-auto">
+                <table id="campaignTableArchive" class="w-full table" style="display:none;">
                     <thead>
-                        <tr>
-                            <th class="col-md-3">Name</th>
-                            <th class="col-md-4">Created Date</th>
-                            <th class="col-md-2">Status</th>
-                            <th class="col-md-3 no-sort"></th>
+                        <tr class="border-b border-cyan-500/30">
+                            <th class="text-left py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Name</th>
+                            <th class="text-left py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Created Date</th>
+                            <th class="text-left py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider">Status</th>
+                            <th class="text-center py-4 px-4 text-xs font-mono text-cyan-400 uppercase tracking-wider no-sort">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-gray-700/50">
+                        <!-- Table rows will be populated here -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-<!-- Modal -->
-<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="dismiss()">
-                    <span aria-hidden="true">&times;</span>
+
+<!-- New Campaign Modal -->
+<div class="modal hidden" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content bg-gray-900 border border-cyan-500/20 shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+            <!-- Header -->
+            <div class="modal-header bg-gray-800/90 border-b border-cyan-500/20 px-4 py-3 flex items-center justify-between">
+                <h4 class="modal-title text-cyan-300 font-mono text-base font-medium" id="campaignModalLabel">New Campaign</h4>
+                <button type="button" class="close text-cyan-400 hover:text-cyan-300 transition-colors" data-dismiss="modal" aria-label="Close" onclick="dismiss()">
+                    <i class="fas fa-times text-sm"></i>
                 </button>
-                <h4 class="modal-title" id="campaignModalLabel">New Campaign</h4>
             </div>
-            <div class="modal-body" id="modal_body">
+            
+            <!-- Body -->
+            <div class="modal-body bg-gray-900 px-4 py-4 overflow-y-auto flex-1 min-h-0" id="modal_body">
                 <div class="row" id="modal.flashes"></div>
-                <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input type="text" class="form-control" id="name" placeholder="Campaign name" autofocus>
-                    <label class="control-label" for="template">Email Template:</label>
-                    <select class="form-control" placeholder="Template Name" id="template" />
-                    <option></option>
-                    </select>
-                    <label class="control-label" for="page">Landing Page:</label>
-                    <select class="form-control" placeholder="Landing Page" id="page" />
-                    <option></option>
-                    </select>
-                    <label class="control-label" for="url">URL:
-                        <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="Location of Gophish listener (must be reachable by targets!)"></i>
-                    </label>
-                    <input type="text" class="form-control" placeholder="http://192.168.1.1" id="url" />
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="control-label" for="url">Launch Date </label>
-                            <input type="text" class="form-control" id="launch_date" />
+                
+                <div class="space-y-6">
+                    <!-- Campaign Configuration Section -->
+                    <div>
+                        <h5 class="text-cyan-300 font-mono text-sm font-medium mb-4 uppercase tracking-wider">Campaign Configuration</h5>
+                        
+                        <!-- Campaign Name -->
+                        <div class="mb-4">
+                            <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="name">Campaign Name</label>
+                            <input type="text" class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" id="name" placeholder="Enter campaign name" autofocus>
                         </div>
-                        <div class="col-md-6">
-                            <label class="control-label" for="delay">Send Emails By (Optional)
-                                <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="If specified, Gophish will send emails evenly between the campaign launch and this date."></i>
+                    </div>
+
+                    <!-- Email Template & Landing Page Section -->
+                    <div>
+                        <h5 class="text-cyan-300 font-mono text-sm font-medium mb-4 uppercase tracking-wider">Email & Page Configuration</h5>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <!-- Email Template -->
+                            <div>
+                                <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="template">Email Template</label>
+                                <select class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" id="template">
+                                    <option value="">Select template...</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Landing Page -->
+                            <div>
+                                <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="page">Landing Page</label>
+                                <select class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" id="page">
+                                    <option value="">Select landing page...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- URL -->
+                        <div class="mb-4">
+                            <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="url">
+                                URL 
+                                <span class="tooltip-trigger relative inline-block ml-1" data-tooltip="Location of Gophish listener (must be reachable by targets!)">
+                                    <i class="fa fa-question-circle text-cyan-400/70 cursor-help hover:text-cyan-300 transition-colors"></i>
+                                </span>
                             </label>
-                            <input type="text" class="form-control" id="send_by_date" autocomplete="random-data"/> <!--Chrome ignores autocomplete="off".-->
+                            <input type="text" class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" id="url" placeholder="http://192.168.1.1">
                         </div>
                     </div>
-                    <label class="control-label" for="profile">Sending Profile:</label>
-                    <div class="input-group">
-                        <select class="form-control" placeholder="Sending Profile" id="profile" />
-                        <option></option>
-                        </select>
-                        <span class="input-group-btn">
-                            <button type="button" data-toggle="modal" data-backdrop="static" data-target="#sendTestEmailModal"
-                                class="btn btn-primary button">
-                                <i class="fa fa-envelope"></i> Send Test Email</button>
-                        </span>
+
+                    <!-- Schedule Section -->
+                    <div>
+                        <h5 class="text-cyan-300 font-mono text-sm font-medium mb-4 uppercase tracking-wider">Campaign Schedule</h5>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <!-- Launch Date -->
+                            <div>
+                                <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="launch_date">Launch Date</label>
+                                <input type="text" class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" id="launch_date" placeholder="Select launch date">
+                            </div>
+                            
+                            <!-- Send By Date -->
+                            <div>
+                                <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="send_by_date">
+                                    Send Emails By (Optional)
+                                    <span class="tooltip-trigger relative inline-block ml-1" data-tooltip="If specified, Gophish will send emails evenly between the campaign launch and this date.">
+                                        <i class="fa fa-question-circle text-cyan-400/70 cursor-help hover:text-cyan-300 transition-colors"></i>
+                                    </span>
+                                </label>
+                                <input type="text" class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" id="send_by_date" placeholder="Select end date" autocomplete="random-data">
+                            </div>
+                        </div>
                     </div>
-                    <label class="control-label" for="users">Groups:</label>
-                    <select class="form-control" id="users" multiple="multiple"></select>
+
+                    <!-- Sending Profile Section -->
+                    <div>
+                        <h5 class="text-cyan-300 font-mono text-sm font-medium mb-4 uppercase tracking-wider">Sending Configuration</h5>
+                        
+                        <!-- Sending Profile with Test Button -->
+                        <div class="mb-4">
+                            <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="profile">Sending Profile</label>
+                            <div class="flex space-x-2">
+                                <select class="flex-1 px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" id="profile">
+                                    <option value="">Select sending profile...</option>
+                                </select>
+                                <button type="button" class="inline-flex items-center px-4 py-2 bg-cyan-600 hover:bg-cyan-500 border border-cyan-500 rounded text-white font-mono text-xs transition-colors" data-toggle="modal" data-backdrop="static" data-target="#sendTestEmailModal">
+                                    <i class="fa fa-envelope mr-1"></i> Test Email
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Groups -->
+                        <div class="mb-4">
+                            <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="users">Target Groups</label>
+                            <select class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" id="users" multiple="multiple">
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="dismiss()">Close</button>
-                <button type="button" id="launchButton" class="btn btn-primary" onclick="launch()">
-                    <i class="fa fa-rocket"></i> Launch Campaign</button>
+            
+            <!-- Footer -->
+            <div class="modal-footer bg-gray-800/90 border-t border-cyan-500/20 px-4 py-3 flex justify-end space-x-2">
+                <button type="button" class="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded text-gray-300 font-mono text-xs transition-colors" data-dismiss="modal" onclick="dismiss()">
+                    Cancel
+                </button>
+                <button type="button" class="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 border border-cyan-500 rounded text-white font-mono text-xs transition-colors" id="launchButton" onclick="launch()">
+                    <i class="fa fa-rocket mr-1"></i> Launch Campaign
+                </button>
             </div>
         </div>
     </div>
 </div>
+
 <!-- Send Test Email Modal -->
-<div class="modal" id="sendTestEmailModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
+<div class="modal hidden" id="sendTestEmailModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- New Email Modal -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+        <div class="modal-content bg-gray-900 border border-cyan-500/20 shadow-2xl rounded-lg">
+            <!-- Header -->
+            <div class="modal-header bg-gray-800/90 border-b border-cyan-500/20 px-4 py-3 flex items-center justify-between">
+                <h4 class="modal-title text-cyan-300 font-mono text-base font-medium" id="sendTestEmailModalTitle">Send Test Email</h4>
+                <button type="button" class="close text-cyan-400 hover:text-cyan-300 transition-colors" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times text-sm"></i>
                 </button>
-                <h4 class="modal-title" id="sendTestEmailModalTitle">Send Test Email</h4>
             </div>
-            <div class="modal-body">
+            
+            <!-- Body -->
+            <div class="modal-body bg-gray-900 px-4 py-4">
                 <div class="row" id="sendTestEmailModal.flashes"></div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <label class="control-label" for="to">Send Test Email to:</label>
-                    </div>
-                    <br>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control" placeholder="First Name" name="to_first_name">
-                    </div>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control" placeholder="Last Name" name="to_last_name">
-                    </div>
-                    <div class="col-sm-4">
-                        <input type="email" class="form-control" placeholder="Email" name="to_email" required>
-                    </div>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control" placeholder="Position" name="to_position">
+                
+                <div class="mb-4">
+                    <label class="block text-cyan-300 font-mono text-xs font-medium mb-3">Send Test Email to:</label>
+                    
+                    <div class="grid grid-cols-12 gap-2">
+                        <div class="col-span-3">
+                            <input type="text" class="w-full px-2 py-1.5 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-xs" placeholder="First Name" name="to_first_name">
+                        </div>
+                        <div class="col-span-3">
+                            <input type="text" class="w-full px-2 py-1.5 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-xs" placeholder="Last Name" name="to_last_name">
+                        </div>
+                        <div class="col-span-3">
+                            <input type="email" class="w-full px-2 py-1.5 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-xs" placeholder="Email" name="to_email" required>
+                        </div>
+                        <div class="col-span-3">
+                            <input type="text" class="w-full px-2 py-1.5 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-xs" placeholder="Position" name="to_position">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
-                <button type="button" class="btn btn-primary" id="sendTestModalSubmit" onclick="sendTestEmail()">
-                    <i class="fa fa-envelope"></i> Send</button>
+            
+            <!-- Footer -->
+            <div class="modal-footer bg-gray-800/90 border-t border-cyan-500/20 px-4 py-3 flex justify-end space-x-2">
+                <button type="button" class="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded text-gray-300 font-mono text-xs transition-colors" data-dismiss="modal">
+                    Cancel
+                </button>
+                <button type="button" class="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 border border-cyan-500 rounded text-white font-mono text-xs transition-colors" id="sendTestModalSubmit" onclick="sendTestEmail()">
+                    <i class="fa fa-envelope mr-1"></i> Send
+                </button>
             </div>
         </div>
     </div>
 </div>
 {{end}} {{define "scripts"}}
 <script src="/js/dist/app/campaigns.min.js"></script>
+<style>
+/* Tab styling */
+.tab-link.active {
+    color: #06b6d4 !important;
+    border-color: #06b6d4 !important;
+}
+
+/* DataTables styling - same as other files */
+.dataTables_length {
+    display: inline-block !important;
+    float: left !important;
+    margin-right: 20px !important;
+}
+
+.dataTables_filter {
+    display: inline-block !important;
+    float: right !important;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    display: inline-block !important;
+    vertical-align: top !important;
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    color: #e5e7eb !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.875rem !important;
+}
+
+.dataTables_wrapper .dataTables_length select:focus,
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #06b6d4 !important;
+    outline: none !important;
+}
+
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+    color: #a5f3fc !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.875rem !important;
+    font-weight: normal !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    color: #a5f3fc !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.875rem !important;
+    float: left !important;
+    margin-top: 1rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    float: right !important;
+    margin-top: 1rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    color: #a5f3fc !important;
+    padding: 4px 12px !important;
+    margin: 0 2px !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.875rem !important;
+    display: inline-block !important;
+    float: none !important;
+    vertical-align: middle !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    border-color: #06b6d4 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background-color: #0891b2 !important;
+    border-color: #06b6d4 !important;
+    color: #ffffff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+/* Clear floats after DataTables controls */
+.dataTables_wrapper:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Modal System - Clean Implementation */
+.modal {
+    z-index: 1050 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    outline: 0 !important;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+}
+
+/* Modal Dialog - Centered on entire viewport */
+.modal-dialog {
+    z-index: 1051 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    width: 90% !important;
+    max-width: 900px !important;
+    pointer-events: none !important;
+}
+
+/* Fade Transition - Single Implementation */
+.modal.fade .modal-dialog {
+    transform: translate(-50%, -50%) scale(0.9) !important;
+    opacity: 0 !important;
+    transition: all 0.3s ease !important;
+}
+
+.modal.fade.show .modal-dialog {
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1 !important;
+}
+
+/* Modal Content Styling */
+.modal-content {
+    position: relative !important;
+    background-color: #111827 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    border-radius: 6px !important;
+    outline: 0 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+    pointer-events: auto !important;
+}
+
+.modal-header {
+    background-color: #1f2937 !important;
+    border-bottom: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+.modal-body {
+    background-color: #111827 !important;
+}
+
+.modal-footer {
+    background-color: #1f2937 !important;
+    border-top: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+/* Ensure modal footer is visible and fixed */
+.modal-footer {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 10 !important;
+}
+
+/* Make modal body properly scrollable */
+.modal-body {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    max-height: calc(90vh - 120px) !important;
+}
+
+/* Test Email Modal - Smaller size */
+#sendTestEmailModal .modal-dialog {
+    max-width: 600px !important;
+}
+</style>
 {{end}}
+    <!-- Enhanced Floating Tooltip Bubble -->
+    <div id="floating-tooltip" class="fixed z-50 invisible opacity-0 transition-all duration-300 ease-in-out pointer-events-none">
+        <div class="relative bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-400/60 rounded-xl shadow-2xl shadow-cyan-500/20 backdrop-blur-sm max-w-sm">
+            <!-- Bubble glow effect -->
+            <div class="absolute inset-0 bg-cyan-400/10 rounded-xl blur-sm"></div>
+            <!-- Content -->
+            <div class="relative px-4 py-3">
+                <div class="text-cyan-100 font-mono text-sm leading-relaxed" id="tooltip-content"></div>
+            </div>
+            <!-- Speech bubble arrow -->
+            <div id="tooltip-arrow" class="absolute w-4 h-4 bg-gradient-to-br from-gray-800 to-gray-900 border-l-2 border-b-2 border-cyan-400/60 transform rotate-45"></div>
+        </div>
+    </div>
+
+    <script>
+    class FloatingTooltip {
+        constructor() {
+            this.tooltip = document.getElementById('floating-tooltip');
+            this.content = document.getElementById('tooltip-content');
+            this.arrow = document.getElementById('tooltip-arrow');
+            this.currentTrigger = null;
+            this.hideTimeout = null;
+            this.init();
+        }
+        
+        init() {
+            // Add event listeners to all tooltip triggers
+            this.attachEventListeners();
+            
+            // Hide tooltip when scrolling or clicking
+            document.addEventListener('scroll', () => this.hide(), true);
+            document.addEventListener('resize', () => this.hide());
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.tooltip-trigger')) {
+                    this.hide();
+                }
+            });
+        }
+        
+        attachEventListeners() {
+            // Use querySelectorAll to directly attach events to each trigger
+            document.querySelectorAll('.tooltip-trigger').forEach(trigger => {
+                trigger.addEventListener('mouseenter', () => this.show(trigger));
+                trigger.addEventListener('mouseleave', () => this.hide());
+            });
+        }
+        
+        show(trigger) {
+            if (this.hideTimeout) {
+                clearTimeout(this.hideTimeout);
+                this.hideTimeout = null;
+            }
+
+            this.currentTrigger = trigger;
+            const tooltipText = trigger.getAttribute('data-tooltip');
+            
+            if (!tooltipText) return;
+
+            this.content.textContent = tooltipText;
+            this.positionTooltip(trigger);
+            
+            // Show tooltip with enhanced bubble styling
+            this.tooltip.classList.remove('invisible', 'opacity-0');
+            this.tooltip.classList.add('visible', 'opacity-100');
+        }
+        
+        hide() {
+            this.hideTimeout = setTimeout(() => {
+                this.tooltip.classList.remove('visible', 'opacity-100');
+                this.tooltip.classList.add('invisible', 'opacity-0');
+                this.currentTrigger = null;
+            }, 150);
+        }
+        
+        positionTooltip(trigger) {
+            const rect = trigger.getBoundingClientRect();
+            const tooltipRect = this.tooltip.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            let top, left;
+            let arrowPosition = 'left';
+
+            // Try to position to the right first
+            left = rect.right + 8;
+            top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+
+            // If tooltip would go off right edge, position to the left
+            if (left + tooltipRect.width > viewportWidth - 16) {
+                left = rect.left - tooltipRect.width - 8;
+                arrowPosition = 'right';
+            }
+
+            // If tooltip would go off left edge, center above/below
+            if (left < 16) {
+                left = Math.max(16, rect.left + (rect.width / 2) - (tooltipRect.width / 2));
+                
+                // Position above if there's room, otherwise below
+                if (rect.top - tooltipRect.height - 8 > 0) {
+                    top = rect.top - tooltipRect.height - 8;
+                    arrowPosition = 'bottom';
+                } else {
+                    top = rect.bottom + 8;
+                    arrowPosition = 'top';
+                }
+            }
+
+            // Adjust for viewport boundaries
+            top = Math.max(8, Math.min(top, viewportHeight - tooltipRect.height - 8));
+            left = Math.max(8, Math.min(left, viewportWidth - tooltipRect.width - 8));
+
+            // Apply position
+            this.tooltip.style.top = top + 'px';
+            this.tooltip.style.left = left + 'px';
+
+            // Position arrow
+            this.positionArrow(arrowPosition, trigger, { top, left });
+        }
+
+        positionArrow(position, trigger, tooltipPos) {
+            const triggerRect = trigger.getBoundingClientRect();
+            
+            // Enhanced arrow styling to match bubble design
+            this.arrow.className = "absolute w-4 h-4 bg-gradient-to-br from-gray-800 to-gray-900 border-l-2 border-b-2 border-cyan-400/60 transform rotate-45";
+            
+            // Reset all positioning styles
+            this.arrow.style.left = '';
+            this.arrow.style.right = '';
+            this.arrow.style.top = '';
+            this.arrow.style.bottom = '';
+            
+            switch (position) {
+                case 'left':
+                    this.arrow.style.left = '-8px';
+                    this.arrow.style.top = '50%';
+                    this.arrow.style.transform = 'translateY(-50%) rotate(45deg)';
+                    break;
+                case 'right':
+                    this.arrow.style.right = '-8px';
+                    this.arrow.style.top = '50%';
+                    this.arrow.style.transform = 'translateY(-50%) rotate(-135deg)';
+                    break;
+                case 'top':
+                    this.arrow.style.top = '-8px';
+                    this.arrow.style.left = '50%';
+                    this.arrow.style.transform = 'translateX(-50%) rotate(45deg)';
+                    break;
+                case 'bottom':
+                    this.arrow.style.bottom = '-8px';
+                    this.arrow.style.left = '50%';
+                    this.arrow.style.transform = 'translateX(-50%) rotate(-135deg)';
+                    break;
+            }
+        }
+    }
+    
+    // Initialize tooltip system when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        new FloatingTooltip();
+    });
+    </script>

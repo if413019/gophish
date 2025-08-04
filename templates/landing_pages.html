@@ -155,7 +155,9 @@
                             <div class="flex-1">
                                 <label for="capture_credentials_checkbox" class="text-cyan-300 font-mono text-xs font-medium">
                                     Capture Submitted Data 
-                                    <i class="fa fa-question-circle text-cyan-400/70 ml-1 cursor-help" data-toggle="tooltip" data-placement="right" title="If the landing page contains a form, submitted input (except passwords!) will be captured."></i>
+                                    <span class="tooltip-trigger relative inline-block ml-1" data-tooltip="If the landing page contains a form, submitted input (except passwords!) will be captured.">
+                                        <i class="fa fa-question-circle text-cyan-400/70 cursor-help hover:text-cyan-300 transition-colors"></i>
+                                    </span>
                                 </label>
                             </div>
                         </div>
@@ -179,7 +181,9 @@
                 <div id="redirect_url" class="mb-4">
                     <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="redirect_url_input">
                         Redirect URL
-                        <i class="fa fa-question-circle text-cyan-400/70 ml-1 cursor-help" data-toggle="tooltip" data-placement="right" title="This option lets you redirect the user to a page after credentials are submitted."></i>
+                        <span class="tooltip-trigger relative inline-block ml-1" data-tooltip="This option lets you redirect the user to a page after credentials are submitted.">
+                            <i class="fa fa-question-circle text-cyan-400/70 cursor-help hover:text-cyan-300 transition-colors"></i>
+                        </span>
                     </label>
                     <input id="redirect_url_input" class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" placeholder="http://example.com" />
                 </div>
@@ -581,3 +585,126 @@
 }
 </style>
 {{end}}
+    <!-- Floating Tooltip System -->
+    <div id="floating-tooltip" class="fixed z-50 invisible opacity-0 transition-all duration-200 ease-in-out pointer-events-none">
+        <div class="bg-gray-800 text-white text-sm rounded-lg px-3 py-2 shadow-lg border border-gray-600 max-w-xs">
+            <div id="tooltip-content"></div>
+            <div id="tooltip-arrow" class="absolute w-2 h-2 bg-gray-800 border border-gray-600 transform rotate-45"></div>
+        </div>
+    </div>
+
+    <script>
+    class FloatingTooltip {
+        constructor() {
+            this.tooltip = document.getElementById('floating-tooltip');
+            this.content = document.getElementById('tooltip-content');
+            this.arrow = document.getElementById('tooltip-arrow');
+            this.currentTrigger = null;
+            this.hideTimeout = null;
+            
+            this.init();
+        }
+        
+        init() {
+            // Add event listeners to all tooltip triggers
+            document.querySelectorAll('.tooltip-trigger').forEach(trigger => {
+                trigger.addEventListener('mouseenter', (e) => this.show(e.target));
+                trigger.addEventListener('mouseleave', () => this.hide());
+            });
+            
+            // Hide tooltip on scroll or window resize
+            window.addEventListener('scroll', () => this.hide(), true);
+            window.addEventListener('resize', () => this.hide());
+            
+            // Hide tooltip on click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.tooltip-trigger')) {
+                    this.hide();
+                }
+            });
+        }
+        
+        show(trigger) {
+            clearTimeout(this.hideTimeout);
+            
+            const tooltipText = trigger.getAttribute('data-tooltip');
+            if (!tooltipText) return;
+            
+            this.currentTrigger = trigger;
+            this.content.textContent = tooltipText;
+            
+            // Make tooltip visible but still transparent for positioning
+            this.tooltip.style.visibility = 'visible';
+            this.tooltip.classList.remove('opacity-0');
+            this.tooltip.classList.add('opacity-100');
+            
+            // Position the tooltip
+            this.position(trigger);
+        }
+        
+        hide() {
+            this.hideTimeout = setTimeout(() => {
+                this.tooltip.classList.remove('opacity-100');
+                this.tooltip.classList.add('opacity-0');
+                
+                setTimeout(() => {
+                    this.tooltip.style.visibility = 'invisible';
+                    this.currentTrigger = null;
+                }, 200);
+            }, 100);
+        }
+        
+        position(trigger) {
+            const triggerRect = trigger.getBoundingClientRect();
+            const tooltipRect = this.tooltip.getBoundingClientRect();
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const scrollX = window.pageXOffset;
+            const scrollY = window.pageYOffset;
+            
+            let left, top, arrowLeft, arrowTop;
+            
+            // Default: show above the trigger
+            left = triggerRect.left + (triggerRect.width / 2) - (tooltipRect.width / 2);
+            top = triggerRect.top - tooltipRect.height - 10;
+            
+            // Arrow positioning (bottom of tooltip, pointing down)
+            arrowLeft = (tooltipRect.width / 2) - 4;
+            arrowTop = tooltipRect.height - 1;
+            this.arrow.style.borderTopColor = '#374151';
+            this.arrow.style.borderRightColor = 'transparent';
+            this.arrow.style.borderBottomColor = 'transparent';
+            this.arrow.style.borderLeftColor = 'transparent';
+            
+            // Adjust if tooltip would go off-screen
+            if (left < 10) {
+                left = 10;
+                arrowLeft = triggerRect.left + (triggerRect.width / 2) - left - 4;
+            } else if (left + tooltipRect.width > windowWidth - 10) {
+                left = windowWidth - tooltipRect.width - 10;
+                arrowLeft = triggerRect.left + (triggerRect.width / 2) - left - 4;
+            }
+            
+            // If tooltip would go above viewport, show below instead
+            if (top < 10) {
+                top = triggerRect.bottom + 10;
+                arrowTop = -4;
+                this.arrow.style.borderTopColor = 'transparent';
+                this.arrow.style.borderRightColor = 'transparent';
+                this.arrow.style.borderBottomColor = '#374151';
+                this.arrow.style.borderLeftColor = 'transparent';
+            }
+            
+            // Apply positions
+            this.tooltip.style.left = (left + scrollX) + 'px';
+            this.tooltip.style.top = (top + scrollY) + 'px';
+            this.arrow.style.left = arrowLeft + 'px';
+            this.arrow.style.top = arrowTop + 'px';
+        }
+    }
+    
+    // Initialize tooltip system when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        new FloatingTooltip();
+    });
+    </script>

@@ -130,7 +130,9 @@
                 <div class="mb-4">
                     <label class="block text-cyan-300 font-mono text-xs font-medium mb-1" for="envelope-sender">
                         Envelope Sender
-                        <i class="fa fa-question-circle text-cyan-400/70 ml-1 cursor-help" data-toggle="tooltip" data-placement="right" title="This sender is shown to the user by most email clients. Defaults to the SMTP From as defined in the Sending Profile."></i>
+                        <span class="tooltip-trigger relative inline-block ml-1" data-tooltip="This sender is shown to the user by most email clients. Defaults to the SMTP From as defined in the Sending Profile.">
+                            <i class="fa fa-question-circle text-cyan-400/70 cursor-help hover:text-cyan-300 transition-colors"></i>
+                        </span>
                     </label>
                     <input type="text" class="w-full px-3 py-2 bg-gray-800/50 border border-cyan-500/30 rounded text-cyan-100 placeholder-gray-400 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 focus:outline-none transition-colors font-mono text-sm" placeholder="First Last <test@example.com>" id="envelope-sender" />
                 </div>
@@ -634,3 +636,165 @@
 }
 </style>
 {{end}}
+
+    <!-- Enhanced Floating Tooltip Bubble -->
+    <div id="floating-tooltip" class="fixed z-50 invisible opacity-0 transition-all duration-300 ease-in-out pointer-events-none">
+        <div class="relative bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-400/60 rounded-xl shadow-2xl shadow-cyan-500/20 backdrop-blur-sm max-w-sm">
+            <!-- Bubble glow effect -->
+            <div class="absolute inset-0 bg-cyan-400/10 rounded-xl blur-sm"></div>
+            <!-- Content -->
+            <div class="relative px-4 py-3">
+                <div class="text-cyan-100 font-mono text-sm leading-relaxed" id="tooltip-content"></div>
+            </div>
+            <!-- Speech bubble arrow -->
+            <div id="tooltip-arrow" class="absolute w-4 h-4 bg-gradient-to-br from-gray-800 to-gray-900 border-l-2 border-b-2 border-cyan-400/60 transform rotate-45"></div>
+        </div>
+    </div>
+
+    <script>
+    class FloatingTooltip {
+        constructor() {
+            this.tooltip = document.getElementById('floating-tooltip');
+            this.content = document.getElementById('tooltip-content');
+            this.arrow = document.getElementById('tooltip-arrow');
+            this.currentTrigger = null;
+            this.hideTimeout = null;
+            this.init();
+        }
+        
+        init() {
+            // Add event listeners to all tooltip triggers
+            this.attachEventListeners();
+            
+            // Hide tooltip when scrolling or clicking
+            document.addEventListener('scroll', () => this.hide(), true);
+            document.addEventListener('resize', () => this.hide());
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.tooltip-trigger')) {
+                    this.hide();
+                }
+            });
+        }
+        
+        attachEventListeners() {
+            // Use querySelectorAll to directly attach events to each trigger
+            document.querySelectorAll('.tooltip-trigger').forEach(trigger => {
+                trigger.addEventListener('mouseenter', () => this.show(trigger));
+                trigger.addEventListener('mouseleave', () => this.hide());
+            });
+        }
+        
+        show(trigger) {
+            if (this.hideTimeout) {
+                clearTimeout(this.hideTimeout);
+                this.hideTimeout = null;
+            }
+
+            this.currentTrigger = trigger;
+            const tooltipText = trigger.getAttribute('data-tooltip');
+            
+            if (!tooltipText) return;
+
+            this.content.textContent = tooltipText;
+            this.positionTooltip(trigger);
+            
+            // Show tooltip with enhanced bubble styling
+            this.tooltip.classList.remove('invisible', 'opacity-0');
+            this.tooltip.classList.add('visible', 'opacity-100');
+        }
+        
+        hide() {
+            this.hideTimeout = setTimeout(() => {
+                this.tooltip.classList.remove('visible', 'opacity-100');
+                this.tooltip.classList.add('invisible', 'opacity-0');
+                this.currentTrigger = null;
+            }, 150);
+        }
+        
+        positionTooltip(trigger) {
+            const rect = trigger.getBoundingClientRect();
+            const tooltipRect = this.tooltip.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            let top, left;
+            let arrowPosition = 'left';
+
+            // Try to position to the right first
+            left = rect.right + 8;
+            top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+
+            // If tooltip would go off right edge, position to the left
+            if (left + tooltipRect.width > viewportWidth - 16) {
+                left = rect.left - tooltipRect.width - 8;
+                arrowPosition = 'right';
+            }
+
+            // If tooltip would go off left edge, center above/below
+            if (left < 16) {
+                left = Math.max(16, rect.left + (rect.width / 2) - (tooltipRect.width / 2));
+                
+                // Position above if there's room, otherwise below
+                if (rect.top - tooltipRect.height - 8 > 0) {
+                    top = rect.top - tooltipRect.height - 8;
+                    arrowPosition = 'bottom';
+                } else {
+                    top = rect.bottom + 8;
+                    arrowPosition = 'top';
+                }
+            }
+
+            // Adjust for viewport boundaries
+            top = Math.max(8, Math.min(top, viewportHeight - tooltipRect.height - 8));
+            left = Math.max(8, Math.min(left, viewportWidth - tooltipRect.width - 8));
+
+            // Apply position
+            this.tooltip.style.top = top + 'px';
+            this.tooltip.style.left = left + 'px';
+
+            // Position arrow
+            this.positionArrow(arrowPosition, trigger, { top, left });
+        }
+
+        positionArrow(position, trigger, tooltipPos) {
+            const triggerRect = trigger.getBoundingClientRect();
+            
+            // Enhanced arrow styling to match bubble design
+            this.arrow.className = "absolute w-4 h-4 bg-gradient-to-br from-gray-800 to-gray-900 border-l-2 border-b-2 border-cyan-400/60 transform rotate-45";
+            
+            // Reset all positioning styles
+            this.arrow.style.left = '';
+            this.arrow.style.right = '';
+            this.arrow.style.top = '';
+            this.arrow.style.bottom = '';
+            
+            switch (position) {
+                case 'left':
+                    this.arrow.style.left = '-8px';
+                    this.arrow.style.top = '50%';
+                    this.arrow.style.transform = 'translateY(-50%) rotate(45deg)';
+                    break;
+                case 'right':
+                    this.arrow.style.right = '-8px';
+                    this.arrow.style.top = '50%';
+                    this.arrow.style.transform = 'translateY(-50%) rotate(-135deg)';
+                    break;
+                case 'top':
+                    this.arrow.style.top = '-8px';
+                    this.arrow.style.left = '50%';
+                    this.arrow.style.transform = 'translateX(-50%) rotate(45deg)';
+                    break;
+                case 'bottom':
+                    this.arrow.style.bottom = '-8px';
+                    this.arrow.style.left = '50%';
+                    this.arrow.style.transform = 'translateX(-50%) rotate(-135deg)';
+                    break;
+            }
+        }
+    }
+    
+    // Initialize tooltip system when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        new FloatingTooltip();
+    });
+    </script>
