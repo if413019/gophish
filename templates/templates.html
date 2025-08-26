@@ -192,19 +192,69 @@
                     </span>
                     
                     <div class="mt-4 bg-gray-800/50 border border-cyan-500/30 rounded overflow-hidden">
-                        <table id="attachmentsTable" class="w-full table">
-                            <thead>
-                                <tr class="border-b border-cyan-500/20">
-                                    <th class="text-center py-2 px-2 text-cyan-300 font-mono text-xs font-medium col-md-1 no-sort w-8"></th>
-                                    <th class="text-left py-2 px-2 text-cyan-300 font-mono text-xs font-medium col-md-10">Name</th>
-                                    <th class="text-center py-2 px-2 text-cyan-300 font-mono text-xs font-medium col-md-1 no-sort w-8"></th>
-                                    <th class="datatable_hidden no-sort">Content</th>
-                                    <th class="datatable_hidden no-sort">Type</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
+                        <!-- DataTables Controls for attachments table -->
+                        <div class="flex items-center justify-between mb-3 px-3 pt-3" style="display:none;" id="attachmentsTableControls">
+                            <div class="flex items-center space-x-2">
+                                <label class="text-cyan-300 font-mono text-xs">Show</label>
+                                <select class="bg-gray-800 border border-cyan-500/30 text-cyan-300 px-2 py-1 rounded font-mono text-xs focus:border-cyan-400">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                                <label class="text-cyan-300 font-mono text-xs">entries</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-cyan-300 font-mono text-xs">Search:</label>
+                                <input type="text" class="bg-gray-800 border border-cyan-500/30 text-cyan-100 px-2 py-1 rounded font-mono text-xs focus:border-cyan-400 focus:outline-none" placeholder="Search attachments...">
+                            </div>
+                        </div>
+                        
+                        <!-- Empty State for attachments -->
+                        <div id="attachmentsTableEmpty" class="text-center py-8" style="display: none;">
+                            <div class="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-xl p-4 border border-cyan-500/30 mx-3">
+                                <div class="mb-4">
+                                    <i class="fas fa-paperclip text-3xl text-cyan-400 mb-3"></i>
+                                    <h4 class="text-md font-orbitron font-bold text-white mb-2">No Attachments</h4>
+                                    <p class="text-cyan-300 font-mono text-xs">Click "Add Files" to attach files to this template</p>
+                                </div>
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-cyan-500 text-xs font-mono font-semibold rounded text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200" onclick="document.getElementById('attachmentUpload').click()">
+                                    <i class="fas fa-plus mr-1.5"></i> Add Files
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table id="attachmentsTable" class="w-full table" style="display:none;">
+                                <thead>
+                                    <tr class="border-b border-cyan-500/30">
+                                        <th class="text-center py-3 px-3 text-xs font-mono text-cyan-400 uppercase tracking-wider col-md-1 no-sort w-8"></th>
+                                        <th class="text-left py-3 px-3 text-xs font-mono text-cyan-400 uppercase tracking-wider col-md-10">Name</th>
+                                        <th class="text-center py-3 px-3 text-xs font-mono text-cyan-400 uppercase tracking-wider col-md-1 no-sort w-8">Action</th>
+                                        <th class="datatable_hidden no-sort">Content</th>
+                                        <th class="datatable_hidden no-sort">Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700/50">
+                                    <!-- Table rows will be populated here with the following styling -->
+                                    <!-- Each row should have: class="hover:bg-gray-800/50 transition-colors" -->
+                                    <!-- Each cell should have: class="py-3 px-3 text-cyan-100 font-mono text-sm" -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- DataTables Pagination for attachments table -->
+                        <div class="flex items-center justify-between mt-3 px-3 pb-3" style="display:none;" id="attachmentsTablePagination">
+                            <div class="text-cyan-300 font-mono text-xs">
+                                Showing <span id="attachmentsEntriesStart">1</span> to <span id="attachmentsEntriesEnd">10</span> of <span id="attachmentsEntriesTotal">0</span> entries
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <button class="px-2 py-1 bg-gray-800 border border-cyan-500/30 text-cyan-300 rounded font-mono text-xs hover:bg-cyan-500/10 disabled:opacity-50" id="attachmentsPrevPage">Previous</button>
+                                <div class="flex space-x-1" id="attachmentsPageNumbers">
+                                    <button class="px-2 py-1 bg-cyan-600 border border-cyan-500 text-white rounded font-mono text-xs">1</button>
+                                </div>
+                                <button class="px-2 py-1 bg-gray-800 border border-cyan-500/30 text-cyan-300 rounded font-mono text-xs hover:bg-cyan-500/10 disabled:opacity-50" id="attachmentsNextPage">Next</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -618,21 +668,90 @@
     color: #e5e7eb !important;
 }
 
-/* Attachments table styling */
+/* Attachments table styling - Updated to match landing_pages.html */
 #attachmentsTable tbody tr {
     border-bottom: 1px solid rgba(6, 182, 212, 0.1) !important;
 }
 
 #attachmentsTable tbody td {
-    padding: 6px 8px !important;
+    padding: 12px 12px !important;
     color: #e5e7eb !important;
     font-family: 'Courier New', monospace !important;
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
     vertical-align: middle !important;
 }
 
 #attachmentsTable tbody tr:hover {
     background-color: rgba(6, 182, 212, 0.05) !important;
+}
+
+/* Attachments Table Controls - Match landing_pages.html DataTables styling */
+#attachmentsTableControls .dataTables_length,
+#attachmentsTableControls .dataTables_filter {
+    display: inline-block !important;
+    vertical-align: top !important;
+}
+
+#attachmentsTableControls .dataTables_length select,
+#attachmentsTableControls .dataTables_filter input {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    color: #e5e7eb !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+}
+
+#attachmentsTableControls .dataTables_length select:focus,
+#attachmentsTableControls .dataTables_filter input:focus {
+    border-color: #06b6d4 !important;
+    outline: none !important;
+}
+
+#attachmentsTableControls .dataTables_length label,
+#attachmentsTableControls .dataTables_filter label {
+    color: #a5f3fc !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+    font-weight: normal !important;
+}
+
+/* Attachments Table Pagination */
+#attachmentsTablePagination .dataTables_info {
+    color: #a5f3fc !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+}
+
+#attachmentsTablePagination .paginate_button {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    color: #a5f3fc !important;
+    padding: 4px 8px !important;
+    margin: 0 1px !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+    display: inline-block !important;
+    float: none !important;
+    vertical-align: middle !important;
+}
+
+#attachmentsTablePagination .paginate_button:hover {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    border-color: #06b6d4 !important;
+}
+
+#attachmentsTablePagination .paginate_button.current {
+    background-color: #0891b2 !important;
+    border-color: #06b6d4 !important;
+    color: #ffffff !important;
+}
+
+#attachmentsTablePagination .paginate_button.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
 }
 </style>
 {{end}}

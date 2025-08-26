@@ -196,17 +196,67 @@
                         
                         <!-- Headers Table -->
                         <div class="bg-gray-800/30 rounded border border-cyan-500/20 overflow-hidden">
-                            <table id="headersTable" class="w-full table table-hover table-striped table-condensed">
-                                <thead>
-                                    <tr class="border-b border-cyan-500/20">
-                                        <th class="text-left py-2 px-3 text-cyan-300 font-mono text-xs font-medium">Header</th>
-                                        <th class="text-left py-2 px-3 text-cyan-300 font-mono text-xs font-medium">Value</th>
-                                        <th class="text-center py-2 px-3 text-cyan-300 font-mono text-xs font-medium no-sort w-16">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                            <!-- DataTables Controls for headers table -->
+                            <div class="flex items-center justify-between mb-3 px-3 pt-3" style="display:none;" id="headersTableControls">
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-cyan-300 font-mono text-xs">Show</label>
+                                    <select class="bg-gray-800 border border-cyan-500/30 text-cyan-300 px-2 py-1 rounded font-mono text-xs focus:border-cyan-400">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                    <label class="text-cyan-300 font-mono text-xs">entries</label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-cyan-300 font-mono text-xs">Search:</label>
+                                    <input type="text" class="bg-gray-800 border border-cyan-500/30 text-cyan-100 px-2 py-1 rounded font-mono text-xs focus:border-cyan-400 focus:outline-none" placeholder="Search headers...">
+                                </div>
+                            </div>
+                            
+                            <!-- Empty State for headers -->
+                            <div id="headersTableEmpty" class="text-center py-8" style="display: none;">
+                                <div class="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-xl p-4 border border-cyan-500/30 mx-3">
+                                    <div class="mb-4">
+                                        <i class="fas fa-envelope-open text-3xl text-cyan-400 mb-3"></i>
+                                        <h4 class="text-md font-orbitron font-bold text-white mb-2">No Custom Headers</h4>
+                                        <p class="text-cyan-300 font-mono text-xs">Add custom email headers to enhance your sending profile</p>
+                                    </div>
+                                    <button type="button" class="inline-flex items-center px-3 py-1.5 border border-cyan-500 text-xs font-mono font-semibold rounded text-cyan-400 bg-transparent hover:bg-cyan-500/10 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200" onclick="document.getElementById('headerKey').focus()">
+                                        <i class="fas fa-plus mr-1.5"></i> Add Header
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table id="headersTable" class="w-full table" style="display:none;">
+                                    <thead>
+                                        <tr class="border-b border-cyan-500/30">
+                                            <th class="text-left py-3 px-3 text-xs font-mono text-cyan-400 uppercase tracking-wider">Header</th>
+                                            <th class="text-left py-3 px-3 text-xs font-mono text-cyan-400 uppercase tracking-wider">Value</th>
+                                            <th class="text-center py-3 px-3 text-xs font-mono text-cyan-400 uppercase tracking-wider no-sort">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-700/50">
+                                        <!-- Table rows will be populated here with the following styling -->
+                                        <!-- Each row should have: class="hover:bg-gray-800/50 transition-colors" -->
+                                        <!-- Each cell should have: class="py-3 px-3 text-cyan-100 font-mono text-sm" -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- DataTables Pagination for headers table -->
+                            <div class="flex items-center justify-between mt-3 px-3 pb-3" style="display:none;" id="headersTablePagination">
+                                <div class="text-cyan-300 font-mono text-xs">
+                                    Showing <span id="headersEntriesStart">1</span> to <span id="headersEntriesEnd">10</span> of <span id="headersEntriesTotal">0</span> entries
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <button class="px-2 py-1 bg-gray-800 border border-cyan-500/30 text-cyan-300 rounded font-mono text-xs hover:bg-cyan-500/10 disabled:opacity-50" id="headersPrevPage">Previous</button>
+                                    <div class="flex space-x-1" id="headersPageNumbers">
+                                        <button class="px-2 py-1 bg-cyan-600 border border-cyan-500 text-white rounded font-mono text-xs">1</button>
+                                    </div>
+                                    <button class="px-2 py-1 bg-gray-800 border border-cyan-500/30 text-cyan-300 rounded font-mono text-xs hover:bg-cyan-500/10 disabled:opacity-50" id="headersNextPage">Next</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -629,21 +679,90 @@ document.addEventListener('DOMContentLoaded', () => {
     border-top: 1px solid rgba(6, 182, 212, 0.3) !important;
 }
 
-/* Headers Table Styling */
+/* Headers Table Styling - Updated to match landing_pages.html */
 #headersTable tbody tr {
     border-bottom: 1px solid rgba(6, 182, 212, 0.1) !important;
 }
 
 #headersTable tbody td {
-    padding: 6px 12px !important;
+    padding: 12px 12px !important;
     color: #e5e7eb !important;
     font-family: 'Courier New', monospace !important;
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
     vertical-align: middle !important;
 }
 
 #headersTable tbody tr:hover {
     background-color: rgba(6, 182, 212, 0.05) !important;
+}
+
+/* Headers Table Controls - Match landing_pages.html DataTables styling */
+#headersTableControls .dataTables_length,
+#headersTableControls .dataTables_filter {
+    display: inline-block !important;
+    vertical-align: top !important;
+}
+
+#headersTableControls .dataTables_length select,
+#headersTableControls .dataTables_filter input {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    color: #e5e7eb !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+}
+
+#headersTableControls .dataTables_length select:focus,
+#headersTableControls .dataTables_filter input:focus {
+    border-color: #06b6d4 !important;
+    outline: none !important;
+}
+
+#headersTableControls .dataTables_length label,
+#headersTableControls .dataTables_filter label {
+    color: #a5f3fc !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+    font-weight: normal !important;
+}
+
+/* Headers Table Pagination */
+#headersTablePagination .dataTables_info {
+    color: #a5f3fc !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+}
+
+#headersTablePagination .paginate_button {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+    color: #a5f3fc !important;
+    padding: 4px 8px !important;
+    margin: 0 1px !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+    display: inline-block !important;
+    float: none !important;
+    vertical-align: middle !important;
+}
+
+#headersTablePagination .paginate_button:hover {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    border-color: #06b6d4 !important;
+}
+
+#headersTablePagination .paginate_button.current {
+    background-color: #0891b2 !important;
+    border-color: #06b6d4 !important;
+    color: #ffffff !important;
+}
+
+#headersTablePagination .paginate_button.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
 }
 
 /* Ensure modal footer is visible and fixed */
