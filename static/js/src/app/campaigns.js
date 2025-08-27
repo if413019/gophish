@@ -37,6 +37,14 @@ function launch() {
                 if (send_by_date != "") {
                     send_by_date = moment(send_by_date, "MMMM Do YYYY, h:mm a").utc().format()
                 }
+                var courseData = $("#course").select2("data")[0]
+                var course = null
+                if (courseData && courseData.text && courseData.text !== "No course") {
+                    course = {
+                        name: courseData.text
+                    }
+                }
+                
                 campaign = {
                     name: $("#name").val(),
                     template: {
@@ -49,6 +57,7 @@ function launch() {
                     smtp: {
                         name: $("#profile").select2("data")[0].text
                     },
+                    course: course,
                     launch_date: moment($("#launch_date").val(), "MMMM Do YYYY, h:mm a").utc().format(),
                     send_by_date: send_by_date || null,
                     groups: groups,
@@ -243,6 +252,35 @@ function setupOptions() {
                     profile_select.trigger('change.select2')
                 }
             }
+        });
+    
+    // Load courses for auto-enrollment
+    api.courses.get()
+        .success(function (courses) {
+            var course_s2 = [{id: "", text: "No course"}]
+            if (courses.length > 0) {
+                course_s2 = course_s2.concat($.map(courses, function (obj) {
+                    obj.text = obj.name
+                    return obj
+                }))
+            }
+            var course_select = $("#course.form-control")
+            course_select.select2({
+                placeholder: "Select a Course (Optional)",
+                data: course_s2,
+            });
+            // Default to "No course"
+            course_select.val("")
+            course_select.trigger('change.select2')
+        })
+        .error(function (data) {
+            // If courses API fails, just show no course option
+            var course_s2 = [{id: "", text: "No course"}]
+            var course_select = $("#course.form-control")
+            course_select.select2({
+                placeholder: "No courses available",
+                data: course_s2,
+            });
         });
 }
 

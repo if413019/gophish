@@ -30,6 +30,8 @@ type Campaign struct {
 	Events        []Event   `json:"timeline,omitempty"`
 	SMTPId        int64     `json:"-"`
 	SMTP          SMTP      `json:"smtp"`
+	CourseId      int64     `json:"-"`
+	Course        Course    `json:"course,omitempty"`
 	URL           string    `json:"url"`
 }
 
@@ -225,6 +227,17 @@ func (c *Campaign) getDetails() error {
 	if err != nil && err != gorm.ErrRecordNotFound {
 		log.Warn(err)
 		return err
+	}
+	// Load course if specified
+	if c.CourseId > 0 {
+		err = db.Table("courses").Where("id=?", c.CourseId).Find(&c.Course).Error
+		if err != nil {
+			if err != gorm.ErrRecordNotFound {
+				return err
+			}
+			c.Course = Course{Name: "[Deleted]"}
+			log.Warnf("%s: course not found for campaign", err)
+		}
 	}
 	return nil
 }
@@ -526,6 +539,21 @@ func PostCampaign(c *Campaign, uid int64) error {
 	}
 	c.SMTP = s
 	c.SMTPId = s.Id
+	// Check to make sure the course exists (if specified)
+	if c.Course.Name != "" {
+		course, err := GetCourseByName(c.Course.Name, uid)
+		if err == gorm.ErrRecordNotFound {
+			log.WithFields(logrus.Fields{
+				"course": c.Course.Name,
+			}).Error("Course does not exist")
+			return ErrCourseNotFound
+		} else if err != nil {
+			log.Error(err)
+			return err
+		}
+		c.Course = course
+		c.CourseId = course.Id
+	}
 	// Insert into the DB
 	err = db.Save(c).Error
 	if err != nil {

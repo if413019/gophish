@@ -120,6 +120,28 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
 	}
 	r.Status = EventClicked
 	r.ModifiedDate = event.Time
+	
+	// Check if auto-enrollment should occur
+	campaign := Campaign{}
+	err = db.Where("id = ?", r.CampaignId).First(&campaign).Error
+	if err == nil && campaign.CourseId > 0 {
+		// Get or create user for enrollment
+		// For now, we'll use the email as a basic user identifier
+		// In a full implementation, this would integrate with the existing user system
+		user, err := r.getOrCreateUserForEnrollment()
+		if err != nil {
+			log.Errorf("Failed to get/create user for enrollment: %v", err)
+		} else {
+			// Enroll the user in the course
+			err = EnrollUser(user.Id, campaign.CourseId, r.CampaignId)
+			if err != nil {
+				log.Errorf("Failed to enroll user in course: %v", err)
+			} else {
+				log.Infof("User %s automatically enrolled in course %d from campaign %d", r.Email, campaign.CourseId, r.CampaignId)
+			}
+		}
+	}
+	
 	return db.Save(r).Error
 }
 
@@ -133,6 +155,40 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
 	r.Status = EventDataSubmit
 	r.ModifiedDate = event.Time
 	return db.Save(r).Error
+}
+
+// getOrCreateUserForEnrollment gets or creates a user for course enrollment
+// This creates a basic user record for course enrollment purposes
+func (r *Result) getOrCreateUserForEnrollment() (User, error) {
+	// Try to find existing user by email
+	var user User
+	err := db.Where("username = ?", r.Email).First(&user).Error
+	if err == nil {
+		// User already exists
+		return user, nil
+	}
+	
+	if err != gorm.ErrRecordNotFound {
+		// Some other error occurred
+		return user, err
+	}
+	
+	// User doesn't exist, create a basic user record for enrollment
+	// This would be a limited user account specifically for course access
+	user = User{
+		Username: r.Email,
+		// Set a placeholder API key - this user won't use API functionality
+		ApiKey:   generateSecureKey(),
+		// These users don't have admin access to the system
+		RoleID: 2, // Assuming role ID 2 is a basic user role
+	}
+	
+	err = db.Save(&user).Error
+	if err != nil {
+		return user, err
+	}
+	
+	return user, nil
 }
 
 // HandleEmailReport updates a Result in the case where they report a simulated

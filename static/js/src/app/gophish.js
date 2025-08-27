@@ -291,6 +291,43 @@ var api = {
     },
     reset: function () {
         return query("/reset", "POST", {}, true)
+    },
+    // courses contains the endpoints for /courses
+    courses: {
+        // get() - Queries the API for GET /courses
+        get: function () {
+            return query("/courses/", "GET", {}, false)
+        },
+        // post() - Posts a course to POST /courses
+        post: function (course) {
+            return query("/courses/", "POST", course, false)
+        }
+    },
+    // courseId contains the endpoints for /courses/:id
+    courseId: {
+        // get() - Queries the API for GET /courses/:id
+        get: function (id) {
+            return query("/courses/" + id, "GET", {}, false)
+        },
+        // put() - Updates a course at PUT /courses/:id
+        put: function (id, course) {
+            return query("/courses/" + id, "PUT", course, false)
+        },
+        // delete() - Deletes a course at DELETE /courses/:id
+        delete: function (id) {
+            return query("/courses/" + id, "DELETE", {}, false)
+        }
+    },
+    // enrollments contains the endpoints for user enrollments
+    enrollments: {
+        // get() - Queries the API for GET /enrollments
+        get: function () {
+            return query("/enrollments/", "GET", {}, false)
+        },
+        // post() - Posts an enrollment to POST /enrollments
+        post: function (enrollment) {
+            return query("/enrollments/", "POST", enrollment, false)
+        }
     }
 }
 window.api = api

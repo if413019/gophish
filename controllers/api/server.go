@@ -86,6 +86,15 @@ func (as *Server) registerRoutes() {
 	router.HandleFunc("/webhooks/", mid.Use(as.Webhooks, mid.RequirePermission(models.PermissionModifySystem)))
 	router.HandleFunc("/webhooks/{id:[0-9]+}/validate", mid.Use(as.ValidateWebhook, mid.RequirePermission(models.PermissionModifySystem)))
 	router.HandleFunc("/webhooks/{id:[0-9]+}", mid.Use(as.Webhook, mid.RequirePermission(models.PermissionModifySystem)))
+	
+	// E-learning course routes
+	router.HandleFunc("/courses/", as.Courses)
+	router.HandleFunc("/courses/{id:[0-9]+}", as.Course)
+	router.HandleFunc("/courses/{id:[0-9]+}/modules", as.CourseModules)
+	router.HandleFunc("/courses/{id:[0-9]+}/quizzes", as.CourseQuizzes)
+	router.HandleFunc("/enrollments/", as.UserEnrollments)
+	router.HandleFunc("/enrollments/{enrollment_id:[0-9]+}/quiz/{quiz_id:[0-9]+}/submit", as.SubmitQuiz)
+	
 	as.handler = router
 }
 
