@@ -1,0 +1,572 @@
+{{define "body"}}
+<!-- Custom layout for course preview without sidebar -->
+<div class="container-fluid full-width-preview"
+    style="padding: 0; margin: 0; width: 100%; height: 100vh; overflow-x: hidden;">
+<!-- Override the nav sidebar for preview mode -->
+<style>
+/* Hide admin sidebar completely */
+.sidebar { 
+    display: none !important; 
+    visibility: hidden !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Reset main content area */
+.main { 
+    margin-left: 0 !important; 
+    padding: 0 !important; 
+}
+
+/* Override container layout */
+.container-fluid .row {
+    margin: 0 !important;
+}
+
+.col-sm-3, .col-md-2 {
+    display: none !important;
+}
+
+/* Fix body layout */
+body { 
+    margin: 0; 
+    padding: 0; 
+    overflow-x: hidden;
+}
+
+/* Fix for header overlap */
+.full-width-preview {
+    margin-top: 70px !important; /* Account for fixed header height */
+    padding-top: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.full-width-preview .alert-info {
+    margin-bottom: 20px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+}
+
+/* Ensure content is visible */
+.html-content {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Module display control */
+.course-module {
+    display: none;
+}
+
+.course-module.active {
+    display: block !important;
+}
+
+/* No default display rules - JavaScript will handle initial state */
+
+/* Force full width for preview content */
+.full-width-preview .col-md-3,
+.full-width-preview .col-md-9 {
+    width: 100% !important;
+    float: none !important;
+    padding: 15px;
+}
+
+/* Adjust course navigation sidebar in preview */
+.full-width-preview .col-md-3 {
+    width: 25% !important;
+    float: left !important;
+}
+
+.full-width-preview .col-md-9 {
+    width: 75% !important;
+    float: right !important;
+}
+</style>
+    {{ if .IsPreview }}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-info">
+                <div class="row">
+                    <div class="col-md-8">
+                        <i class="fa fa-eye"></i>
+                        <strong>Preview Mode:</strong> This is how the course will appear to users. This is for admin review only.
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <a href="/courses" class="btn btn-sm btn-default">
+                            <i class="fa fa-arrow-left"></i> Back to Courses
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ end }}
+    
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Course Navigation Sidebar -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <i class="fa fa-book"></i> Course Navigation
+                    </h4>
+                </div>
+                <div class="panel-body">
+                    <div class="course-progress">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" style="width: 0%">
+                                <span class="sr-only">0% Complete</span>
+                            </div>
+                        </div>
+                        <small>0% Complete</small>
+                    </div>
+                    
+                    <div class="module-list">
+                        {{ range $index, $module := .Course.Modules }}
+                        <div class="module-nav-item" data-module-id="{{ $module.Id }}" data-index="{{ $index }}">
+                            <div class="module-nav-header">
+                                <span class="module-number">{{ add $index 1 }}</span>
+                                <span class="module-icon">
+                                    {{ if eq $module.ModuleType "html" }}
+                                        <i class="fa fa-file-text-o"></i>
+                                    {{ else if eq $module.ModuleType "video" }}
+                                        <i class="fa fa-play-circle"></i>
+                                    {{ else if eq $module.ModuleType "presentation" }}
+                                        <i class="fa fa-bar-chart"></i>
+                                    {{ else if eq $module.ModuleType "quiz" }}
+                                        <i class="fa fa-question-circle"></i>
+                                    {{ end }}
+                                </span>
+                                <span class="module-name">{{ $module.Name }}</span>
+                                <span class="module-status pull-right">
+                                    <i class="fa fa-circle-o text-muted"></i>
+                                </span>
+                            </div>
+                            {{ if $module.Description }}
+                            <div class="module-description">{{ $module.Description }}</div>
+                            {{ end }}
+                        </div>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <!-- Course Header -->
+            <div class="course-header">
+                <h1>{{ .Course.Name }}</h1>
+                {{ if .Course.Description }}
+                <p class="lead">{{ .Course.Description }}</p>
+                {{ end }}
+            </div>
+            
+            <!-- Module Content Area -->
+            <div class="module-content-area">
+                {{ range $index, $module := .Course.Modules }}
+                <div class="course-module panel panel-default" data-module-id="{{ $module.Id }}" data-module-index="{{ $index }}">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <span class="module-icon">
+                                {{ if eq $module.ModuleType "html" }}
+                                    <i class="fa fa-file-text-o"></i>
+                                {{ else if eq $module.ModuleType "video" }}
+                                    <i class="fa fa-play-circle"></i>
+                                {{ else if eq $module.ModuleType "presentation" }}
+                                    <i class="fa fa-bar-chart"></i>
+                                {{ else if eq $module.ModuleType "quiz" }}
+                                    <i class="fa fa-question-circle"></i>
+                                {{ end }}
+                            </span>
+                            {{ $module.Name }}
+                            <span class="label label-info module-type-label">{{ $module.ModuleType }}</span>
+                        </h3>
+                        {{ if $module.Description }}
+                        <p class="module-description">{{ $module.Description }}</p>
+                        {{ end }}
+                    </div>
+                    
+                    <div class="panel-body">
+                        {{ if eq $module.ModuleType "html" }}
+                            <!-- HTML Content Module -->
+                            <div class="html-content">
+                                {{ if $module.Content }}
+                                    {{ $module.Content | safehtml }}
+                                {{ else }}
+                                    <p><em>No content available for this module.</em></p>
+                                {{ end }}
+                            </div>
+                            
+                        {{ else if eq $module.ModuleType "video" }}
+                            <!-- Video Module -->
+                            {{ if $module.Content }}
+                            <div class="video-guidelines">
+                                <h4>About this video:</h4>
+                                <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
+                            </div>
+                            {{ end }}
+                            
+                            <div class="video-container">
+                                {{ if $module.VideoURL }}
+                                <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe class="embed-responsive-item" src="{{ $module.VideoURL }}" allowfullscreen></iframe>
+                                </div>
+                                {{ else }}
+                                <div class="alert alert-warning">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                    No video URL configured for this module.
+                                </div>
+                                {{ end }}
+                            </div>
+                            
+                            {{ if $module.MinTimeSpent }}
+                            <div class="video-timer alert alert-info">
+                                <i class="fa fa-clock-o"></i>
+                                <strong>Minimum viewing time:</strong> {{ $module.MinTimeSpent }} seconds
+                            </div>
+                            {{ end }}
+                            
+                        {{ else if eq $module.ModuleType "presentation" }}
+                            <!-- Presentation Module -->
+                            {{ if $module.Content }}
+                            <div class="presentation-guidelines">
+                                <h4>About this presentation:</h4>
+                                <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
+                            </div>
+                            {{ end }}
+                            
+                            <div class="presentation-container">
+                                {{ if $module.PresentationURL }}
+                                <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe class="embed-responsive-item" src="{{ $module.PresentationURL }}" allowfullscreen></iframe>
+                                </div>
+                                {{ else }}
+                                <div class="alert alert-warning">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                    No presentation URL configured for this module.
+                                </div>
+                                {{ end }}
+                            </div>
+                            
+                        {{ else if eq $module.ModuleType "quiz" }}
+                            <!-- Quiz Module -->
+                            {{ if $module.Content }}
+                            <div class="quiz-guidelines">
+                                <h4>Quiz Instructions:</h4>
+                                <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
+                            </div>
+                            {{ end }}
+                            
+                            <div class="quiz-container">
+                                <!-- Find linked quiz -->
+                                {{ range $.Course.Quizzes }}
+                                    {{ if eq .ModuleId $module.Id }}
+                                    <div class="quiz-info alert alert-info">
+                                        <h4><i class="fa fa-question-circle"></i> {{ .Name }}</h4>
+                                        {{ if .Description }}
+                                        <p>{{ .Description }}</p>
+                                        {{ end }}
+                                        <ul class="quiz-details">
+                                            {{ if .PassingScore }}<li><strong>Passing Score:</strong> {{ .PassingScore }}%</li>{{ end }}
+                                            {{ if .TimeLimit }}<li><strong>Time Limit:</strong> {{ .TimeLimit }} minutes</li>{{ end }}
+                                            {{ if .MaxAttempts }}<li><strong>Maximum Attempts:</strong> {{ .MaxAttempts }}</li>{{ end }}
+                                            <li><strong>Questions:</strong> {{ len .Questions }}</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="quiz-questions">
+                                        {{ range $qIndex, $question := .Questions }}
+                                        <div class="question-preview panel panel-default">
+                                            <div class="panel-heading">
+                                                <h5>Question {{ add $qIndex 1 }} 
+                                                    <span class="label label-default">{{ $question.QuestionType }}</span>
+                                                    {{ if $question.Points }}<span class="label label-primary">{{ $question.Points }} pts</span>{{ end }}
+                                                </h5>
+                                            </div>
+                                            <div class="panel-body">
+                                                <p><strong>{{ $question.Question }}</strong></p>
+                                                
+                                                {{ if $question.Options }}
+                                                <div class="question-options">
+                                                    {{ range $option := $question.Options }}
+                                                    <div class="option">
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="q{{ $qIndex }}" disabled>
+                                                            {{ $option.Option }}
+                                                            {{ if $option.IsCorrect }}
+                                                            <span class="label label-success">Correct</span>
+                                                            {{ end }}
+                                                        </label>
+                                                    </div>
+                                                    {{ end }}
+                                                </div>
+                                                {{ end }}
+                                                
+                                                {{ if $question.Explanation }}
+                                                <div class="question-explanation alert alert-info">
+                                                    <strong>Explanation:</strong> {{ $question.Explanation }}
+                                                </div>
+                                                {{ end }}
+                                            </div>
+                                        </div>
+                                        {{ end }}
+                                    </div>
+                                    {{ end }}
+                                {{ end }}
+                            </div>
+                        {{ end }}
+                        
+                        <!-- Module Completion Requirements -->
+                        {{ if $module.MustComplete }}
+                        <div class="completion-requirements alert alert-warning">
+                            <i class="fa fa-exclamation-circle"></i>
+                            <strong>Required:</strong> This module must be completed to proceed to the next module.
+                            {{ if $module.MinTimeSpent }}
+                            <br><strong>Minimum time:</strong> {{ $module.MinTimeSpent }} seconds
+                            {{ end }}
+                        </div>
+                        {{ end }}
+                    </div>
+                    
+                    <div class="panel-footer">
+                        <div class="module-navigation">
+                            {{ if ne $index 0 }}
+                            <button class="btn btn-default prev-module" data-target="{{ sub $index 1 }}">
+                                <i class="fa fa-arrow-left"></i> Previous
+                            </button>
+                            {{ end }}
+                            
+                            {{ if lt $index (sub (len $.Course.Modules) 1) }}
+                            <button class="btn btn-primary next-module pull-right" data-target="{{ add $index 1 }}">
+                                Next <i class="fa fa-arrow-right"></i>
+                            </button>
+                            {{ else }}
+                            <button class="btn btn-success complete-course pull-right">
+                                <i class="fa fa-check"></i> Complete Course
+                            </button>
+                            {{ end }}
+                        </div>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+$(document).ready(function() {
+    var currentModule = 0;
+    var totalModules = {{ len .Course.Modules }};
+    
+    // Helper functions for template math
+    function add(a, b) { return a + b; }
+    function sub(a, b) { return a - b; }
+    
+    // Module navigation - using event delegation
+    $(document).on('click', '.module-nav-item', function(e) {
+        e.preventDefault();
+        var targetIndex = $(this).data('index');
+        console.log('Sidebar nav clicked, target index:', targetIndex);
+        showModule(targetIndex);
+    });
+    
+    $(document).on('click', '.next-module', function(e) {
+        e.preventDefault();
+        var targetIndex = $(this).data('target');
+        console.log('Next button clicked, target index:', targetIndex);
+        showModule(targetIndex);
+    });
+    
+    $(document).on('click', '.prev-module', function(e) {
+        e.preventDefault();
+        var targetIndex = $(this).data('target');
+        console.log('Previous button clicked, target index:', targetIndex);
+        showModule(targetIndex);
+    });
+    
+    function showModule(index) {
+        console.log('Switching to module index:', index);
+        
+        // Validate index
+        if (index < 0 || index >= totalModules) {
+            console.error('Invalid module index:', index);
+            return;
+        }
+        
+        // Remove active class from all modules and hide them
+        $('.course-module').removeClass('active');
+        
+        // Remove active class from all navigation items
+        $('.module-nav-item').removeClass('active');
+        
+        // Show target module with active class
+        var targetModule = $('.course-module').eq(index);
+        var moduleId = targetModule.attr('data-module-id');
+        console.log('Showing module:', moduleId, 'Element:', targetModule.length, 'Index:', index);
+        
+        if (!moduleId) {
+            console.error('Module ID is undefined for index:', index, 'Element:', targetModule[0]);
+            console.error('All module elements:');
+            $('.course-module').each(function(i) {
+                console.error('  Index', i, 'ID:', $(this).attr('data-module-id'), 'Type:', $(this).attr('data-module-index'));
+            });
+        }
+        
+        targetModule.addClass('active');
+        
+        // Update navigation active state
+        $('.module-nav-item').eq(index).addClass('active');
+        
+        // Update progress bar
+        var progress = ((index + 1) / totalModules) * 100;
+        $('.progress-bar').css('width', progress + '%');
+        $('.progress').next('small').text(Math.round(progress) + '% Complete');
+        
+        // Update current module tracker
+        currentModule = index;
+        
+        console.log('Module switch complete. Current module:', currentModule);
+    }
+    
+    // Initialize first module after a short delay to ensure DOM is ready
+    setTimeout(function() {
+        showModule(0);
+    }, 100);
+    
+    $('.complete-course').click(function() {
+        alert('Course completed! In the actual implementation, this would record completion and redirect.');
+    });
+});
+</script>
+
+<style>
+.full-width-preview {
+    padding: 0;
+}
+
+.full-width-preview .row {
+    margin: 0;
+}
+
+.full-width-preview .col-md-3, 
+.full-width-preview .col-md-9 {
+    padding: 15px;
+}
+
+.course-header {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.html-content {
+    line-height: 1.6;
+}
+
+.html-content h1, .html-content h2, .html-content h3 {
+    color: #333;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.html-content .alert {
+    margin: 15px 0;
+}
+
+.html-content ul, .html-content ol {
+    margin: 10px 0;
+    padding-left: 30px;
+}
+
+.module-nav-item {
+    padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.module-nav-item:hover {
+    background-color: #f5f5f5;
+}
+
+.module-nav-item.active {
+    background-color: #337ab7;
+    color: white;
+    border-color: #2e6da4;
+}
+
+.module-nav-header {
+    font-weight: bold;
+}
+
+.module-number {
+    background-color: #ccc;
+    color: #333;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    text-align: center;
+    line-height: 24px;
+    font-size: 12px;
+    margin-right: 8px;
+}
+
+.module-nav-item.active .module-number {
+    background-color: #fff;
+    color: #337ab7;
+}
+
+.module-description {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.module-nav-item.active .module-description {
+    color: #ccc;
+}
+
+.module-type-label {
+    text-transform: capitalize;
+}
+
+.video-container, .presentation-container {
+    margin: 20px 0;
+}
+
+.quiz-details {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.question-preview {
+    margin-bottom: 15px;
+}
+
+.question-options .option {
+    margin: 5px 0;
+}
+
+.completion-requirements {
+    margin-top: 15px;
+}
+
+.course-progress {
+    margin-bottom: 20px;
+}
+
+.module-navigation {
+    overflow: hidden;
+}
+</style>
+{{end}}

@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -137,6 +138,7 @@ func (as *AdminServer) registerRoutes() {
 	router.HandleFunc("/users", mid.Use(as.UserManagement, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
 	router.HandleFunc("/webhooks", mid.Use(as.Webhooks, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
 	router.HandleFunc("/courses", mid.Use(as.Courses, mid.RequireLogin))
+	router.HandleFunc("/courses/{id:[0-9]+}/preview", mid.Use(as.CoursePreview, mid.RequireLogin))
 	router.HandleFunc("/impersonate", mid.Use(as.Impersonate, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
 	// Create the API routes
 	api := api.NewServer(
@@ -348,6 +350,42 @@ func (as *AdminServer) Courses(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CoursePreview shows a preview of how the course will appear to users
+func (as *AdminServer) CoursePreview(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.ParseInt(vars["id"], 0, 64)
+	user := ctx.Get(r, "user").(models.User)
+	
+	// Get the course with all modules and quizzes
+	course, err := models.GetCourse(id, user.Id)
+	if err != nil {
+		log.Error("Error getting course for preview: ", err)
+		http.Error(w, "Course not found", http.StatusNotFound)
+		return
+	}
+	
+	// Create custom template params that include course data
+	baseParams := newTemplateParams(r)
+	params := struct {
+		templateParams
+		Course    models.Course
+		IsPreview bool
+	}{
+		templateParams: baseParams,
+		Course:        course,
+		IsPreview:     true,
+	}
+	params.Title = "Course Preview: " + course.Name
+	
+	tmpl := getTemplate(w, "course_preview")
+	err = tmpl.ExecuteTemplate(w, "base", params)
+	if err != nil {
+		log.Error("Template execution error: ", err)
+		http.Error(w, "Template error", http.StatusInternalServerError)
+		return
+	}
+}
+
 // Impersonate allows an admin to login to a user account without needing the password
 func (as *AdminServer) Impersonate(w http.ResponseWriter, r *http.Request) {
 
@@ -491,7 +529,13 @@ func (as *AdminServer) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 // TODO: Make this execute the template, too
 func getTemplate(w http.ResponseWriter, tmpl string) *template.Template {
-	templates := template.New("template")
+	funcMap := template.FuncMap{
+		"add": func(a, b int) int { return a + b },
+		"sub": func(a, b int) int { return a - b },
+		"safehtml": func(s string) template.HTML { return template.HTML(s) },
+	}
+	
+	templates := template.New("template").Funcs(funcMap)
 	_, err := templates.ParseFiles("templates/base.html", "templates/nav.html", "templates/"+tmpl+".html", "templates/flashes.html")
 	if err != nil {
 		log.Error(err)

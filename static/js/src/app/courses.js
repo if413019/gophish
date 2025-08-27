@@ -299,7 +299,10 @@ function load(){
                 quizCount,
                 moment(course.created_date).format('MMMM Do YYYY, h:mm:ss a'),
                 moment(course.modified_date).format('MMMM Do YYYY, h:mm:ss a'),
-                "<div class='pull-right'><span data-toggle='tooltip' data-placement='left' title='Edit Course'><button class='btn btn-primary' data-toggle='modal' data-backdrop='static' data-target='#modal' onclick='save(" + i + ")'>\
+                "<div class='pull-right'><span data-toggle='tooltip' data-placement='left' title='Preview Course'><a href='/courses/" + course.id + "/preview' class='btn btn-info' target='_blank'>\
+                    <i class='fa fa-eye'></i>\
+                    </a></span>\
+                    <span data-toggle='tooltip' data-placement='left' title='Edit Course'><button class='btn btn-primary' data-toggle='modal' data-backdrop='static' data-target='#modal' onclick='save(" + i + ")'>\
                     <i class='fa fa-pencil'></i>\
                     </button></span>\
                     <span data-toggle='tooltip' data-placement='left' title='Delete Course'><button class='btn btn-danger' onclick='deleteCourse(" + i + ")'>\
