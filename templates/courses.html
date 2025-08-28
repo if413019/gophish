@@ -154,16 +154,100 @@
             
             <!-- Video-specific fields -->
             <div class="form-group module-video-fields" style="display: none;">
-                <label>Video URL:</label>
-                <input type="text" class="form-control module-video-url" placeholder="YouTube, Vimeo, or direct video URL" />
-                <small class="help-block">Enter the video URL. For YouTube, use embed format: https://www.youtube.com/embed/VIDEO_ID</small>
+                <label>Video Source:</label>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="video-source" class="video-source-type" value="upload" checked>
+                        Upload Video File (Recommended)
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="video-source" class="video-source-type" value="url">
+                        External Video URL (YouTube, Vimeo)
+                    </label>
+                </div>
+                
+                <!-- Video Upload Section -->
+                <div class="video-upload-section">
+                    <div class="form-group">
+                        <label>Upload Video File:</label>
+                        <input type="file" class="form-control-file module-video-file" accept=".mp4,.webm,.avi,.mov" />
+                        <small class="help-block">Supported formats: MP4, WebM, AVI, MOV. Maximum size: 500MB</small>
+                        <div class="upload-progress" style="display: none;">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="upload-status">Uploading...</small>
+                        </div>
+                        <div class="uploaded-file-info" style="display: none;">
+                            <div class="alert alert-success">
+                                <i class="fa fa-check"></i> <strong>File uploaded:</strong> <span class="filename"></span>
+                                <button type="button" class="btn btn-xs btn-danger pull-right remove-uploaded-file">
+                                    <i class="fa fa-trash"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Video URL Section -->
+                <div class="video-url-section" style="display: none;">
+                    <div class="form-group">
+                        <label>Video URL:</label>
+                        <input type="text" class="form-control module-video-url" placeholder="YouTube, Vimeo, or direct video URL" />
+                        <small class="help-block">Enter the video URL. For YouTube, use embed format: https://www.youtube.com/embed/VIDEO_ID</small>
+                    </div>
+                </div>
             </div>
             
             <!-- Presentation-specific fields -->
             <div class="form-group module-presentation-fields" style="display: none;">
-                <label>Google Presentation URL/ID:</label>
-                <input type="text" class="form-control module-presentation-url" placeholder="Google Slides presentation URL or ID" />
-                <small class="help-block">Enter the Google Slides URL or presentation ID</small>
+                <label>Presentation Source:</label>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="presentation-source" class="presentation-source-type" value="upload" checked>
+                        Upload Presentation File (Recommended)
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="presentation-source" class="presentation-source-type" value="url">
+                        External Presentation URL (Google Slides)
+                    </label>
+                </div>
+                
+                <!-- Presentation Upload Section -->
+                <div class="presentation-upload-section">
+                    <div class="form-group">
+                        <label>Upload Presentation File:</label>
+                        <input type="file" class="form-control-file module-presentation-file" accept=".pptx,.ppt,.pdf" />
+                        <small class="help-block">Supported formats: PPTX, PPT, PDF. Maximum size: 500MB</small>
+                        <div class="upload-progress" style="display: none;">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="upload-status">Uploading...</small>
+                        </div>
+                        <div class="uploaded-file-info" style="display: none;">
+                            <div class="alert alert-success">
+                                <i class="fa fa-check"></i> <strong>File uploaded:</strong> <span class="filename"></span>
+                                <button type="button" class="btn btn-xs btn-danger pull-right remove-uploaded-file">
+                                    <i class="fa fa-trash"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Presentation URL Section -->
+                <div class="presentation-url-section" style="display: none;">
+                    <div class="form-group">
+                        <label>Google Presentation URL/ID:</label>
+                        <input type="text" class="form-control module-presentation-url" placeholder="Google Slides presentation URL or ID" />
+                        <small class="help-block">Enter the Google Slides URL or presentation ID</small>
+                    </div>
+                </div>
             </div>
             
             <!-- Quiz-specific fields -->

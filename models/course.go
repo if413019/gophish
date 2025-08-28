@@ -33,10 +33,16 @@ type CourseModule struct {
 	Description  string    `json:"description"`
 	ModuleType      string    `json:"module_type" sql:"not null;default:'html'"` // 'html', 'video', 'presentation', 'quiz'
 	Content         string    `json:"content" sql:"type:text"`                   // HTML content for html modules or description/guidelines for others
-	VideoURL        string    `json:"video_url"`                                 // Video URL for video modules
+	VideoURL        string    `json:"video_url"`                                 // Legacy: External video URL
 	VideoDuration   int       `json:"video_duration"`                           // Duration in seconds
-	PresentationURL string    `json:"presentation_url"`                          // Google Presentation URL/ID for presentation modules
+	VideoFilePath   string    `json:"video_file_path"`                          // Local video file path
+	PresentationURL string    `json:"presentation_url"`                          // Legacy: External presentation URL
+	PresentationFilePath string `json:"presentation_file_path"`                 // Local presentation file path
 	QuizId          int64     `json:"quiz_id"`                                   // Linked quiz ID for quiz modules
+	OriginalFilename string   `json:"original_filename"`                        // Original uploaded filename
+	FileSize        int64     `json:"file_size"`                               // File size in bytes
+	MimeType        string    `json:"mime_type"`                               // MIME type of uploaded file
+	UploadedDate    time.Time `json:"uploaded_date"`                           // Upload timestamp
 	MustComplete bool      `json:"must_complete" sql:"default:true"`         // Whether completion is required
 	MinTimeSpent int       `json:"min_time_spent" sql:"default:0"`           // Minimum time to spend (seconds)
 	OrderIndex   int       `json:"order_index"`
@@ -269,9 +275,95 @@ func PutCourse(c *Course, uid int64) error {
 		return err
 	}
 	
+	tx := db.Begin()
+	
+	// Update course basic info
 	c.ModifiedDate = time.Now().UTC()
-	err = db.Model(&Course{}).Where("id = ? AND user_id = ?", c.Id, uid).Updates(c).Error
-	return err
+	err = tx.Model(&Course{}).Where("id = ? AND user_id = ?", c.Id, uid).Updates(c).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	
+	// Update or create modules
+	for i := range c.Modules {
+		c.Modules[i].CourseId = c.Id
+		c.Modules[i].ModifiedDate = time.Now().UTC()
+		
+		// Debug logging
+		log.Info("Processing module: ", c.Modules[i].Name, " (ID: ", c.Modules[i].Id, ", Type: ", c.Modules[i].ModuleType, ")")
+		log.Info("Presentation file path: '", c.Modules[i].PresentationFilePath, "'")
+		log.Info("Video file path: '", c.Modules[i].VideoFilePath, "'")
+		log.Info("Original filename: '", c.Modules[i].OriginalFilename, "'")
+		
+		if c.Modules[i].Id == 0 {
+			// New module - create it
+			c.Modules[i].CreatedDate = time.Now().UTC()
+			err = tx.Create(&c.Modules[i]).Error
+			log.Info("Created new module with ID: ", c.Modules[i].Id)
+		} else {
+			// Existing module - update it, preserve created_date if not provided
+			if c.Modules[i].CreatedDate.IsZero() {
+				// Frontend didn't provide created_date, fetch it from database
+				existingModule := CourseModule{}
+				err = tx.Where("id = ?", c.Modules[i].Id).First(&existingModule).Error
+				if err == nil {
+					c.Modules[i].CreatedDate = existingModule.CreatedDate
+				}
+			}
+			err = tx.Save(&c.Modules[i]).Error
+			log.Info("Updated existing module ID: ", c.Modules[i].Id)
+		}
+		
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	
+	// Handle module deletion - delete any modules that exist in DB but not in current submission
+	var existingModuleIds []int64
+	err = tx.Model(&CourseModule{}).Where("course_id = ?", c.Id).Pluck("id", &existingModuleIds).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	
+	// Build list of module IDs from current submission
+	var submittedModuleIds []int64
+	for _, module := range c.Modules {
+		if module.Id != 0 {
+			submittedModuleIds = append(submittedModuleIds, module.Id)
+		}
+	}
+	
+	// Find modules to delete (exist in DB but not in submission)
+	var modulesToDelete []int64
+	for _, existingId := range existingModuleIds {
+		found := false
+		for _, submittedId := range submittedModuleIds {
+			if existingId == submittedId {
+				found = true
+				break
+			}
+		}
+		if !found {
+			modulesToDelete = append(modulesToDelete, existingId)
+		}
+	}
+	
+	// Delete the modules that were removed
+	if len(modulesToDelete) > 0 {
+		log.Info("Deleting removed modules: ", modulesToDelete)
+		err = tx.Where("id IN (?)", modulesToDelete).Delete(&CourseModule{}).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	
+	tx.Commit()
+	return nil
 }
 
 // DeleteCourse deletes a course and all related data

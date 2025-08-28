@@ -41,6 +41,11 @@ function addModule() {
     var moduleHtml = $("#module-template").html()
     var moduleCount = $("#modules-container .module-panel").length
     var moduleElement = $(moduleHtml)
+    var uniqueId = Date.now() + "_" + moduleCount
+    
+    // Fix radio button names to be unique per module
+    moduleElement.find('input[name="video-source"]').attr('name', 'video-source-' + uniqueId)
+    moduleElement.find('input[name="presentation-source"]').attr('name', 'presentation-source-' + uniqueId)
     
     // Handle remove module
     moduleElement.find('.remove-module').click(function() {
@@ -77,10 +82,12 @@ function toggleModuleFields(moduleTypeSelect) {
         case 'video':
             console.log('Showing video fields')
             modulePanel.find('.module-video-fields').show()
+            setupVideoSourceToggle(modulePanel)
             break
         case 'presentation':
             console.log('Showing presentation fields')
             modulePanel.find('.module-presentation-fields').show()
+            setupPresentationSourceToggle(modulePanel)
             break
         case 'quiz':
             console.log('Showing quiz fields')
@@ -92,6 +99,168 @@ function toggleModuleFields(moduleTypeSelect) {
             // HTML is default, no extra fields needed
             break
     }
+}
+
+function setupVideoSourceToggle(modulePanel) {
+    var videoRadios = modulePanel.find('input[type="radio"]').filter(function() {
+        return $(this).attr('name') && $(this).attr('name').startsWith('video-source-')
+    })
+    var uploadSection = modulePanel.find('.video-upload-section')
+    var urlSection = modulePanel.find('.video-url-section')
+    
+    videoRadios.change(function() {
+        if ($(this).val() === 'upload') {
+            uploadSection.show()
+            urlSection.hide()
+        } else {
+            uploadSection.hide()
+            urlSection.show()
+        }
+    })
+    
+    // Trigger initial state
+    videoRadios.filter(':checked').trigger('change')
+    
+    // Setup file upload handler
+    var fileInput = modulePanel.find('.module-video-file')
+    fileInput.change(function() {
+        handleFileUpload($(this), 'video', modulePanel)
+    })
+    
+    // Setup remove uploaded file handler
+    modulePanel.find('.remove-uploaded-file').click(function() {
+        removeUploadedFile($(this), 'video', modulePanel)
+    })
+}
+
+function setupPresentationSourceToggle(modulePanel) {
+    var presentationRadios = modulePanel.find('input[type="radio"]').filter(function() {
+        return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-')
+    })
+    var uploadSection = modulePanel.find('.presentation-upload-section')
+    var urlSection = modulePanel.find('.presentation-url-section')
+    
+    presentationRadios.change(function() {
+        if ($(this).val() === 'upload') {
+            uploadSection.show()
+            urlSection.hide()
+        } else {
+            uploadSection.hide()
+            urlSection.show()
+        }
+    })
+    
+    // Trigger initial state
+    presentationRadios.filter(':checked').trigger('change')
+    
+    // Setup file upload handler
+    var fileInput = modulePanel.find('.module-presentation-file')
+    fileInput.change(function() {
+        handleFileUpload($(this), 'presentation', modulePanel)
+    })
+    
+    // Setup remove uploaded file handler
+    modulePanel.find('.remove-uploaded-file').click(function() {
+        removeUploadedFile($(this), 'presentation', modulePanel)
+    })
+}
+
+function handleFileUpload(fileInput, fileType, modulePanel) {
+    var file = fileInput[0].files[0]
+    if (!file) return
+    
+    var progressDiv = modulePanel.find('.upload-progress')
+    var progressBar = progressDiv.find('.progress-bar')
+    var statusText = progressDiv.find('.upload-status')
+    var uploadedInfo = modulePanel.find('.uploaded-file-info')
+    
+    // Show progress
+    progressDiv.show()
+    progressBar.css('width', '0%')
+    statusText.text('Uploading...')
+    uploadedInfo.hide()
+    
+    // Create form data
+    var formData = new FormData()
+    formData.append('file', file)
+    
+    // Upload file
+    $.ajax({
+        url: '/api/courses/upload/' + fileType,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        xhr: function() {
+            var xhr = new window.XMLHttpRequest()
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    var percent = Math.round((e.loaded / e.total) * 100)
+                    progressBar.css('width', percent + '%')
+                    statusText.text('Uploading... ' + percent + '%')
+                }
+            }, false)
+            return xhr
+        },
+        success: function(response) {
+            if (response.success) {
+                progressDiv.hide()
+                uploadedInfo.show()
+                uploadedInfo.find('.filename').text(response.original_filename)
+                
+                // Store file info for form submission
+                modulePanel.data('uploaded-file', {
+                    filename: response.filename,
+                    original_filename: response.original_filename,
+                    file_path: response.file_path,
+                    file_size: response.file_size,
+                    mime_type: response.mime_type
+                })
+                
+                successFlash('File uploaded successfully: ' + response.original_filename)
+            } else {
+                progressDiv.hide()
+                modalError(response.message || 'Upload failed')
+            }
+        },
+        error: function(xhr) {
+            progressDiv.hide()
+            var errorMsg = 'Upload failed'
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message
+            }
+            modalError(errorMsg)
+        }
+    })
+}
+
+function removeUploadedFile(button, fileType, modulePanel) {
+    var uploadedFile = modulePanel.data('uploaded-file')
+    if (!uploadedFile) return
+    
+    // Delete file from server
+    $.ajax({
+        url: '/api/courses/files/' + fileType + '/' + uploadedFile.filename,
+        type: 'DELETE',
+        success: function(response) {
+            if (response.success) {
+                // Clear UI
+                modulePanel.find('.uploaded-file-info').hide()
+                modulePanel.find('.module-' + fileType + '-file').val('')
+                modulePanel.removeData('uploaded-file')
+                successFlash('File removed successfully')
+            } else {
+                modalError(response.message || 'Failed to remove file')
+            }
+        },
+        error: function(xhr) {
+            var errorMsg = 'Failed to remove file'
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message
+            }
+            modalError(errorMsg)
+        }
+    })
 }
 
 function loadQuizzesForModule(moduleElement) {
@@ -190,11 +359,45 @@ function serializeCourse() {
             order_index: index
         }
         
+        // Include module ID and timestamps if this is an existing module
+        var moduleId = modulePanel.data('module-id')
+        if (moduleId) {
+            module.id = moduleId
+            module.created_date = modulePanel.data('created-date')
+            // Don't include modified_date - let the backend set it
+        }
+        
         // Add type-specific fields
         if (moduleType === 'video') {
-            module.video_url = modulePanel.find('.module-video-url').val()
+            var videoSource = modulePanel.find('input[type="radio"]:checked').filter(function() {
+                return $(this).attr('name') && $(this).attr('name').startsWith('video-source-')
+            }).val()
+            if (videoSource === 'upload') {
+                var uploadedFile = modulePanel.data('uploaded-file')
+                if (uploadedFile) {
+                    module.video_file_path = uploadedFile.file_path
+                    module.original_filename = uploadedFile.original_filename
+                    module.file_size = uploadedFile.file_size
+                    module.mime_type = uploadedFile.mime_type
+                }
+            } else {
+                module.video_url = modulePanel.find('.module-video-url').val()
+            }
         } else if (moduleType === 'presentation') {
-            module.presentation_url = modulePanel.find('.module-presentation-url').val()
+            var presentationSource = modulePanel.find('input[type="radio"]:checked').filter(function() {
+                return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-')
+            }).val()
+            var uploadedFile = modulePanel.data('uploaded-file')
+            if (presentationSource === 'upload') {
+                if (uploadedFile) {
+                    module.presentation_file_path = uploadedFile.file_path
+                    module.original_filename = uploadedFile.original_filename
+                    module.file_size = uploadedFile.file_size
+                    module.mime_type = uploadedFile.mime_type
+                }
+            } else {
+                module.presentation_url = modulePanel.find('.module-presentation-url').val()
+            }
         } else if (moduleType === 'quiz') {
             var selectedQuizIndex = modulePanel.find('.module-quiz-id').val()
             if (selectedQuizIndex !== '') {
@@ -332,9 +535,73 @@ function edit(course) {
         $.each(course.modules, function(i, module) {
             addModule()
             var modulePanel = $("#modules-container .module-panel").last()
+            
+            // Store the module ID and timestamps for existing modules
+            if (module.id) {
+                modulePanel.data('module-id', module.id)
+                modulePanel.data('created-date', module.created_date)
+                modulePanel.data('modified-date', module.modified_date)
+            }
+            
             modulePanel.find('.module-name').val(module.name)
             modulePanel.find('.module-description').val(module.description)
             modulePanel.find('.module-content').val(module.content)
+            modulePanel.find('.module-type').val(module.module_type).trigger('change')
+            modulePanel.find('.module-must-complete').prop('checked', module.must_complete)
+            modulePanel.find('.module-min-time').val(module.min_time_spent)
+            
+            // Load type-specific data
+            if (module.module_type === 'video') {
+                if (module.video_file_path) {
+                    // Uploaded file
+                    modulePanel.find('input[type="radio"]').filter(function() {
+                        return $(this).attr('name') && $(this).attr('name').startsWith('video-source-') && $(this).val() === 'upload'
+                    }).prop('checked', true).trigger('change')
+                    if (module.original_filename) {
+                        modulePanel.find('.uploaded-file-info').show()
+                        modulePanel.find('.filename').text(module.original_filename)
+                        modulePanel.data('uploaded-file', {
+                            filename: module.video_file_path.split('/').pop(),
+                            original_filename: module.original_filename,
+                            file_path: module.video_file_path,
+                            file_size: module.file_size,
+                            mime_type: module.mime_type
+                        })
+                    }
+                } else if (module.video_url) {
+                    // External URL
+                    modulePanel.find('input[type="radio"]').filter(function() {
+                        return $(this).attr('name') && $(this).attr('name').startsWith('video-source-') && $(this).val() === 'url'
+                    }).prop('checked', true).trigger('change')
+                    modulePanel.find('.module-video-url').val(module.video_url)
+                }
+            } else if (module.module_type === 'presentation') {
+                if (module.presentation_file_path) {
+                    // Uploaded file
+                    modulePanel.find('input[type="radio"]').filter(function() {
+                        return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-') && $(this).val() === 'upload'
+                    }).prop('checked', true).trigger('change')
+                    if (module.original_filename) {
+                        modulePanel.find('.uploaded-file-info').show()
+                        modulePanel.find('.filename').text(module.original_filename)
+                        modulePanel.data('uploaded-file', {
+                            filename: module.presentation_file_path.split('/').pop(),
+                            original_filename: module.original_filename,
+                            file_path: module.presentation_file_path,
+                            file_size: module.file_size,
+                            mime_type: module.mime_type
+                        })
+                    }
+                } else if (module.presentation_url) {
+                    // External URL
+                    modulePanel.find('input[type="radio"]').filter(function() {
+                        return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-') && $(this).val() === 'url'
+                    }).prop('checked', true).trigger('change')
+                    modulePanel.find('.module-presentation-url').val(module.presentation_url)
+                }
+            } else if (module.module_type === 'quiz') {
+                modulePanel.find('.module-quiz-id').val(module.quiz_id)
+            }
         })
     }
     

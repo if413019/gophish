@@ -6,6 +6,7 @@
 # Folders
 _obj
 _test
+uploads
 
 # Node Modules
 node_modules

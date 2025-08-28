@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -533,6 +534,9 @@ func getTemplate(w http.ResponseWriter, tmpl string) *template.Template {
 		"add": func(a, b int) int { return a + b },
 		"sub": func(a, b int) int { return a - b },
 		"safehtml": func(s string) template.HTML { return template.HTML(s) },
+		"base": func(path string) string {
+			return filepath.Base(path)
+		},
 	}
 	
 	templates := template.New("template").Funcs(funcMap)

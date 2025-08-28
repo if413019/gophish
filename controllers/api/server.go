@@ -92,10 +92,14 @@ func (as *Server) registerRoutes() {
 	router.HandleFunc("/courses/{id:[0-9]+}", as.Course)
 	router.HandleFunc("/courses/{id:[0-9]+}/modules", as.CourseModules)
 	router.HandleFunc("/courses/{id:[0-9]+}/quizzes", as.CourseQuizzes)
+	// File upload routes (these bypass API key requirement for web interface)
+	root.HandleFunc("/api/courses/upload/{type:(?:video|presentation)}", as.UploadCourseFile).Methods("POST")
+	root.HandleFunc("/api/courses/files/{type:(?:video|presentation)}/{filename}", as.ServeCourseFile).Methods("GET")
+	router.PathPrefix("/courses/files/{type:(?:video|presentation)}/{filename}").HandlerFunc(mid.Use(as.DeleteCourseFile)).Methods("DELETE")
 	router.HandleFunc("/enrollments/", as.UserEnrollments)
 	router.HandleFunc("/enrollments/{enrollment_id:[0-9]+}/quiz/{quiz_id:[0-9]+}/submit", as.SubmitQuiz)
 	
-	as.handler = router
+	as.handler = root
 }
 
 func (as *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

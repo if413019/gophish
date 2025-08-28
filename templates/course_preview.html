@@ -78,12 +78,75 @@ body {
 /* Adjust course navigation sidebar in preview */
 .full-width-preview .col-md-3 {
     width: 25% !important;
-    float: left !important;
+    float: right !important;
 }
 
 .full-width-preview .col-md-9 {
     width: 75% !important;
-    float: right !important;
+    float: left !important;
+}
+
+/* Corporate video player styles */
+.corporate-video {
+    width: 100%;
+    height: auto;
+    background: #000;
+    border-radius: 4px;
+}
+
+/* Hide fast-forward controls by customizing the video player */
+.corporate-video::-webkit-media-controls-seek-forward-button,
+.corporate-video::-webkit-media-controls-seek-back-button {
+    display: none !important;
+}
+
+.corporate-video::-webkit-media-controls-rewind-button,
+.corporate-video::-webkit-media-controls-return-to-realtime-button {
+    display: none !important;
+}
+
+/* Firefox controls */
+.corporate-video::-moz-media-controls .moz-media-controls-seek-forward,
+.corporate-video::-moz-media-controls .moz-media-controls-seek-back {
+    display: none !important;
+}
+
+/* Custom video overlay for additional control */
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    z-index: 10;
+}
+
+.video-container {
+    position: relative;
+}
+
+/* Tab visibility warning */
+.tab-warning {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 30px;
+    border-radius: 8px;
+    display: none;
+    z-index: 9999;
+    text-align: center;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    max-width: 400px;
 }
 </style>
     {{ if .IsPreview }}
@@ -106,64 +169,20 @@ body {
     </div>
     {{ end }}
     
+    <!-- Course Header (Compact) -->
     <div class="row">
-        <div class="col-md-3">
-            <!-- Course Navigation Sidebar -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <i class="fa fa-book"></i> Course Navigation
-                    </h4>
-                </div>
-                <div class="panel-body">
-                    <div class="course-progress">
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-success" style="width: 0%">
-                                <span class="sr-only">0% Complete</span>
-                            </div>
-                        </div>
-                        <small>0% Complete</small>
-                    </div>
-                    
-                    <div class="module-list">
-                        {{ range $index, $module := .Course.Modules }}
-                        <div class="module-nav-item" data-module-id="{{ $module.Id }}" data-index="{{ $index }}">
-                            <div class="module-nav-header">
-                                <span class="module-number">{{ add $index 1 }}</span>
-                                <span class="module-icon">
-                                    {{ if eq $module.ModuleType "html" }}
-                                        <i class="fa fa-file-text-o"></i>
-                                    {{ else if eq $module.ModuleType "video" }}
-                                        <i class="fa fa-play-circle"></i>
-                                    {{ else if eq $module.ModuleType "presentation" }}
-                                        <i class="fa fa-bar-chart"></i>
-                                    {{ else if eq $module.ModuleType "quiz" }}
-                                        <i class="fa fa-question-circle"></i>
-                                    {{ end }}
-                                </span>
-                                <span class="module-name">{{ $module.Name }}</span>
-                                <span class="module-status pull-right">
-                                    <i class="fa fa-circle-o text-muted"></i>
-                                </span>
-                            </div>
-                            {{ if $module.Description }}
-                            <div class="module-description">{{ $module.Description }}</div>
-                            {{ end }}
-                        </div>
-                        {{ end }}
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-9">
-            <!-- Course Header -->
-            <div class="course-header">
-                <h1>{{ .Course.Name }}</h1>
+        <div class="col-sm-12">
+            <div class="course-header" style="margin-bottom: 8px;">
+                <h2 style="margin-bottom: 8px;">{{ .Course.Name }}</h2>
                 {{ if .Course.Description }}
-                <p class="lead">{{ .Course.Description }}</p>
+                <p class="text-muted" style="margin-bottom: 0; font-size: 14px;">{{ .Course.Description }}</p>
                 {{ end }}
             </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-9">
             
             <!-- Module Content Area -->
             <div class="module-content-area">
@@ -202,6 +221,26 @@ body {
                             </div>
                             
                         {{ else if eq $module.ModuleType "video" }}
+                            <div class="video-container">
+                                {{ if $module.VideoFilePath }}
+                                <!-- Local video file with strict controls -->
+                                <video class="corporate-video" controls preload="metadata" data-min-time="{{ $module.MinTimeSpent }}" data-module-id="{{ $module.Id }}">
+                                    <source src="/api/courses/files/video/{{ base $module.VideoFilePath }}" type="{{ $module.MimeType }}">
+                                    Your browser does not support the video tag.
+                                </video>
+                                {{ else if $module.VideoURL }}
+                                <!-- External video URL -->
+                                <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe class="embed-responsive-item" src="{{ $module.VideoURL }}" allowfullscreen></iframe>
+                                </div>
+                                {{ else }}
+                                <div class="alert alert-warning">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                    No video configured for this module.
+                                </div>
+                                {{ end }}
+                            </div>
+
                             <!-- Video Module -->
                             {{ if $module.Content }}
                             <div class="video-guidelines">
@@ -209,19 +248,6 @@ body {
                                 <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
                             </div>
                             {{ end }}
-                            
-                            <div class="video-container">
-                                {{ if $module.VideoURL }}
-                                <div class="embed-responsive embed-responsive-16by9">
-                                    <iframe class="embed-responsive-item" src="{{ $module.VideoURL }}" allowfullscreen></iframe>
-                                </div>
-                                {{ else }}
-                                <div class="alert alert-warning">
-                                    <i class="fa fa-exclamation-triangle"></i>
-                                    No video URL configured for this module.
-                                </div>
-                                {{ end }}
-                            </div>
                             
                             {{ if $module.MinTimeSpent }}
                             <div class="video-timer alert alert-info">
@@ -231,6 +257,30 @@ body {
                             {{ end }}
                             
                         {{ else if eq $module.ModuleType "presentation" }}
+                            <div class="presentation-container">
+                                {{ if $module.PresentationFilePath }}
+                                <!-- Local presentation file -->
+                                <div class="presentation-viewer">
+                                    <!-- PDF viewer for presentation files with custom settings -->
+                                    <div class="pdf-embed">
+                                        <iframe src="/api/courses/files/presentation/{{ base $module.PresentationFilePath }}#toolbar=1&navpanes=0&scrollbar=1&zoom=80&view=FitH" 
+                                                width="100%" height="700px" style="border: 1px solid #ddd; border-radius: 4px;">
+                                        </iframe>
+                                    </div>
+                                </div>
+                                {{ else if $module.PresentationURL }}
+                                <!-- External presentation URL -->
+                                <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe class="embed-responsive-item" src="{{ $module.PresentationURL }}" allowfullscreen></iframe>
+                                </div>
+                                {{ else }}
+                                <div class="alert alert-warning">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                    No presentation configured for this module.
+                                </div>
+                                {{ end }}
+                            </div>
+
                             <!-- Presentation Module -->
                             {{ if $module.Content }}
                             <div class="presentation-guidelines">
@@ -238,19 +288,6 @@ body {
                                 <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
                             </div>
                             {{ end }}
-                            
-                            <div class="presentation-container">
-                                {{ if $module.PresentationURL }}
-                                <div class="embed-responsive embed-responsive-16by9">
-                                    <iframe class="embed-responsive-item" src="{{ $module.PresentationURL }}" allowfullscreen></iframe>
-                                </div>
-                                {{ else }}
-                                <div class="alert alert-warning">
-                                    <i class="fa fa-exclamation-triangle"></i>
-                                    No presentation URL configured for this module.
-                                </div>
-                                {{ end }}
-                            </div>
                             
                         {{ else if eq $module.ModuleType "quiz" }}
                             <!-- Quiz Module -->
@@ -355,6 +392,55 @@ body {
                 {{ end }}
             </div>
         </div>
+        
+        <div class="col-md-3">
+            <!-- Course Navigation Sidebar -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <i class="fa fa-book"></i> Course Navigation
+                    </h4>
+                </div>
+                <div class="panel-body">
+                    <div class="course-progress">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" style="width: 0%">
+                                <span class="sr-only">0% Complete</span>
+                            </div>
+                        </div>
+                        <small>0% Complete</small>
+                    </div>
+                    
+                    <div class="module-list">
+                        {{ range $index, $module := .Course.Modules }}
+                        <div class="module-nav-item" data-module-id="{{ $module.Id }}" data-index="{{ $index }}">
+                            <div class="module-nav-header">
+                                <span class="module-number">{{ add $index 1 }}</span>
+                                <span class="module-icon">
+                                    {{ if eq $module.ModuleType "html" }}
+                                        <i class="fa fa-file-text-o"></i>
+                                    {{ else if eq $module.ModuleType "video" }}
+                                        <i class="fa fa-play-circle"></i>
+                                    {{ else if eq $module.ModuleType "presentation" }}
+                                        <i class="fa fa-bar-chart"></i>
+                                    {{ else if eq $module.ModuleType "quiz" }}
+                                        <i class="fa fa-question-circle"></i>
+                                    {{ end }}
+                                </span>
+                                <span class="module-name">{{ $module.Name }}</span>
+                                <span class="module-status pull-right">
+                                    <i class="fa fa-circle-o text-muted"></i>
+                                </span>
+                            </div>
+                            {{ if $module.Description }}
+                            <div class="module-description">{{ $module.Description }}</div>
+                            {{ end }}
+                        </div>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {{end}}
@@ -443,6 +529,178 @@ $(document).ready(function() {
     $('.complete-course').click(function() {
         alert('Course completed! In the actual implementation, this would record completion and redirect.');
     });
+    
+    // Strict video controls implementation
+    function initCorporateVideoControls() {
+        var videos = $('.corporate-video');
+        var isPageVisible = true;
+        var videoStates = {};
+        
+        // Create tab visibility warning
+        if ($('.tab-warning').length === 0) {
+            $('body').append('<div class="tab-warning"><h3>Video Paused</h3><p>Please return to this tab to continue watching the video.<br>Videos cannot be played in background tabs.</p></div>');
+        }
+        
+        videos.each(function(index) {
+            var video = this;
+            var $video = $(video);
+            var videoId = $video.data('module-id') || 'video-' + index;
+            var minTime = parseInt($video.data('min-time')) || 0;
+            var startTime = 0;
+            var totalWatchTime = 0;
+            var lastPosition = 0;
+            
+            // Initialize video state
+            videoStates[videoId] = {
+                watchTime: 0,
+                minTime: minTime,
+                completed: false,
+                lastPosition: 0
+            };
+            
+            // Disable right-click context menu
+            $video.on('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Disable keyboard shortcuts for seeking
+            $video.on('keydown', function(e) {
+                var key = e.which || e.keyCode;
+                // Disable arrow keys (left: 37, right: 39), space (32), home (36), end (35)
+                if ([37, 39, 32, 36, 35].indexOf(key) !== -1) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            
+            // Track watch time
+            video.addEventListener('timeupdate', function() {
+                if (isPageVisible && !video.paused) {
+                    var currentTime = video.currentTime;
+                    
+                    // Only count if playing forward (prevent seeking back)
+                    if (currentTime > lastPosition) {
+                        totalWatchTime += (currentTime - lastPosition);
+                        videoStates[videoId].watchTime = totalWatchTime;
+                    }
+                    
+                    lastPosition = currentTime;
+                    videoStates[videoId].lastPosition = currentTime;
+                    
+                    // Check if minimum time is reached
+                    if (minTime > 0 && totalWatchTime >= minTime) {
+                        videoStates[videoId].completed = true;
+                    }
+                }
+            });
+            
+            // Prevent seeking by monitoring position changes
+            video.addEventListener('seeked', function() {
+                var currentTime = video.currentTime;
+                var lastPos = videoStates[videoId].lastPosition;
+                
+                // If user seeks forward more than 2 seconds, reset to last position
+                if (currentTime > lastPos + 2) {
+                    video.currentTime = lastPos;
+                    alert('Fast-forwarding is not allowed. Please watch the entire video.');
+                }
+                // If user seeks backward, allow it but don't count the rewatched time
+                else if (currentTime < lastPos) {
+                    lastPosition = currentTime;
+                    videoStates[videoId].lastPosition = currentTime;
+                }
+            });
+            
+            // Handle playback rate changes (prevent speed adjustment)
+            video.addEventListener('ratechange', function() {
+                if (video.playbackRate !== 1.0) {
+                    video.playbackRate = 1.0;
+                    alert('Changing playback speed is not allowed.');
+                }
+            });
+            
+            // Pause when video loses focus
+            video.addEventListener('blur', function() {
+                if (!video.paused) {
+                    video.pause();
+                }
+            });
+        });
+        
+        // Page visibility detection
+        function handleVisibilityChange() {
+            var wasVisible = isPageVisible;
+            
+            if (document.hidden || document.webkitHidden || document.mozHidden || document.msHidden) {
+                isPageVisible = false;
+                var hadActiveVideo = false;
+                // Pause all videos when tab becomes hidden
+                videos.each(function() {
+                    if (!this.paused) {
+                        this.pause();
+                        hadActiveVideo = true;
+                    }
+                });
+                // Show warning if we're in a video module and there was a playing video
+                var isVideo = isCurrentModuleVideo();
+                console.log('Tab hidden - isVideo:', isVideo, 'hadActiveVideo:', hadActiveVideo);
+                if (isVideo && hadActiveVideo) {
+                    console.log('Showing video warning popup');
+                    $('.tab-warning').show();
+                } else {
+                    console.log('Not showing popup - isVideo:', isVideo, 'hadActiveVideo:', hadActiveVideo);
+                }
+            } else {
+                isPageVisible = true;
+                $('.tab-warning').hide();
+                
+                // Auto-resume is not allowed - user must manually click play
+                // This ensures they are actively watching
+            }
+        }
+        
+        // Listen for page visibility changes
+        document.addEventListener('visibilitychange', handleVisibilityChange, false);
+        document.addEventListener('webkitvisibilitychange', handleVisibilityChange, false);
+        document.addEventListener('mozvisibilitychange', handleVisibilityChange, false);
+        document.addEventListener('msvisibilitychange', handleVisibilityChange, false);
+        
+        // Helper function to check if current module is a video module
+        function isCurrentModuleVideo() {
+            var currentModule = $('.course-module.active');
+            return currentModule.find('.corporate-video').length > 0;
+        }
+        
+        // Window focus/blur events as backup
+        $(window).on('focus', function() {
+            isPageVisible = true;
+            $('.tab-warning').hide();
+        }).on('blur', function() {
+            isPageVisible = false;
+            var hadActiveVideo = false;
+            videos.each(function() {
+                if (!this.paused) {
+                    this.pause();
+                    hadActiveVideo = true;
+                }
+            });
+            // Show warning if we're in a video module and there was a playing video
+            var isVideo = isCurrentModuleVideo();
+            console.log('Window blur - isVideo:', isVideo, 'hadActiveVideo:', hadActiveVideo);
+            if (isVideo && hadActiveVideo) {
+                console.log('Showing video warning popup (blur)');
+                $('.tab-warning').show();
+            } else {
+                console.log('Not showing popup (blur) - isVideo:', isVideo, 'hadActiveVideo:', hadActiveVideo);
+            }
+        });
+    }
+    
+    // Initialize corporate video controls after modules are loaded
+    setTimeout(function() {
+        initCorporateVideoControls();
+    }, 500);
 });
 </script>
 
