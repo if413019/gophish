@@ -475,3 +475,67 @@ func UpdateEnrollmentProgress(enrollmentId int64, progress int, status string) e
 	
 	return db.Model(&CourseEnrollment{}).Where("id = ?", enrollmentId).Updates(updates).Error
 }
+
+// GetUserModuleProgress gets module progress for a user's enrollment
+func GetUserModuleProgress(enrollmentId int64) ([]ModuleProgress, error) {
+	var progress []ModuleProgress
+	err := db.Where("enrollment_id = ?", enrollmentId).Find(&progress).Error
+	return progress, err
+}
+
+// StartModule marks a module as started for a user
+func StartModule(enrollmentId, moduleId int64) error {
+	// Check if progress already exists
+	var existing ModuleProgress
+	err := db.Where("enrollment_id = ? AND module_id = ?", enrollmentId, moduleId).First(&existing).Error
+	
+	if err == gorm.ErrRecordNotFound {
+		// Create new progress record
+		progress := ModuleProgress{
+			EnrollmentId: enrollmentId,
+			ModuleId:     moduleId,
+			StartedDate:  &[]time.Time{time.Now().UTC()}[0],
+		}
+		return db.Create(&progress).Error
+	} else if err != nil {
+		return err
+	}
+	
+	// Update existing record if not already started
+	if existing.StartedDate == nil {
+		now := time.Now().UTC()
+		existing.StartedDate = &now
+		return db.Save(&existing).Error
+	}
+	
+	return nil
+}
+
+// CompleteModule marks a module as completed for a user
+func CompleteModule(enrollmentId, moduleId int64) error {
+	var progress ModuleProgress
+	err := db.Where("enrollment_id = ? AND module_id = ?", enrollmentId, moduleId).First(&progress).Error
+	
+	if err == gorm.ErrRecordNotFound {
+		// Create new progress record with both started and completed dates
+		now := time.Now().UTC()
+		progress = ModuleProgress{
+			EnrollmentId:  enrollmentId,
+			ModuleId:      moduleId,
+			StartedDate:   &now,
+			CompletedDate: &now,
+		}
+		return db.Create(&progress).Error
+	} else if err != nil {
+		return err
+	}
+	
+	// Update completion date
+	now := time.Now().UTC()
+	progress.CompletedDate = &now
+	if progress.StartedDate == nil {
+		progress.StartedDate = &now
+	}
+	
+	return db.Save(&progress).Error
+}

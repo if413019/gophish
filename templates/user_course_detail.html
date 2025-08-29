@@ -1,0 +1,578 @@
+{{define "body"}}
+<!-- Custom layout for user course view without admin sidebar -->
+<div class="container-fluid full-width-preview"
+    style="padding: 0; margin: 0; width: 100%; height: 100vh; overflow-x: hidden;">
+<!-- Override the nav sidebar for course view -->
+<style>
+/* Hide admin sidebar completely */
+.sidebar { 
+    display: none !important; 
+    visibility: hidden !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Reset main content area */
+.main { 
+    margin-left: 0 !important; 
+    padding: 0 !important; 
+}
+
+/* Override container layout */
+.container-fluid .row {
+    margin: 0 !important;
+}
+
+.col-sm-3, .col-md-2 {
+    display: none !important;
+}
+
+/* Fix body layout */
+body { 
+    margin: 0; 
+    padding: 0; 
+    overflow-x: hidden;
+}
+
+/* Fix for header overlap */
+.full-width-preview {
+    margin-top: 70px !important; /* Account for fixed header height */
+    padding-top: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.full-width-preview .alert-info {
+    margin-bottom: 20px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+}
+
+/* Ensure content is visible */
+.html-content {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Module display control */
+.course-module {
+    display: none;
+}
+
+.course-module.active {
+    display: block !important;
+}
+
+/* Force full width for preview content */
+.full-width-preview .col-md-3,
+.full-width-preview .col-md-9 {
+    width: 100% !important;
+    float: none !important;
+    padding: 15px;
+}
+
+/* Adjust course navigation sidebar in preview */
+.full-width-preview .col-md-3 {
+    width: 25% !important;
+    float: right !important;
+}
+
+.full-width-preview .col-md-9 {
+    width: 75% !important;
+    float: left !important;
+}
+
+/* Corporate video player styles */
+.corporate-video {
+    width: 100%;
+    height: auto;
+    background: #000;
+    border-radius: 4px;
+}
+
+/* Hide fast-forward controls by customizing the video player */
+.corporate-video::-webkit-media-controls-seek-forward-button,
+.corporate-video::-webkit-media-controls-seek-back-button {
+    display: none !important;
+}
+
+.corporate-video::-webkit-media-controls-rewind-button,
+.corporate-video::-webkit-media-controls-return-to-realtime-button {
+    display: none !important;
+}
+
+/* Firefox controls */
+.corporate-video::-moz-media-controls .moz-media-controls-seek-forward,
+.corporate-video::-moz-media-controls .moz-media-controls-seek-back {
+    display: none !important;
+}
+
+/* Custom video overlay for additional control */
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    z-index: 10;
+}
+
+.video-container {
+    position: relative;
+}
+
+.course-header {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.html-content {
+    line-height: 1.6;
+}
+
+.html-content h1, .html-content h2, .html-content h3 {
+    color: #333;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.module-nav-item {
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.module-nav-item:hover {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+}
+
+.module-nav-item.active {
+    background-color: #337ab7;
+    color: white;
+    border-color: #2e6da4;
+}
+
+.module-nav-item.completed {
+    background-color: #5cb85c;
+    color: white;
+    border-color: #4cae4c;
+}
+
+.module-nav-item.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f9f9f9;
+    color: #999;
+}
+
+.module-nav-item .module-title {
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.module-nav-item .module-status {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.course-progress {
+    margin-bottom: 15px;
+}
+
+.complete-module-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.complete-module-btn:hover {
+    background: #4cae4c;
+}
+
+.complete-module-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+</style>
+
+    <!-- User Course Banner -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-info">
+                <div class="row">
+                    <div class="col-md-8">
+                        <i class="fa fa-graduation-cap"></i>
+                        <strong>Course Learning:</strong> Complete each module in order to track your progress.
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <a href="/user/courses" class="btn btn-sm btn-default">
+                            <i class="fa fa-arrow-left"></i> Back to My Courses
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Header (Compact) -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="course-header" style="margin-bottom: 8px;">
+                <h2 style="margin-bottom: 8px;">{{ .Course.Name }}</h2>
+                {{ if .Course.Description }}
+                <p class="text-muted" style="margin-bottom: 0; font-size: 14px;">{{ .Course.Description }}</p>
+                {{ end }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-9">
+            
+            <!-- Module Content Area -->
+            <div class="module-content-area">
+                {{ range $index, $module := .Course.Modules }}
+                <div class="course-module panel panel-default" data-module-id="{{ $module.Id }}" data-module-index="{{ $index }}">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <span class="module-icon">
+                                {{ if eq $module.ModuleType "html" }}
+                                    <i class="fa fa-file-text-o"></i>
+                                {{ else if eq $module.ModuleType "video" }}
+                                    <i class="fa fa-play-circle"></i>
+                                {{ else if eq $module.ModuleType "presentation" }}
+                                    <i class="fa fa-bar-chart"></i>
+                                {{ else if eq $module.ModuleType "quiz" }}
+                                    <i class="fa fa-question-circle"></i>
+                                {{ end }}
+                            </span>
+                            Module {{ add $index 1 }}: {{ $module.Name }}
+                            <span class="label label-info module-type-label">{{ $module.ModuleType }}</span>
+                        </h3>
+                        {{ if $module.Description }}
+                        <p class="module-description">{{ $module.Description }}</p>
+                        {{ end }}
+                    </div>
+                    
+                    <div class="panel-body">
+                        {{ if eq $module.ModuleType "html" }}
+                            <!-- HTML Content Module -->
+                            <div class="html-content">
+                                {{ if $module.Content }}
+                                    {{ $module.Content | safehtml }}
+                                {{ else }}
+                                    <div style="padding: 20px; text-align: center; color: #666;">
+                                        <i class="fa fa-file-text-o fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+                                        <h4>Security Awareness Training Module</h4>
+                                        <p>This module contains important security awareness content to help protect you and your organization from cyber threats.</p>
+                                        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #007bff; text-align: left;">
+                                            <h5>Key Topics Covered:</h5>
+                                            <ul style="margin: 10px 0;">
+                                                <li>Recognizing phishing emails and suspicious links</li>
+                                                <li>Best practices for password security</li>
+                                                <li>Safe browsing and email habits</li>
+                                                <li>Reporting security incidents</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                {{ end }}
+                            </div>
+                            
+                        {{ else if eq $module.ModuleType "video" }}
+                            <div class="video-container">
+                                {{ if $module.VideoFilePath }}
+                                <!-- Local video file with strict controls -->
+                                <video class="corporate-video" controls preload="metadata" data-min-time="{{ $module.MinTimeSpent }}" data-module-id="{{ $module.Id }}">
+                                    <source src="/api/courses/files/video/{{ base $module.VideoFilePath }}" type="{{ $module.MimeType }}">
+                                    Your browser does not support the video tag.
+                                </video>
+                                {{ else if $module.VideoURL }}
+                                <!-- External video URL -->
+                                <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe class="embed-responsive-item" src="{{ $module.VideoURL }}" allowfullscreen></iframe>
+                                </div>
+                                {{ else }}
+                                <div style="padding: 20px; text-align: center; color: #666; background: #f8f9fa;">
+                                    <i class="fa fa-play-circle fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+                                    <h4>Security Awareness Video</h4>
+                                    <p>This video module will help you understand important security concepts and best practices.</p>
+                                </div>
+                                {{ end }}
+                            </div>
+
+                            <!-- Video Module -->
+                            {{ if $module.Content }}
+                            <div class="video-guidelines">
+                                <h4>About this video:</h4>
+                                <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
+                            </div>
+                            {{ end }}
+                            
+                            {{ if $module.MinTimeSpent }}
+                            <div class="video-timer alert alert-info">
+                                <i class="fa fa-clock-o"></i>
+                                <strong>Minimum viewing time:</strong> {{ $module.MinTimeSpent }} seconds
+                            </div>
+                            {{ end }}
+                            
+                        {{ else if eq $module.ModuleType "presentation" }}
+                            <div class="presentation-container">
+                                {{ if $module.PresentationFilePath }}
+                                <!-- Local presentation file -->
+                                <div class="presentation-viewer">
+                                    <div class="pdf-embed">
+                                        <iframe src="/api/courses/files/presentation/{{ base $module.PresentationFilePath }}#toolbar=1&navpanes=0&scrollbar=1&zoom=80&view=FitH" 
+                                                width="100%" height="700px" style="border: 1px solid #ddd; border-radius: 4px;">
+                                        </iframe>
+                                    </div>
+                                </div>
+                                {{ else if $module.PresentationURL }}
+                                <!-- External presentation URL -->
+                                <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe class="embed-responsive-item" src="{{ $module.PresentationURL }}" allowfullscreen></iframe>
+                                </div>
+                                {{ else }}
+                                <div style="padding: 20px; text-align: center; color: #666; background: #f8f9fa;">
+                                    <i class="fa fa-bar-chart fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+                                    <h4>Security Training Presentation</h4>
+                                    <p>This presentation covers essential security awareness topics and guidelines.</p>
+                                </div>
+                                {{ end }}
+                            </div>
+
+                            <!-- Presentation Module -->
+                            {{ if $module.Content }}
+                            <div class="presentation-guidelines">
+                                <h4>About this presentation:</h4>
+                                <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
+                            </div>
+                            {{ end }}
+                            
+                        {{ else if eq $module.ModuleType "quiz" }}
+                            <!-- Quiz Module -->
+                            {{ if $module.Content }}
+                            <div class="quiz-guidelines">
+                                <h4>Quiz Instructions:</h4>
+                                <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
+                            </div>
+                            {{ end }}
+
+                            <div style="padding: 20px; text-align: center; color: #666; background: #f8f9fa;">
+                                <i class="fa fa-question-circle fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+                                <h4>Knowledge Check Quiz</h4>
+                                <p>Test your understanding of the security concepts covered in this course.</p>
+                                <div class="alert alert-info">
+                                    <i class="fa fa-info-circle"></i>
+                                    Complete the previous modules before taking this quiz.
+                                </div>
+                            </div>
+                        {{ end }}
+                        
+                        <!-- Module Completion Button -->
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                            <button class="complete-module-btn" data-module-id="{{ $module.Id }}" onclick="completeModule({{ $module.Id }})">
+                                <i class="fa fa-check"></i> Mark Module as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <!-- Course Navigation Sidebar -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <i class="fa fa-book"></i> Course Navigation
+                    </h4>
+                </div>
+                <div class="panel-body">
+                    <div class="course-progress">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" id="courseProgressBar" style="width: 0%">
+                                <span class="sr-only">0% Complete</span>
+                            </div>
+                        </div>
+                        <small id="courseProgressText">0% Complete</small>
+                    </div>
+                    
+                    <div class="module-list">
+                        {{ range $index, $module := .Course.Modules }}
+                        <div class="module-nav-item" data-module-id="{{ $module.Id }}" data-index="{{ $index }}">
+                            <div class="module-title">{{ add $index 1 }}. {{ $module.Name }}</div>
+                            <div class="module-status" id="moduleStatus{{ $module.Id }}">Not Started</div>
+                        </div>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+$(document).ready(function() {
+    var courseId = {{ .Course.Id }};
+    var totalModules = {{ len .Course.Modules }};
+    
+    loadModuleProgress();
+    initializeModuleNavigation();
+    
+    // Show first available module
+    showFirstAvailableModule();
+});
+
+function loadModuleProgress() {
+    $.get('/api/user/courses/{{ .Course.Id }}/modules/progress')
+        .done(function(progress) {
+            var completedModules = 0;
+            
+            // Reset all modules
+            $('.module-nav-item').removeClass('completed active locked').addClass('locked');
+            $('.module-status').text('Not Started');
+            
+            // Update based on progress
+            var completedIds = [];
+            progress.forEach(function(moduleProgress) {
+                if (moduleProgress.completed_date) {
+                    completedIds.push(moduleProgress.module_id);
+                    $('#moduleStatus' + moduleProgress.module_id).text('Completed');
+                    $('.module-nav-item[data-module-id="' + moduleProgress.module_id + '"]').removeClass('locked').addClass('completed');
+                    completedModules++;
+                } else if (moduleProgress.started_date) {
+                    $('#moduleStatus' + moduleProgress.module_id).text('In Progress');
+                    $('.module-nav-item[data-module-id="' + moduleProgress.module_id + '"]').removeClass('locked');
+                }
+            });
+            
+            // Enable modules based on sequential progression
+            enableSequentialModules(completedIds);
+            
+            // Update progress display
+            var percentage = {{ len .Course.Modules }} > 0 ? Math.round((completedModules / {{ len .Course.Modules }}) * 100) : 0;
+            updateProgressDisplay(percentage);
+        })
+        .fail(function() {
+            console.error('Failed to load module progress');
+            // Enable first module by default
+            $('.module-nav-item:first').removeClass('locked');
+        });
+}
+
+function enableSequentialModules(completedIds) {
+    var foundIncomplete = false;
+    $('.module-nav-item').each(function() {
+        var moduleId = parseInt($(this).data('module-id'));
+        
+        if (!foundIncomplete) {
+            $(this).removeClass('locked');
+            
+            if (!completedIds.includes(moduleId)) {
+                foundIncomplete = true;
+            }
+        } else {
+            $(this).addClass('locked');
+        }
+    });
+}
+
+function updateProgressDisplay(percentage) {
+    $('#courseProgressBar').css('width', percentage + '%');
+    $('#courseProgressText').text(percentage + '% Complete');
+}
+
+function initializeModuleNavigation() {
+    $('.module-nav-item').on('click', function() {
+        if ($(this).hasClass('locked')) {
+            alert('Please complete the previous modules first.');
+            return;
+        }
+        
+        var moduleId = $(this).data('module-id');
+        var moduleIndex = $(this).data('index');
+        
+        showModule(moduleId, moduleIndex);
+    });
+}
+
+function showModule(moduleId, moduleIndex) {
+    // Start module via API
+    $.post('/api/user/courses/{{ .Course.Id }}/modules/' + moduleId + '/start')
+        .done(function() {
+            $('#moduleStatus' + moduleId).text('In Progress');
+        });
+    
+    // Hide all modules
+    $('.course-module').removeClass('active');
+    $('.module-nav-item').removeClass('active');
+    
+    // Show selected module
+    $('.course-module[data-module-id="' + moduleId + '"]').addClass('active');
+    $('.module-nav-item[data-module-id="' + moduleId + '"]').addClass('active');
+}
+
+function showFirstAvailableModule() {
+    // Find first non-locked module and show it
+    var firstAvailable = $('.module-nav-item:not(.locked):first');
+    if (firstAvailable.length > 0) {
+        var moduleId = firstAvailable.data('module-id');
+        var moduleIndex = firstAvailable.data('index');
+        showModule(moduleId, moduleIndex);
+    }
+}
+
+function completeModule(moduleId) {
+    if (!confirm('Are you sure you want to mark this module as complete?')) {
+        return;
+    }
+    
+    $.post('/api/user/courses/{{ .Course.Id }}/modules/' + moduleId + '/complete')
+        .done(function(response) {
+            if (response.success) {
+                // Reload progress
+                loadModuleProgress();
+                
+                // Show next module if available
+                setTimeout(function() {
+                    var currentNav = $('.module-nav-item[data-module-id="' + moduleId + '"]');
+                    var nextNav = currentNav.next('.module-nav-item:not(.locked)');
+                    if (nextNav.length > 0) {
+                        var nextModuleId = nextNav.data('module-id');
+                        var nextModuleIndex = nextNav.data('index');
+                        showModule(nextModuleId, nextModuleIndex);
+                    } else {
+                        alert('Congratulations! You have completed all available modules in this course.');
+                    }
+                }, 500);
+            } else {
+                alert('Error completing module: ' + response.message);
+            }
+        })
+        .fail(function() {
+            alert('Error completing module. Please try again.');
+        });
+}
+</script>
+{{end}}

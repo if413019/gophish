@@ -140,6 +140,9 @@ func (as *AdminServer) registerRoutes() {
 	router.HandleFunc("/webhooks", mid.Use(as.Webhooks, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
 	router.HandleFunc("/courses", mid.Use(as.Courses, mid.RequireLogin))
 	router.HandleFunc("/courses/{id:[0-9]+}/preview", mid.Use(as.CoursePreview, mid.RequireLogin))
+	// User-specific course routes
+	router.HandleFunc("/user/courses", mid.Use(as.UserCourses, mid.RequireLogin))
+	router.HandleFunc("/user/courses/{id:[0-9]+}", mid.Use(as.UserCourseDetails, mid.RequireLogin))
 	router.HandleFunc("/impersonate", mid.Use(as.Impersonate, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
 	// Create the API routes
 	api := api.NewServer(
@@ -202,6 +205,15 @@ func newTemplateParams(r *http.Request) templateParams {
 
 // Base handles the default path and template execution
 func (as *AdminServer) Base(w http.ResponseWriter, r *http.Request) {
+	user := ctx.Get(r, "user").(models.User)
+	
+	// Redirect normal users to their custom dashboard
+	if user.RoleID == 2 { // User role
+		as.UserDashboard(w, r)
+		return
+	}
+	
+	// Admin users get the normal dashboard
 	params := newTemplateParams(r)
 	params.Title = "Dashboard"
 	getTemplate(w, "dashboard").ExecuteTemplate(w, "base", params)
@@ -349,6 +361,71 @@ func (as *AdminServer) Courses(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Template error", http.StatusInternalServerError)
 		return
 	}
+}
+
+// UserDashboard handles the custom dashboard for normal users
+func (as *AdminServer) UserDashboard(w http.ResponseWriter, r *http.Request) {
+	params := newTemplateParams(r)
+	params.Title = "Security Awareness Dashboard"
+	getTemplate(w, "user_dashboard").ExecuteTemplate(w, "base", params)
+}
+
+// UserCourses handles the user courses page
+func (as *AdminServer) UserCourses(w http.ResponseWriter, r *http.Request) {
+	params := newTemplateParams(r)
+	params.Title = "My Courses"
+	getTemplate(w, "user_courses").ExecuteTemplate(w, "base", params)
+}
+
+// UserCourseDetails handles individual course details for users
+func (as *AdminServer) UserCourseDetails(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.ParseInt(vars["id"], 0, 64)
+	user := ctx.Get(r, "user").(models.User)
+	
+	// Check if user is enrolled in this course
+	enrollments, err := models.GetUserEnrollments(user.Id)
+	if err != nil {
+		log.Error("Error checking user enrollment: ", err)
+		http.Error(w, "Course not found", http.StatusNotFound)
+		return
+	}
+	
+	// Verify user is enrolled in this specific course
+	enrolled := false
+	for _, enrollment := range enrollments {
+		if enrollment.CourseId == id {
+			enrolled = true
+			break
+		}
+	}
+	
+	if !enrolled {
+		log.Errorf("User %d is not enrolled in course %d", user.Id, id)
+		http.Error(w, "Course not found", http.StatusNotFound)
+		return
+	}
+	
+	// Get the course with admin privileges (ID 1) since user is verified to be enrolled
+	course, err := models.GetCourse(id, 1)
+	if err != nil {
+		log.Error("Error getting course details: ", err)
+		http.Error(w, "Course not found", http.StatusNotFound)
+		return
+	}
+	
+	// Create custom template params that include course data
+	baseParams := newTemplateParams(r)
+	params := struct {
+		templateParams
+		Course models.Course
+	}{
+		templateParams: baseParams,
+		Course:        course,
+	}
+	params.Title = course.Name
+	
+	getTemplate(w, "user_course_detail").ExecuteTemplate(w, "base", params)
 }
 
 // CoursePreview shows a preview of how the course will appear to users
@@ -537,6 +614,13 @@ func getTemplate(w http.ResponseWriter, tmpl string) *template.Template {
 		"base": func(path string) string {
 			return filepath.Base(path)
 		},
+		"truncate": func(s string) string {
+			if len(s) > 100 {
+				return s[:100] + "..."
+			}
+			return s
+		},
+		"js": func(s string) template.JS { return template.JS(s) },
 	}
 	
 	templates := template.New("template").Funcs(funcMap)

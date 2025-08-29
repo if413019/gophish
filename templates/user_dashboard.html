@@ -1,0 +1,677 @@
+{{define "body"}}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+<div class="user-dashboard">
+    <!-- Header with user info -->
+    <div class="dashboard-header">
+        <div class="user-welcome">
+            <h1>Welcome, {{.User.Username}}</h1>
+            <p class="subtitle">Security Awareness Learning Portal</p>
+        </div>
+        <div class="user-avatar">
+            <div class="avatar-circle">
+                <i class="fa fa-user"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card phishing-stats">
+            <div class="stat-icon">
+                <i class="fa fa-shield"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="phishingCount">-</h3>
+                <p>Phishing Tests</p>
+                <div class="stat-trend">
+                    <span id="phishingStatus" class="status-pending">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card course-stats">
+            <div class="stat-icon">
+                <i class="fa fa-graduation-cap"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="courseCount">-</h3>
+                <p>Assigned Courses</p>
+                <div class="stat-trend">
+                    <span id="courseProgress" class="status-pending">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card completion-stats">
+            <div class="stat-icon">
+                <i class="fa fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="completionRate">-</h3>
+                <p>Completion Rate</p>
+                <div class="stat-trend">
+                    <span id="completionStatus" class="status-pending">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card streak-stats">
+            <div class="stat-icon">
+                <i class="fa fa-fire"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="streakDays">-</h3>
+                <p>Learning Streak</p>
+                <div class="stat-trend">
+                    <span id="streakStatus" class="status-pending">days</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+        <!-- Active Courses -->
+        <div class="content-section courses-section">
+            <div class="section-header">
+                <h2>
+                    <i class="fa fa-play-circle"></i>
+                    Active Courses
+                </h2>
+                <a href="/user/courses" class="view-all-btn">View All</a>
+            </div>
+            <div class="courses-container" id="activeCourses">
+                <div class="loading-state">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    <p>Loading courses...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="content-section activity-section">
+            <div class="section-header">
+                <h2>
+                    <i class="fa fa-clock-o"></i>
+                    Recent Activity
+                </h2>
+            </div>
+            <div class="activity-timeline" id="recentActivity">
+                <div class="loading-state">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    <p>Loading activity...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Section -->
+    <div class="achievement-section">
+        <div class="section-header">
+            <h2>
+                <i class="fa fa-trophy"></i>
+                Your Achievements
+            </h2>
+        </div>
+        <div class="achievement-grid" id="achievements">
+            <div class="loading-state">
+                <i class="fa fa-spinner fa-spin"></i>
+                <p>Loading achievements...</p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+.user-dashboard {
+    padding: 2rem;
+    background: #f8f9fa;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-welcome h1 {
+    color: #2d3748;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.user-welcome .subtitle {
+    color: #718096;
+    font-size: 1.1rem;
+    margin: 0.5rem 0 0 0;
+    font-weight: 500;
+}
+
+.user-avatar .avatar-circle {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.phishing-stats .stat-icon {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+}
+
+.course-stats .stat-icon {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+}
+
+.completion-stats .stat-icon {
+    background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+}
+
+.streak-stats .stat-icon {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-content h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+    line-height: 1;
+}
+
+.stat-content p {
+    color: #718096;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin: 0.5rem 0;
+}
+
+.stat-trend {
+    font-size: 0.85rem;
+}
+
+.status-pending {
+    color: #ed8936;
+    font-weight: 500;
+}
+
+.status-success {
+    color: #38a169;
+    font-weight: 500;
+}
+
+.status-danger {
+    color: #e53e3e;
+    font-weight: 500;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.content-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.section-header h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-header h2 i {
+    color: #667eea;
+}
+
+.view-all-btn {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.view-all-btn:hover {
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+}
+
+.courses-container {
+    display: grid;
+    gap: 1rem;
+}
+
+.course-card {
+    background: rgba(102, 126, 234, 0.05);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.course-card:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.course-title {
+    color: #2d3748;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.course-progress {
+    background: rgba(102, 126, 234, 0.1);
+    height: 8px;
+    border-radius: 4px;
+    margin: 1rem 0;
+    overflow: hidden;
+}
+
+.course-progress-fill {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.course-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #718096;
+}
+
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.activity-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.activity-content h4 {
+    color: #2d3748;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.activity-content p {
+    color: #718096;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.activity-time {
+    color: #a0aec0;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.achievement-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.achievement-card {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.achievement-card:hover {
+    transform: scale(1.05);
+}
+
+.achievement-card.locked {
+    background: #e2e8f0;
+    color: #a0aec0;
+}
+
+.achievement-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.achievement-title {
+    font-weight: 600;
+    margin: 0.5rem 0;
+}
+
+.achievement-desc {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 2rem;
+    color: #718096;
+}
+
+.loading-state i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #667eea;
+}
+
+.loading-state p {
+    margin: 0;
+    font-size: 1rem;
+}
+</style>
+{{end}}
+
+{{define "scripts"}}
+<script>
+$(document).ready(function() {
+    loadUserDashboard();
+});
+
+function loadUserDashboard() {
+    // Load user statistics
+    loadUserStats();
+    
+    // Load active courses
+    loadActiveCourses();
+    
+    // Load recent activity
+    loadRecentActivity();
+    
+    // Load achievements
+    loadAchievements();
+}
+
+function loadUserStats() {
+    $.get('/api/user/stats')
+        .done(function(stats) {
+            $('#phishingCount').text(stats.phishing_tests || 0);
+            $('#courseCount').text(stats.assigned_courses || 0);
+            $('#completionRate').text((stats.completion_rate || 0) + '%');
+            $('#streakDays').text(stats.learning_streak || 0);
+            
+            // Update status indicators
+            updateStatusIndicator('#phishingStatus', stats.phishing_status);
+            updateStatusIndicator('#courseProgress', stats.course_status);
+            updateStatusIndicator('#completionStatus', stats.completion_status);
+            updateStatusIndicator('#streakStatus', 'days');
+        })
+        .fail(function() {
+            // Set default values on error
+            $('.stat-content h3').text('0');
+            $('.status-pending').text('Error loading');
+        });
+}
+
+function loadActiveCourses() {
+    $.get('/api/user/courses/active')
+        .done(function(courses) {
+            var container = $('#activeCourses');
+            
+            if (courses.length === 0) {
+                container.html('<div class="empty-state"><p>No active courses assigned yet.</p></div>');
+                return;
+            }
+            
+            var html = '';
+            courses.forEach(function(course) {
+                html += `
+                    <div class="course-card">
+                        <h3 class="course-title">${course.name}</h3>
+                        <p>${course.description}</p>
+                        <div class="course-progress">
+                            <div class="course-progress-fill" style="width: ${course.progress || 0}%"></div>
+                        </div>
+                        <div class="course-meta">
+                            <span>${course.progress || 0}% Complete</span>
+                            <a href="/user/courses/${course.id}" class="course-link">Continue →</a>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.html(html);
+        })
+        .fail(function() {
+            $('#activeCourses').html('<div class="loading-state"><p>Error loading courses</p></div>');
+        });
+}
+
+function loadRecentActivity() {
+    $.get('/api/user/activity')
+        .done(function(activities) {
+            var container = $('#recentActivity');
+            
+            if (activities.length === 0) {
+                container.html('<div class="empty-state"><p>No recent activity.</p></div>');
+                return;
+            }
+            
+            var html = '';
+            activities.forEach(function(activity) {
+                html += `
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fa ${getActivityIcon(activity.type)}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>${activity.title}</h4>
+                            <p>${activity.description}</p>
+                            <div class="activity-time">${formatTime(activity.created_date)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.html(html);
+        })
+        .fail(function() {
+            $('#recentActivity').html('<div class="loading-state"><p>Error loading activity</p></div>');
+        });
+}
+
+function loadAchievements() {
+    $.get('/api/user/achievements')
+        .done(function(achievements) {
+            var container = $('#achievements');
+            
+            if (achievements.length === 0) {
+                container.html('<div class="empty-state"><p>Complete courses to earn achievements!</p></div>');
+                return;
+            }
+            
+            var html = '';
+            achievements.forEach(function(achievement) {
+                var cardClass = achievement.unlocked ? '' : 'locked';
+                html += `
+                    <div class="achievement-card ${cardClass}">
+                        <div class="achievement-icon">
+                            <i class="fa ${achievement.icon}"></i>
+                        </div>
+                        <h4 class="achievement-title">${achievement.title}</h4>
+                        <p class="achievement-desc">${achievement.description}</p>
+                    </div>
+                `;
+            });
+            
+            container.html(html);
+        })
+        .fail(function() {
+            $('#achievements').html('<div class="loading-state"><p>Error loading achievements</p></div>');
+        });
+}
+
+function updateStatusIndicator(selector, status) {
+    var element = $(selector);
+    element.removeClass('status-pending status-success status-danger');
+    
+    switch(status) {
+        case 'good':
+        case 'completed':
+            element.addClass('status-success').text('Good');
+            break;
+        case 'needs_attention':
+        case 'in_progress':
+            element.addClass('status-pending').text('In Progress');
+            break;
+        case 'failed':
+        case 'overdue':
+            element.addClass('status-danger').text('Needs Attention');
+            break;
+        default:
+            element.addClass('status-pending').text('Pending');
+    }
+}
+
+function getActivityIcon(type) {
+    switch(type) {
+        case 'course_started': return 'fa-play';
+        case 'course_completed': return 'fa-check-circle';
+        case 'quiz_passed': return 'fa-trophy';
+        case 'quiz_failed': return 'fa-times-circle';
+        case 'phishing_clicked': return 'fa-shield';
+        case 'enrollment': return 'fa-user-plus';
+        default: return 'fa-info-circle';
+    }
+}
+
+function formatTime(dateString) {
+    if (!dateString) return '';
+    var date = new Date(dateString);
+    var now = new Date();
+    var diff = now - date;
+    
+    var minutes = Math.floor(diff / 60000);
+    var hours = Math.floor(diff / 3600000);
+    var days = Math.floor(diff / 86400000);
+    
+    if (minutes < 60) return minutes + ' minutes ago';
+    if (hours < 24) return hours + ' hours ago';
+    return days + ' days ago';
+}
+</script>
+{{end}}

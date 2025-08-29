@@ -3,6 +3,7 @@ package models
 import (
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"net"
 	"time"
@@ -138,6 +139,14 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
 				log.Errorf("Failed to enroll user in course: %v", err)
 			} else {
 				log.Infof("User %s automatically enrolled in course %d from campaign %d", r.Email, campaign.CourseId, r.CampaignId)
+				// Send enrollment notification email
+				log.Infof("Sending enrollment notification to user: %s", r.Email)
+				err = r.sendEnrollmentNotification(user, campaign)
+				if err != nil {
+					log.Errorf("Failed to send enrollment notification to %s: %v", r.Email, err)
+				} else {
+					log.Infof("Enrollment notification sent successfully to %s", r.Email)
+				}
 			}
 		}
 	}
@@ -154,6 +163,34 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
 	}
 	r.Status = EventDataSubmit
 	r.ModifiedDate = event.Time
+	
+	// Check if auto-enrollment should occur (form submission also triggers enrollment)
+	campaign := Campaign{}
+	err = db.Where("id = ?", r.CampaignId).First(&campaign).Error
+	if err == nil && campaign.CourseId > 0 {
+		// Get or create user for enrollment
+		user, err := r.getOrCreateUserForEnrollment()
+		if err != nil {
+			log.Errorf("Failed to get/create user for enrollment: %v", err)
+		} else {
+			// Enroll the user in the course
+			err = EnrollUser(user.Id, campaign.CourseId, r.CampaignId)
+			if err != nil {
+				log.Errorf("Failed to enroll user in course: %v", err)
+			} else {
+				log.Infof("User %s automatically enrolled in course %d from campaign %d (form submit)", r.Email, campaign.CourseId, r.CampaignId)
+				// Send enrollment notification email
+				log.Infof("Sending enrollment notification to user: %s (form submit)", r.Email)
+				err = r.sendEnrollmentNotification(user, campaign)
+				if err != nil {
+					log.Errorf("Failed to send enrollment notification to %s (form submit): %v", r.Email, err)
+				} else {
+					log.Infof("Enrollment notification sent successfully to %s (form submit)", r.Email)
+				}
+			}
+		}
+	}
+	
 	return db.Save(r).Error
 }
 
@@ -189,6 +226,53 @@ func (r *Result) getOrCreateUserForEnrollment() (User, error) {
 	}
 	
 	return user, nil
+}
+
+// sendEnrollmentNotification sends an email to notify the user about their enrollment
+func (r *Result) sendEnrollmentNotification(user User, campaign Campaign) error {
+	log.Infof("Starting enrollment notification process for %s", r.Email)
+	log.Infof("Campaign CourseId: %d, Campaign UserId: %d", campaign.CourseId, campaign.UserId)
+	
+	// Load the course details
+	course, err := GetCourse(campaign.CourseId, campaign.UserId)
+	if err != nil {
+		log.Errorf("Failed to load course details for CourseId %d, UserId %d: %v", campaign.CourseId, campaign.UserId, err)
+		return fmt.Errorf("failed to load course details: %v", err)
+	}
+	log.Infof("Successfully loaded course: %s (ID: %d)", course.Name, course.Id)
+
+	// Check if this is a new user or needs password reset (needs password setup)
+	isNewUser := user.Hash == "" || user.PasswordChangeRequired
+	log.Infof("User %s isNewUser: %t (hash empty: %t, password_change_required: %t)", r.Email, isNewUser, user.Hash == "", user.PasswordChangeRequired)
+	var tempPassword string
+	
+	if isNewUser {
+		log.Infof("Generating temporary password for new user: %s", r.Email)
+		// Generate a temporary password
+		tempPassword, err = GenerateSecurePassword(12)
+		if err != nil {
+			return fmt.Errorf("failed to generate temporary password: %v", err)
+		}
+		
+		// Set up the user for first login
+		err = UpdateUserPasswordForFirstLogin(&user, tempPassword)
+		if err != nil {
+			return fmt.Errorf("failed to set up user password: %v", err)
+		}
+		log.Infof("Temporary password set up for user: %s", r.Email)
+	} else {
+		log.Infof("User %s already has password, skipping temporary password setup", r.Email)
+	}
+
+	// Send the notification email
+	log.Infof("Calling SendEnrollmentNotification for %s", r.Email)
+	err = SendEnrollmentNotification(r.Email, course, isNewUser, tempPassword)
+	if err != nil {
+		log.Errorf("SendEnrollmentNotification failed for %s: %v", r.Email, err)
+		return err
+	}
+	log.Infof("SendEnrollmentNotification completed successfully for %s", r.Email)
+	return nil
 }
 
 // HandleEmailReport updates a Result in the case where they report a simulated

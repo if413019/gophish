@@ -99,6 +99,15 @@ func (as *Server) registerRoutes() {
 	router.HandleFunc("/enrollments/", as.UserEnrollments)
 	router.HandleFunc("/enrollments/{enrollment_id:[0-9]+}/quiz/{quiz_id:[0-9]+}/submit", as.SubmitQuiz)
 	
+	// User-specific dashboard API endpoints (no API key required - uses session auth)
+	root.HandleFunc("/api/user/stats", mid.Use(as.UserStats, mid.RequireLogin))
+	root.HandleFunc("/api/user/courses/active", mid.Use(as.UserActiveCourses, mid.RequireLogin))
+	root.HandleFunc("/api/user/activity", mid.Use(as.UserActivity, mid.RequireLogin))
+	root.HandleFunc("/api/user/achievements", mid.Use(as.UserAchievements, mid.RequireLogin))
+	root.HandleFunc("/api/user/courses/{id:[0-9]+}/modules/progress", mid.Use(as.UserModuleProgress, mid.RequireLogin))
+	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/modules/{moduleId:[0-9]+}/start", mid.Use(as.UserStartModule, mid.RequireLogin))
+	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/modules/{moduleId:[0-9]+}/complete", mid.Use(as.UserCompleteModule, mid.RequireLogin))
+	
 	as.handler = root
 }
 
