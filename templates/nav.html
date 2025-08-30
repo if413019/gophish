@@ -1,146 +1,446 @@
 {{define "nav"}}
 <div class="container-fluid">
     <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
+        <aside class="sidebar-container">
             {{if eq .User.RoleID 2}}
             <!-- User Navigation -->
-            <ul class="nav nav-sidebar user-nav">
-                <li class="nav-header">
-                    <i class="fa fa-shield"></i>
-                    <span>Security Portal</span>
-                </li>
-                <li>
-                    <a href="/">
-                        <i class="fa fa-dashboard"></i>
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="/user/courses">
-                        <i class="fa fa-graduation-cap"></i>
-                        My Courses
-                    </a>
-                </li>
-                <li>
-                    <a href="/settings">
-                        <i class="fa fa-user"></i>
-                        Account Settings
-                    </a>
-                </li>
-                <li>
-                    <hr>
-                </li>
-                <li>
-                    <a href="/logout">
-                        <i class="fa fa-sign-out"></i>
-                        Logout
-                    </a>
-                </li>
-            </ul>
+            <div class="sidebar-content">
+                <!-- Sidebar Header -->
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">
+                        <i class="fa fa-shield"></i>
+                        <span class="sidebar-title">Security Portal</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="sidebar-nav">
+                    <div class="nav-group">
+                        <div class="nav-group-title">Main</div>
+                        <a href="/" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-home"></i>
+                            </div>
+                            <span class="nav-item-label">Dashboard</span>
+                        </a>
+                        <a href="/user/courses" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-graduation-cap"></i>
+                            </div>
+                            <span class="nav-item-label">My Courses</span>
+                        </a>
+                    </div>
+
+                    <div class="nav-separator"></div>
+
+                    <div class="nav-group">
+                        <div class="nav-group-title">Account</div>
+                        <a href="/settings" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-cog"></i>
+                            </div>
+                            <span class="nav-item-label">Settings</span>
+                        </a>
+                        <a href="/logout" class="nav-item nav-item-danger">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-sign-out"></i>
+                            </div>
+                            <span class="nav-item-label">Logout</span>
+                        </a>
+                    </div>
+                </nav>
+            </div>
             {{else}}
             <!-- Admin Navigation -->
-            <ul class="nav nav-sidebar">
-                <li>
-                    <a href="/">Dashboard</a>
-                </li>
-                <li>
-                    <a href="/campaigns">Campaigns</a>
-                </li>
-                <li>
-                    <a href="/groups">Users &amp; Groups</a>
-                </li>
-                <li> <a href="/templates">Email Templates</a>
-                </li>
-                <li>
-                    <a href="/landing_pages">Landing Pages</a>
-                </li>
-                <li>
-                    <a href="/sending_profiles">Sending Profiles</a>
-                </li>
-                <li>
-                    <a href="/courses">E-Learning Courses</a>
-                </li>
-                <li>
-                    <a href="/settings">Account Settings</span></a>
-                </li>
-                {{if .ModifySystem}}
-                <li>
-                    <a href="/users">User Management<span class="nav-badge badge pull-right">Admin</span></a>
-                </li>
-                <li>
-                    <a href="/webhooks">Webhooks<span class="nav-badge badge pull-right">Admin</span></a>
-                </li>
-                {{end}}
-                <li>
-                    <hr>
-                </li>
-                <li>
-                    <a href="https://docs.getgophish.com/user-guide/">User Guide</a>
-                </li>
-                <li>
-                    <a href="https://docs.getgophish.com/api-documentation/">API Documentation</a>
-                </li>
-            </ul>
+            <div class="sidebar-content">
+                <!-- Sidebar Header -->
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">
+                        <i class="fa fa-shield"></i>
+                        <span class="sidebar-title">Gophish</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="sidebar-nav">
+                    <div class="nav-group">
+                        <div class="nav-group-title">Main</div>
+                        <a href="/" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-dashboard"></i>
+                            </div>
+                            <span class="nav-item-label">Dashboard</span>
+                        </a>
+                        <a href="/campaigns" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-envelope"></i>
+                            </div>
+                            <span class="nav-item-label">Campaigns</span>
+                        </a>
+                    </div>
+
+                    <div class="nav-separator"></div>
+
+                    <div class="nav-group">
+                        <div class="nav-group-title">Setup</div>
+                        <a href="/groups" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-users"></i>
+                            </div>
+                            <span class="nav-item-label">Users & Groups</span>
+                        </a>
+                        <a href="/templates" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-file-text"></i>
+                            </div>
+                            <span class="nav-item-label">Email Templates</span>
+                        </a>
+                        <a href="/landing_pages" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-globe"></i>
+                            </div>
+                            <span class="nav-item-label">Landing Pages</span>
+                        </a>
+                        <a href="/sending_profiles" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-send"></i>
+                            </div>
+                            <span class="nav-item-label">Sending Profiles</span>
+                        </a>
+                        <a href="/courses" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-graduation-cap"></i>
+                            </div>
+                            <span class="nav-item-label">E-Learning</span>
+                        </a>
+                    </div>
+
+                    <div class="nav-separator"></div>
+
+                    <div class="nav-group">
+                        <div class="nav-group-title">Settings</div>
+                        <a href="/settings" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-cog"></i>
+                            </div>
+                            <span class="nav-item-label">Account Settings</span>
+                        </a>
+                        {{if .ModifySystem}}
+                        <a href="/users" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-user-plus"></i>
+                            </div>
+                            <span class="nav-item-label">User Management</span>
+                            <div class="nav-badge">Admin</div>
+                        </a>
+                        <a href="/webhooks" class="nav-item">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-link"></i>
+                            </div>
+                            <span class="nav-item-label">Webhooks</span>
+                            <div class="nav-badge">Admin</div>
+                        </a>
+                        {{end}}
+                    </div>
+
+                    <div class="nav-separator"></div>
+
+                    <div class="nav-group">
+                        <div class="nav-group-title">Help</div>
+                        <a href="https://docs.getgophish.com/user-guide/" class="nav-item" target="_blank">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-book"></i>
+                            </div>
+                            <span class="nav-item-label">User Guide</span>
+                            <i class="fa fa-external-link nav-external"></i>
+                        </a>
+                        <a href="https://docs.getgophish.com/api-documentation/" class="nav-item" target="_blank">
+                            <div class="nav-item-icon">
+                                <i class="fa fa-code"></i>
+                            </div>
+                            <span class="nav-item-label">API Documentation</span>
+                            <i class="fa fa-external-link nav-external"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
             {{end}}
-        </div>
+        </aside>
     </div>
 </div>
 
 <style>
-/* Add gradient background to entire sidebar for user nav */
-.col-sm-3.col-md-2.sidebar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
+/* Modern Sidebar Styling - shadcn/ui inspired */
+.sidebar-container {
     position: fixed;
     top: 0;
     left: 0;
-    padding-top: 51px; /* Account for navbar height */
     z-index: 1000;
+    width: 256px;
+    height: 100vh;
+    background: hsl(0 0% 100%);
+    border-right: 1px solid hsl(210 40% 95%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow-y: auto;
 }
 
-.user-nav {
-    background: transparent;
-    padding: 1rem 0;
-    margin: 1rem;
-    border-radius: 0;
-}
-
-.nav-header {
-    padding: 1rem 1.5rem 0.5rem 1.5rem;
-    color: white;
-    font-weight: 600;
-    font-size: 1.1rem;
+.sidebar-content {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
 }
 
-.user-nav li a {
-    color: rgba(255, 255, 255, 0.9);
-    padding: 0.75rem 1.5rem;
+/* Sidebar Header */
+.sidebar-header {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid hsl(210 40% 95%);
+    background: hsl(0 0% 100%);
+}
+
+.sidebar-logo {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    transition: all 0.3s ease;
-    border-radius: 8px;
-    margin: 0 0.5rem;
+    font-weight: 600;
+    color: hsl(210 40% 8%);
 }
 
-.user-nav li a:hover,
-.user-nav li a:focus {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+.sidebar-logo i {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: hsl(210 40% 8%);
+    color: hsl(0 0% 100%);
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: hsl(210 40% 8%);
+}
+
+/* Navigation */
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.nav-group {
+    margin-bottom: 1.5rem;
+}
+
+.nav-group:last-child {
+    margin-bottom: 0;
+}
+
+.nav-group-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: hsl(210 40% 60%);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    margin-bottom: 0.5rem;
+    padding: 0 0.75rem;
+}
+
+.nav-separator {
+    height: 1px;
+    background: hsl(210 40% 95%);
+    margin: 1rem 0;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    margin-bottom: 0.125rem;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: hsl(210 40% 8%);
+    text-decoration: none;
+    transition: all 0.15s ease-in-out;
+    position: relative;
+}
+
+.nav-item:hover {
+    background: hsl(210 40% 96%);
+    color: hsl(210 40% 8%);
     text-decoration: none;
 }
 
-.user-nav li a i {
-    width: 20px;
-    text-align: center;
+.nav-item:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(210 84% 56%);
 }
 
-.user-nav hr {
-    border-color: rgba(255, 255, 255, 0.3);
-    margin: 1rem 1.5rem;
+.nav-item.nav-item-active,
+.nav-item[aria-current="page"] {
+    background: hsl(210 40% 96%);
+    color: hsl(210 40% 8%);
+}
+
+.nav-item.nav-item-danger {
+    color: hsl(0 84% 60%);
+}
+
+.nav-item.nav-item-danger:hover {
+    background: hsl(0 84% 97%);
+    color: hsl(0 84% 60%);
+}
+
+.nav-item-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.nav-item-icon i {
+    font-size: 14px;
+}
+
+.nav-item-label {
+    flex: 1;
+}
+
+.nav-badge {
+    padding: 0.125rem 0.5rem;
+    background: hsl(210 84% 56%);
+    color: hsl(0 0% 100%);
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.nav-external {
+    width: 12px;
+    height: 12px;
+    opacity: 0.5;
+    margin-left: auto;
+}
+
+/* Active state styling */
+.nav-item.active {
+    background: hsl(210 84% 56%);
+    color: hsl(0 0% 100%);
+}
+
+.nav-item.active .nav-item-icon i {
+    color: hsl(0 0% 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar-container {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+    
+    .sidebar-container.mobile-open {
+        transform: translateX(0);
+    }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    .sidebar-container {
+        background: hsl(224 71% 4%);
+        border-right-color: hsl(215 27% 17%);
+    }
+    
+    .sidebar-header {
+        border-bottom-color: hsl(215 27% 17%);
+        background: hsl(224 71% 4%);
+    }
+    
+    .sidebar-logo {
+        color: hsl(0 0% 100%);
+    }
+    
+    .sidebar-logo i {
+        background: hsl(0 0% 100%);
+        color: hsl(224 71% 4%);
+    }
+    
+    .sidebar-title {
+        color: hsl(0 0% 100%);
+    }
+    
+    .nav-group-title {
+        color: hsl(215 20% 65%);
+    }
+    
+    .nav-separator {
+        background: hsl(215 27% 17%);
+    }
+    
+    .nav-item {
+        color: hsl(215 20% 65%);
+    }
+    
+    .nav-item:hover {
+        background: hsl(215 27% 17%);
+        color: hsl(0 0% 100%);
+    }
+    
+    .nav-item.nav-item-active {
+        background: hsl(215 27% 17%);
+        color: hsl(0 0% 100%);
+    }
+    
+    .nav-item.active {
+        background: hsl(210 84% 56%);
+        color: hsl(0 0% 100%);
+    }
+}
+
+/* Adjust main content margin for fixed sidebar */
+.main {
+    margin-left: 256px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
+    }
 }
 </style>
+
+<script>
+// Add active state to current navigation item
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    navItems.forEach(item => {
+        const href = item.getAttribute('href');
+        if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href)))) {
+            item.classList.add('active');
+        }
+    });
+    
+    // Mobile sidebar toggle (if needed in future)
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarContainer = document.querySelector('.sidebar-container');
+    
+    if (sidebarToggle && sidebarContainer) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebarContainer.classList.toggle('mobile-open');
+        });
+    }
+});
+</script>
 {{end}}

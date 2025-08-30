@@ -1,11 +1,11 @@
 {{define "body"}}
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+<div class="main">
 <div class="user-dashboard">
     <!-- Header with user info -->
     <div class="dashboard-header">
         <div class="user-welcome">
             <h1>Welcome, {{.User.Username}}</h1>
-            <p class="subtitle">Security Awareness Learning Portal</p>
+            <p class="subtitle">Phishing Simulation & Security Training Portal</p>
         </div>
         <div class="user-avatar">
             <div class="avatar-circle">
@@ -16,15 +16,28 @@
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card phishing-stats">
+        <div class="stat-card phished-stats">
             <div class="stat-icon">
-                <i class="fa fa-shield"></i>
+                <i class="fa fa-exclamation-triangle"></i>
             </div>
             <div class="stat-content">
-                <h3 id="phishingCount">-</h3>
-                <p>Phishing Tests</p>
+                <h3 id="phishedCount">-</h3>
+                <p>Got Phished</p>
                 <div class="stat-trend">
-                    <span id="phishingStatus" class="status-pending">Loading...</span>
+                    <span id="phishedStatus" class="status-pending">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card reported-stats">
+            <div class="stat-icon">
+                <i class="fa fa-flag"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="reportedCount">-</h3>
+                <p>Reported Phishing</p>
+                <div class="stat-trend">
+                    <span id="reportedStatus" class="status-pending">Loading...</span>
                 </div>
             </div>
         </div>
@@ -47,23 +60,10 @@
                 <i class="fa fa-check-circle"></i>
             </div>
             <div class="stat-content">
-                <h3 id="completionRate">-</h3>
-                <p>Completion Rate</p>
+                <h3 id="completionCount">-</h3>
+                <p>Completed Training</p>
                 <div class="stat-trend">
                     <span id="completionStatus" class="status-pending">Loading...</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="stat-card streak-stats">
-            <div class="stat-icon">
-                <i class="fa fa-fire"></i>
-            </div>
-            <div class="stat-content">
-                <h3 id="streakDays">-</h3>
-                <p>Learning Streak</p>
-                <div class="stat-trend">
-                    <span id="streakStatus" class="status-pending">days</span>
                 </div>
             </div>
         </div>
@@ -211,20 +211,20 @@
     color: white;
 }
 
-.phishing-stats .stat-icon {
+.phished-stats .stat-icon {
     background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
 }
 
-.course-stats .stat-icon {
+.reported-stats .stat-icon {
     background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+}
+
+.course-stats .stat-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .completion-stats .stat-icon {
     background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
-}
-
-.streak-stats .stat-icon {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
 .stat-content h3 {
@@ -509,16 +509,16 @@ function loadUserDashboard() {
 function loadUserStats() {
     $.get('/api/user/stats')
         .done(function(stats) {
-            $('#phishingCount').text(stats.phishing_tests || 0);
+            $('#phishedCount').text(stats.phished_count || 0);
+            $('#reportedCount').text(stats.reported_count || 0);
             $('#courseCount').text(stats.assigned_courses || 0);
-            $('#completionRate').text((stats.completion_rate || 0) + '%');
-            $('#streakDays').text(stats.learning_streak || 0);
+            $('#completionCount').text(stats.completed_courses || 0);
             
             // Update status indicators
-            updateStatusIndicator('#phishingStatus', stats.phishing_status);
+            updateStatusIndicator('#phishedStatus', stats.phished_count > 0 ? 'needs_attention' : 'good');
+            updateStatusIndicator('#reportedStatus', stats.reported_count > 0 ? 'good' : 'pending');
             updateStatusIndicator('#courseProgress', stats.course_status);
             updateStatusIndicator('#completionStatus', stats.completion_status);
-            updateStatusIndicator('#streakStatus', 'days');
         })
         .fail(function() {
             // Set default values on error

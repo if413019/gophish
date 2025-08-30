@@ -1,7 +1,9 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -82,11 +84,12 @@ func (as *Server) UserAchievements(w http.ResponseWriter, r *http.Request) {
 
 // UserDashboardStats represents the statistics shown on the user dashboard
 type UserDashboardStats struct {
-	PhishingTests     int    `json:"phishing_tests"`
+	PhishedCount      int    `json:"phished_count"`
+	ReportedCount     int    `json:"reported_count"`
 	AssignedCourses   int    `json:"assigned_courses"`
-	CompletionRate    int    `json:"completion_rate"`
-	LearningStreak    int    `json:"learning_streak"`
-	PhishingStatus    string `json:"phishing_status"`
+	CompletedCourses  int    `json:"completed_courses"`
+	PhishedStatus     string `json:"phished_status"`
+	ReportedStatus    string `json:"reported_status"`
 	CourseStatus      string `json:"course_status"`
 	CompletionStatus  string `json:"completion_status"`
 }
@@ -129,40 +132,54 @@ func getUserDashboardStats(userID int64) (UserDashboardStats, error) {
 	
 	stats.AssignedCourses = len(enrollments)
 	
-	// Calculate completion rate based on actual module progress
+	// Calculate completed courses and course progress
+	completedCourses := 0
 	if stats.AssignedCourses > 0 {
-		totalProgress := 0
 		for _, enrollment := range enrollments {
 			courseProgress := calculateCourseProgress(enrollment.Id, enrollment.CourseId)
-			totalProgress += courseProgress
+			if courseProgress == 100 {
+				completedCourses++
+			}
 		}
-		stats.CompletionRate = totalProgress / stats.AssignedCourses
 	}
+	stats.CompletedCourses = completedCourses
 	
-	// Placeholder values for other stats
-	stats.PhishingTests = 0
-	stats.LearningStreak = 1
+	// Calculate phishing statistics from campaign results
+	phishedCount, reportedCount := calculatePhishingStats(userID)
+	stats.PhishedCount = phishedCount
+	stats.ReportedCount = reportedCount
 	
 	// Status indicators
+	if stats.PhishedCount > 0 {
+		stats.PhishedStatus = "needs_attention"
+	} else {
+		stats.PhishedStatus = "good"
+	}
+	
+	if stats.ReportedCount > 0 {
+		stats.ReportedStatus = "good"
+	} else {
+		stats.ReportedStatus = "pending"
+	}
+	
 	if stats.AssignedCourses > 0 {
-		if stats.CompletionRate >= 80 {
+		completionPercentage := (completedCourses * 100) / stats.AssignedCourses
+		if completionPercentage >= 80 {
 			stats.CourseStatus = "good"
-		} else if stats.CompletionRate >= 50 {
+		} else if completionPercentage >= 50 {
 			stats.CourseStatus = "in_progress"
 		} else {
 			stats.CourseStatus = "needs_attention"
 		}
 		
-		if stats.CompletionRate == 100 {
+		if completedCourses == stats.AssignedCourses {
 			stats.CompletionStatus = "completed"
-		} else if stats.CompletionRate >= 50 {
+		} else if completedCourses > 0 {
 			stats.CompletionStatus = "in_progress"
 		} else {
 			stats.CompletionStatus = "needs_attention"
 		}
 	}
-	
-	stats.PhishingStatus = "good" // Placeholder
 	
 	return stats, nil
 }
@@ -238,8 +255,9 @@ func getUserActivity(userID int64) ([]UserActivity, error) {
 	
 	// Add enrollment activities
 	for _, enrollment := range enrollments {
-		course, err := models.GetCourse(enrollment.CourseId, userID)
+		course, err := models.GetCourse(enrollment.CourseId, 1) // Use admin user ID
 		if err != nil {
+			log.Errorf("Error getting course %d for activity: %v", enrollment.CourseId, err)
 			continue
 		}
 		
@@ -252,10 +270,63 @@ func getUserActivity(userID int64) ([]UserActivity, error) {
 		activities = append(activities, activity)
 	}
 	
-	// TODO: Add phishing test activities when we have proper models for them
+	// Add module completion activities
+	for _, enrollment := range enrollments {
+		moduleProgress, err := models.GetUserModuleProgress(enrollment.Id)
+		if err != nil {
+			log.Errorf("Error getting module progress for enrollment %d: %v", enrollment.Id, err)
+			continue
+		}
+		
+		course, err := models.GetCourse(enrollment.CourseId, 1)
+		if err != nil {
+			continue
+		}
+		
+		// Add activity for each completed module
+		for _, progress := range moduleProgress {
+			if progress.CompletedDate != nil {
+				// Find the module name
+				var moduleName string
+				for _, module := range course.Modules {
+					if module.Id == progress.ModuleId {
+						moduleName = module.Name
+						break
+					}
+				}
+				
+				activity := UserActivity{
+					Type:        "module_completion",
+					Title:       "Completed Module",
+					Description: fmt.Sprintf("You completed \"%s\" in course \"%s\"", moduleName, course.Name),
+					CreatedDate: *progress.CompletedDate,
+				}
+				activities = append(activities, activity)
+			} else if progress.StartedDate != nil {
+				// Add activity for started modules
+				var moduleName string
+				for _, module := range course.Modules {
+					if module.Id == progress.ModuleId {
+						moduleName = module.Name
+						break
+					}
+				}
+				
+				activity := UserActivity{
+					Type:        "module_start",
+					Title:       "Started Module",
+					Description: fmt.Sprintf("You started \"%s\" in course \"%s\"", moduleName, course.Name),
+					CreatedDate: *progress.StartedDate,
+				}
+				activities = append(activities, activity)
+			}
+		}
+	}
 	
 	// Sort activities by date (most recent first)
-	// For now, we'll keep them as is since we only have enrollments
+	sort.Slice(activities, func(i, j int) bool {
+		return activities[i].CreatedDate.After(activities[j].CreatedDate)
+	})
 	
 	return activities, nil
 }
@@ -270,37 +341,43 @@ func getUserAchievements(userID int64) ([]UserAchievement, error) {
 		return achievements, err
 	}
 	
-	// Define achievements
+	// Define phishing-focused achievements
 	achievementDefs := []UserAchievement{
 		{
-			Title:       "First Steps",
-			Description: "Complete your first security awareness course",
-			Icon:        "fa-baby",
-			Unlocked:    stats.CompletionRate > 0,
+			Title:       "Lesson Learned",
+			Description: "Complete your first security awareness course after being phished",
+			Icon:        "fa-graduation-cap",
+			Unlocked:    stats.PhishedCount > 0 && stats.CompletedCourses > 0,
 		},
 		{
-			Title:       "Security Aware",
-			Description: "Complete 3 security awareness courses",
+			Title:       "Security Defender",
+			Description: "Report your first suspicious email",
 			Icon:        "fa-shield",
-			Unlocked:    stats.AssignedCourses >= 3 && stats.CompletionRate >= 50,
+			Unlocked:    stats.ReportedCount > 0,
 		},
 		{
-			Title:       "Phishing Expert",
-			Description: "Recognize and report 5 phishing attempts",
-			Icon:        "fa-eye",
-			Unlocked:    false, // Placeholder - need to track reported phishing
+			Title:       "Phishing Hunter",
+			Description: "Report 5 or more phishing attempts",
+			Icon:        "fa-flag",
+			Unlocked:    stats.ReportedCount >= 5,
 		},
 		{
-			Title:       "Perfect Score",
-			Description: "Complete all assigned courses with 100% score",
+			Title:       "Victim to Victor",
+			Description: "Complete training and avoid falling for phishing twice",
+			Icon:        "fa-trophy",
+			Unlocked:    stats.PhishedCount <= 1 && stats.CompletedCourses > 0,
+		},
+		{
+			Title:       "Security Champion",
+			Description: "Complete all assigned training courses",
 			Icon:        "fa-star",
-			Unlocked:    stats.CompletionRate == 100 && stats.AssignedCourses > 0,
+			Unlocked:    stats.CompletedCourses == stats.AssignedCourses && stats.AssignedCourses > 0,
 		},
 		{
-			Title:       "Streak Master",
-			Description: "Maintain a 30-day learning streak",
-			Icon:        "fa-fire",
-			Unlocked:    stats.LearningStreak >= 30,
+			Title:       "Eagle Eye",
+			Description: "Report suspicious emails without falling victim",
+			Icon:        "fa-eye",
+			Unlocked:    stats.ReportedCount > 0 && stats.PhishedCount == 0,
 		},
 	}
 	
@@ -342,6 +419,43 @@ func calculateCourseProgress(enrollmentId, courseId int64) int {
 	log.Infof("Course progress: %d/%d modules completed = %d%%", completedModules, totalModules, percentage)
 	
 	return percentage
+}
+
+// calculatePhishingStats calculates phishing-related statistics from campaign results
+func calculatePhishingStats(userID int64) (int, int) {
+	// Get the user to find their email/username
+	user, err := models.GetUser(userID)
+	if err != nil {
+		log.Errorf("Error getting user for phishing stats: %v", err)
+		return 0, 0
+	}
+	
+	// Query campaign results to count phishing interactions
+	// In Gophish, results are linked by email address in the BaseRecipient
+	phishedCount := 0
+	reportedCount := 0
+	
+	// Count how many times user clicked links or submitted data
+	err = models.DB().Model(&models.Result{}).
+		Where("email = ? AND (status = ? OR status = ?)", user.Username, models.EventClicked, models.EventDataSubmit).
+		Count(&phishedCount).Error
+	
+	if err != nil {
+		log.Errorf("Error counting phished results: %v", err)
+	}
+	
+	// Count how many times user reported phishing emails
+	err = models.DB().Model(&models.Result{}).
+		Where("email = ? AND reported = ?", user.Username, true).
+		Count(&reportedCount).Error
+	
+	if err != nil {
+		log.Errorf("Error counting reported results: %v", err)
+	}
+	
+	log.Infof("Phishing stats for user %s (ID: %d): phished=%d, reported=%d", user.Username, userID, phishedCount, reportedCount)
+	
+	return phishedCount, reportedCount
 }
 
 // UserModuleProgress returns module progress for a user's course enrollment

@@ -1,53 +1,31 @@
 {{define "body"}}
-<!-- Custom layout for user course view without admin sidebar -->
-<div class="container-fluid full-width-preview"
-    style="padding: 0; margin: 0; width: 100%; height: 100vh; overflow-x: hidden;">
-<!-- Override the nav sidebar for course view -->
+<!-- User course view with sidebar visible -->
+<div class="main">
+<div class="container-fluid course-view"
+    style="padding: 20px; margin: 0; width: 100%; min-height: 100vh;">
+<!-- Course view specific styles -->
 <style>
-/* Hide admin sidebar completely */
-.sidebar { 
-    display: none !important; 
-    visibility: hidden !important;
-    width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-/* Reset main content area */
-.main { 
-    margin-left: 0 !important; 
-    padding: 0 !important; 
+/* Ensure main content area works with sidebar */
+.course-view .main { 
+    margin-left: 256px; 
+    padding: 20px; 
 }
 
 /* Override container layout */
 .container-fluid .row {
-    margin: 0 !important;
+    margin: 0;
 }
 
-.col-sm-3, .col-md-2 {
-    display: none !important;
+/* Course content area styling */
+.course-view {
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Fix body layout */
-body { 
-    margin: 0; 
-    padding: 0; 
-    overflow-x: hidden;
-}
-
-/* Fix for header overlap */
-.full-width-preview {
-    margin-top: 70px !important; /* Account for fixed header height */
-    padding-top: 20px;
-    position: relative;
-    z-index: 1;
-}
-
-.full-width-preview .alert-info {
+.course-view .alert-info {
     margin-bottom: 20px;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
+    border-radius: 6px;
 }
 
 /* Ensure content is visible */
@@ -65,23 +43,21 @@ body {
     display: block !important;
 }
 
-/* Force full width for preview content */
-.full-width-preview .col-md-3,
-.full-width-preview .col-md-9 {
-    width: 100% !important;
-    float: none !important;
+/* Course layout adjustments */
+.course-view .col-md-3,
+.course-view .col-md-9 {
     padding: 15px;
 }
 
-/* Adjust course navigation sidebar in preview */
-.full-width-preview .col-md-3 {
-    width: 25% !important;
-    float: right !important;
+/* Course navigation sidebar */
+.course-view .col-md-3 {
+    width: 25%;
+    float: right;
 }
 
-.full-width-preview .col-md-9 {
-    width: 75% !important;
-    float: left !important;
+.course-view .col-md-9 {
+    width: 75%;
+    float: left;
 }
 
 /* Corporate video player styles */
@@ -428,6 +404,7 @@ body {
             </div>
         </div>
     </div>
+</div>
 </div>
 {{end}}
 
