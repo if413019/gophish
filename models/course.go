@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"errors"
+	"math/rand"
 	"time"
 
 	log "github.com/gophish/gophish/logger"
@@ -678,4 +679,249 @@ func CreateCourseCompletionEvent(enrollment CourseEnrollment, campaignId int64) 
 	event.Details = string(detailsJSON)
 	
 	return AddEvent(&event, campaignId)
+}
+
+// QuizResponseSubmission represents a quiz response from the frontend
+type QuizResponseSubmission struct {
+	QuestionId       int64 `json:"question_id"`
+	SelectedOptionId int64 `json:"selected_option_id"`
+}
+
+// QuizAttemptResult represents the result of a quiz submission
+type QuizAttemptResult struct {
+	AttemptId       int64        `json:"attempt_id"`
+	Score           int          `json:"score"`
+	Passed          bool         `json:"passed"`
+	PassingScore    int          `json:"passing_score"`
+	TimeTaken       int          `json:"time_taken"`
+	CompletedDate   *time.Time   `json:"completed_date"`
+	CanRetake       bool         `json:"can_retake"`
+	AttemptsLeft    int          `json:"attempts_left"`
+	Responses       []QuizResponse `json:"responses,omitempty"`
+}
+
+// GetQuizWithQuestions retrieves a quiz with its questions and options
+func GetQuizWithQuestions(quizId, courseId int64) (CourseQuiz, error) {
+	var quiz CourseQuiz
+	err := db.Where("id = ? AND course_id = ?", quizId, courseId).First(&quiz).Error
+	if err != nil {
+		return quiz, err
+	}
+	
+	// Load questions with options
+	err = db.Where("quiz_id = ?", quizId).Order("order_index").Find(&quiz.Questions).Error
+	if err != nil {
+		return quiz, err
+	}
+	
+	// Load options for each question
+	for i := range quiz.Questions {
+		err = db.Where("question_id = ?", quiz.Questions[i].Id).Find(&quiz.Questions[i].Options).Error
+		if err != nil {
+			return quiz, err
+		}
+	}
+	
+	return quiz, nil
+}
+
+// CanAccessQuiz checks if a user can access a quiz based on module prerequisites
+func CanAccessQuiz(enrollmentId, moduleId int64) (bool, error) {
+	if moduleId == 0 {
+		// No prerequisite module, can access
+		return true, nil
+	}
+	
+	// Get all modules for this course to check order
+	var enrollment CourseEnrollment
+	err := db.Where("id = ?", enrollmentId).First(&enrollment).Error
+	if err != nil {
+		return false, err
+	}
+	
+	var currentModule CourseModule
+	err = db.Where("id = ?", moduleId).First(&currentModule).Error
+	if err != nil {
+		return false, err
+	}
+	
+	// Get all modules before this one
+	var previousModules []CourseModule
+	err = db.Where("course_id = ? AND order_index < ?", enrollment.CourseId, currentModule.OrderIndex).Find(&previousModules).Error
+	if err != nil {
+		return false, err
+	}
+	
+	// Check if all previous modules are completed
+	for _, module := range previousModules {
+		var progress ModuleProgress
+		err = db.Where("enrollment_id = ? AND module_id = ?", enrollmentId, module.Id).First(&progress).Error
+		if err == gorm.ErrRecordNotFound || progress.CompletedDate == nil {
+			// Previous module not completed
+			return false, nil
+		}
+	}
+	
+	return true, nil
+}
+
+// ShuffleQuestions randomizes the order of questions
+func ShuffleQuestions(questions *[]CourseQuestion) {
+	if len(*questions) <= 1 {
+		return
+	}
+	
+	// Simple Fisher-Yates shuffle
+	for i := len(*questions) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		(*questions)[i], (*questions)[j] = (*questions)[j], (*questions)[i]
+	}
+}
+
+// StartQuizAttempt creates a new quiz attempt for a user
+func StartQuizAttempt(enrollmentId, quizId int64) (QuizAttempt, error) {
+	// Check if user has reached max attempts
+	var existingAttempts []QuizAttempt
+	err := db.Where("enrollment_id = ? AND quiz_id = ?", enrollmentId, quizId).Find(&existingAttempts).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return QuizAttempt{}, err
+	}
+	
+	// Get quiz to check max attempts
+	var quiz CourseQuiz
+	err = db.Where("id = ?", quizId).First(&quiz).Error
+	if err != nil {
+		return QuizAttempt{}, err
+	}
+	
+	if len(existingAttempts) >= quiz.MaxAttempts {
+		return QuizAttempt{}, errors.New("Maximum attempts reached for this quiz")
+	}
+	
+	// Create new attempt
+	now := time.Now().UTC()
+	attempt := QuizAttempt{
+		EnrollmentId:  enrollmentId,
+		QuizId:        quizId,
+		AttemptNumber: len(existingAttempts) + 1,
+		StartedDate:   &now,
+		AttemptDate:   now,
+	}
+	
+	err = db.Create(&attempt).Error
+	return attempt, err
+}
+
+// SubmitQuizAttempt processes quiz responses and calculates score
+func SubmitQuizAttempt(attemptId int64, responses []QuizResponseSubmission, enrollmentId, quizId int64) (QuizAttemptResult, error) {
+	// Get the attempt
+	var attempt QuizAttempt
+	err := db.Where("id = ? AND enrollment_id = ?", attemptId, enrollmentId).First(&attempt).Error
+	if err != nil {
+		return QuizAttemptResult{}, err
+	}
+	
+	// Get quiz details
+	quiz, err := GetQuizWithQuestions(quizId, 0) // courseId not needed for validation
+	if err != nil {
+		return QuizAttemptResult{}, err
+	}
+	
+	// Calculate score
+	totalQuestions := len(quiz.Questions)
+	correctAnswers := 0
+	var quizResponses []QuizResponse
+	
+	// Create a map of questions for easy lookup
+	questionMap := make(map[int64]CourseQuestion)
+	for _, question := range quiz.Questions {
+		questionMap[question.Id] = question
+	}
+	
+	// Process each response
+	for _, response := range responses {
+		question, exists := questionMap[response.QuestionId]
+		if !exists {
+			continue // Skip invalid questions
+		}
+		
+		// Find the correct answer
+		isCorrect := false
+		for _, option := range question.Options {
+			if option.Id == response.SelectedOptionId && option.IsCorrect {
+				isCorrect = true
+				correctAnswers++
+				break
+			}
+		}
+		
+		// Create quiz response record
+		quizResponse := QuizResponse{
+			AttemptId:        attemptId,
+			QuestionId:       response.QuestionId,
+			SelectedOptionId: response.SelectedOptionId,
+			IsCorrect:        isCorrect,
+		}
+		
+		err = db.Create(&quizResponse).Error
+		if err != nil {
+			return QuizAttemptResult{}, err
+		}
+		
+		quizResponses = append(quizResponses, quizResponse)
+	}
+	
+	// Calculate final score
+	score := 0
+	if totalQuestions > 0 {
+		score = (correctAnswers * 100) / totalQuestions
+	}
+	
+	passed := score >= quiz.PassingScore
+	now := time.Now().UTC()
+	
+	// Calculate time taken
+	timeTaken := 0
+	if attempt.StartedDate != nil {
+		timeTaken = int(now.Sub(*attempt.StartedDate).Seconds())
+	}
+	
+	// Update attempt with results
+	attempt.CompletedDate = &now
+	attempt.Score = score
+	attempt.Passed = passed
+	attempt.TimeTaken = timeTaken
+	
+	err = db.Save(&attempt).Error
+	if err != nil {
+		return QuizAttemptResult{}, err
+	}
+	
+	// Check attempts left
+	var totalAttempts int64
+	db.Model(&QuizAttempt{}).Where("enrollment_id = ? AND quiz_id = ?", enrollmentId, quizId).Count(&totalAttempts)
+	attemptsLeft := quiz.MaxAttempts - int(totalAttempts)
+	if attemptsLeft < 0 {
+		attemptsLeft = 0
+	}
+	
+	return QuizAttemptResult{
+		AttemptId:     attemptId,
+		Score:         score,
+		Passed:        passed,
+		PassingScore:  quiz.PassingScore,
+		TimeTaken:     timeTaken,
+		CompletedDate: &now,
+		CanRetake:     !passed && attemptsLeft > 0,
+		AttemptsLeft:  attemptsLeft,
+		Responses:     quizResponses,
+	}, nil
+}
+
+// GetQuizAttempts retrieves all attempts for a user's quiz
+func GetQuizAttempts(enrollmentId, quizId int64) ([]QuizAttempt, error) {
+	var attempts []QuizAttempt
+	err := db.Where("enrollment_id = ? AND quiz_id = ?", enrollmentId, quizId).
+		Order("attempt_number desc").Find(&attempts).Error
+	return attempts, err
 }

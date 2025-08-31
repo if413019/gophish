@@ -551,6 +551,192 @@
     color: #999;
 }
 
+/* Quiz Module Styles */
+.quiz-module-content {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin: 1rem 0;
+}
+
+.quiz-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.quiz-icon {
+    font-size: 3rem;
+    color: #9b59b6;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.quiz-header h4 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.quiz-header p {
+    color: #718096;
+    font-size: 1rem;
+}
+
+.quiz-info {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.quiz-details {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border-left: 4px solid #9b59b6;
+}
+
+.quiz-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #495057;
+}
+
+.quiz-detail-item i {
+    width: 20px;
+    color: #9b59b6;
+    font-size: 1.1rem;
+}
+
+.quiz-status {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.loading-message {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.quiz-actions {
+    text-align: center;
+}
+
+.quiz-available-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #28a745;
+    margin-bottom: 1rem;
+}
+
+.quiz-locked-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #dc3545;
+    margin-bottom: 1rem;
+}
+
+.quiz-completed-message {
+    background: #cce7ff;
+    color: #004085;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+    margin-bottom: 1rem;
+}
+
+.quiz-attempts-info {
+    background: #fff3cd;
+    color: #856404;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border-left: 4px solid #ffc107;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.btn-quiz-take {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-quiz-take:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(155, 89, 182, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-quiz-retake {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.btn-quiz-retake:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.quiz-score-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.score-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.score-passed {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+}
+
+.score-failed {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
 .module-nav-item .module-title {
     font-weight: bold;
     margin-bottom: 2px;
@@ -761,13 +947,39 @@
                             </div>
                             {{ end }}
 
-                            <div style="padding: 20px; text-align: center; color: #666; background: #f8f9fa;">
-                                <i class="fa fa-question-circle fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
-                                <h4>Knowledge Check Quiz</h4>
-                                <p>Test your understanding of the security concepts covered in this course.</p>
-                                <div class="alert alert-info">
-                                    <i class="fa fa-info-circle"></i>
-                                    Complete the previous modules before taking this quiz.
+                            <div class="quiz-module-content">
+                                <div class="quiz-header">
+                                    <i class="fa fa-question-circle quiz-icon"></i>
+                                    <h4>Knowledge Check Quiz</h4>
+                                    <p>Test your understanding of the security concepts covered in this course.</p>
+                                </div>
+                                
+                                <div class="quiz-info">
+                                    <div class="quiz-details">
+                                        <div class="quiz-detail-item">
+                                            <i class="fa fa-clock-o"></i>
+                                            <span id="quiz-time-limit-{{ $module.Id }}">Loading...</span>
+                                        </div>
+                                        <div class="quiz-detail-item">
+                                            <i class="fa fa-list"></i>
+                                            <span id="quiz-question-count-{{ $module.Id }}">Loading...</span>
+                                        </div>
+                                        <div class="quiz-detail-item">
+                                            <i class="fa fa-trophy"></i>
+                                            <span id="quiz-passing-score-{{ $module.Id }}">Loading...</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="quiz-status" id="quiz-status-{{ $module.Id }}">
+                                        <div class="loading-message">
+                                            <i class="fa fa-spinner fa-spin"></i>
+                                            Checking quiz availability...
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="quiz-actions" id="quiz-actions-{{ $module.Id }}" style="display: none;">
+                                        <!-- Actions will be populated by JavaScript -->
+                                    </div>
                                 </div>
                             </div>
                         {{ end }}
@@ -1083,5 +1295,122 @@ function initializeVideoTimers() {
         });
     });
 }
+
+// Quiz Management Functions
+function loadQuizInformation() {
+    {{ range $index, $module := .Course.Modules }}
+    {{ if eq $module.ModuleType "quiz" }}
+    loadQuizDetails({{ $module.Id }}, {{ $module.QuizId }}, {{ $.Course.Id }});
+    {{ end }}
+    {{ end }}
+}
+
+function loadQuizDetails(moduleId, quizId, courseId) {
+    if (!quizId || quizId === 0) {
+        $('#quiz-status-' + moduleId).html('<div class="quiz-locked-message"><i class="fa fa-exclamation-circle"></i> Quiz not configured for this module</div>');
+        return;
+    }
+    
+    // Load quiz information
+    $.get('/api/user/courses/' + courseId + '/quiz/' + quizId + '/questions')
+        .done(function(data) {
+            const quiz = data.quiz;
+            const questions = data.questions;
+            
+            // Update quiz details
+            const timeLimit = quiz.time_limit > 0 ? quiz.time_limit + ' minutes' : 'No time limit';
+            $('#quiz-time-limit-' + moduleId).text(timeLimit);
+            $('#quiz-question-count-' + moduleId).text(questions.length + ' questions');
+            $('#quiz-passing-score-' + moduleId).text(quiz.passing_score + '% to pass');
+            
+            // Load user's attempts
+            loadQuizAttempts(moduleId, quizId, courseId, quiz);
+        })
+        .fail(function(xhr) {
+            if (xhr.status === 403) {
+                $('#quiz-status-' + moduleId).html('<div class="quiz-locked-message"><i class="fa fa-lock"></i> Complete the previous modules before taking this quiz</div>');
+            } else {
+                $('#quiz-status-' + moduleId).html('<div class="quiz-locked-message"><i class="fa fa-exclamation-circle"></i> Unable to load quiz</div>');
+            }
+        });
+}
+
+function loadQuizAttempts(moduleId, quizId, courseId, quiz) {
+    $.get('/api/user/courses/' + courseId + '/quiz/' + quizId + '/attempts')
+        .done(function(attempts) {
+            displayQuizStatus(moduleId, quizId, courseId, quiz, attempts);
+        })
+        .fail(function() {
+            // If attempts fail to load, still show quiz as available
+            displayQuizStatus(moduleId, quizId, courseId, quiz, []);
+        });
+}
+
+function displayQuizStatus(moduleId, quizId, courseId, quiz, attempts) {
+    const statusContainer = $('#quiz-status-' + moduleId);
+    const actionsContainer = $('#quiz-actions-' + moduleId);
+    
+    let statusHtml = '';
+    let actionsHtml = '';
+    
+    if (attempts.length === 0) {
+        // No attempts yet
+        statusHtml = '<div class="quiz-available-message"><i class="fa fa-check-circle"></i> Quiz is ready to take</div>';
+        actionsHtml = '<a href="/user/courses/' + courseId + '/quiz/' + quizId + '" class="btn-quiz-take">' +
+                     '<i class="fa fa-play"></i> Take Quiz</a>';
+    } else {
+        const latestAttempt = attempts[0]; // Already sorted by attempt_number desc
+        
+        if (latestAttempt.passed) {
+            // Passed the quiz
+            statusHtml = '<div class="quiz-completed-message">' +
+                        '<i class="fa fa-check-circle"></i> Quiz completed successfully!' +
+                        '<div class="quiz-score-display">' +
+                        '<div class="score-circle score-passed">' + latestAttempt.score + '%</div>' +
+                        '<div>You scored ' + latestAttempt.score + '% (passing: ' + quiz.passing_score + '%)</div>' +
+                        '</div></div>';
+                        
+            if (attempts.length < quiz.max_attempts) {
+                actionsHtml = '<a href="/user/courses/' + courseId + '/quiz/' + quizId + '" class="btn-quiz-retake">' +
+                             '<i class="fa fa-repeat"></i> Retake Quiz</a>';
+            }
+        } else {
+            // Failed or not completed
+            if (attempts.length < quiz.max_attempts) {
+                // Can retake
+                statusHtml = '<div class="quiz-attempts-info">' +
+                            '<i class="fa fa-info-circle"></i> Previous attempt: ' + latestAttempt.score + '% ' +
+                            '(attempt ' + attempts.length + ' of ' + quiz.max_attempts + ')' +
+                            '</div>';
+                
+                if (latestAttempt.score < quiz.passing_score) {
+                    statusHtml += '<div class="quiz-score-display">' +
+                                 '<div class="score-circle score-failed">' + latestAttempt.score + '%</div>' +
+                                 '<div>You need ' + quiz.passing_score + '% to pass</div>' +
+                                 '</div>';
+                }
+                
+                actionsHtml = '<a href="/user/courses/' + courseId + '/quiz/' + quizId + '" class="btn-quiz-retake">' +
+                             '<i class="fa fa-repeat"></i> Retake Quiz</a>';
+            } else {
+                // No more attempts
+                statusHtml = '<div class="quiz-locked-message">' +
+                            '<i class="fa fa-times-circle"></i> Maximum attempts reached (' + quiz.max_attempts + ')' +
+                            '<div class="quiz-score-display">' +
+                            '<div class="score-circle score-failed">' + latestAttempt.score + '%</div>' +
+                            '<div>Final score: ' + latestAttempt.score + '% (needed: ' + quiz.passing_score + '%)</div>' +
+                            '</div></div>';
+            }
+        }
+    }
+    
+    statusContainer.html(statusHtml);
+    actionsContainer.html(actionsHtml).show();
+}
+
+// Initialize quiz information when page loads
+$(document).ready(function() {
+    loadQuizInformation();
+});
 </script>
 {{end}}

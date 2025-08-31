@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"context"
 	"crypto/tls"
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -143,6 +144,10 @@ func (as *AdminServer) registerRoutes() {
 	// User-specific course routes
 	router.HandleFunc("/user/courses", mid.Use(as.UserCourses, mid.RequireLogin))
 	router.HandleFunc("/user/courses/{id:[0-9]+}", mid.Use(as.UserCourseDetails, mid.RequireLogin))
+	// Quiz routes for users
+	router.HandleFunc("/user/courses/{courseId:[0-9]+}/quiz/{quizId:[0-9]+}", mid.Use(as.UserQuizInterface, mid.RequireLogin))
+	router.HandleFunc("/user/courses/{courseId:[0-9]+}/quiz/{quizId:[0-9]+}/start", mid.Use(as.UserStartQuiz, mid.RequireLogin))
+	router.HandleFunc("/user/courses/{courseId:[0-9]+}/quiz/{quizId:[0-9]+}/submit", mid.Use(as.UserSubmitQuiz, mid.RequireLogin))
 	router.HandleFunc("/impersonate", mid.Use(as.Impersonate, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
 	// Create the API routes
 	api := api.NewServer(
@@ -462,6 +467,97 @@ func (as *AdminServer) CoursePreview(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Template error", http.StatusInternalServerError)
 		return
 	}
+}
+
+// UserQuizInterface displays the quiz taking interface for users
+func (as *AdminServer) UserQuizInterface(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	courseId, _ := strconv.ParseInt(vars["courseId"], 0, 64)
+	quizId, _ := strconv.ParseInt(vars["quizId"], 0, 64)
+	user := ctx.Get(r, "user").(models.User)
+	
+	// Check if user is enrolled in this course
+	enrollment, err := models.GetCourseEnrollment(user.Id, courseId)
+	if err != nil {
+		log.Error("Error checking user enrollment: ", err)
+		http.Error(w, "Course not found", http.StatusNotFound)
+		return
+	}
+	
+	// Get the course with quiz details
+	course, err := models.GetCourse(courseId, 1)
+	if err != nil {
+		log.Error("Error getting course details: ", err)
+		http.Error(w, "Course not found", http.StatusNotFound)
+		return
+	}
+	
+	// Get quiz details
+	quiz, err := models.GetQuizWithQuestions(quizId, courseId)
+	if err != nil {
+		log.Error("Error getting quiz details: ", err)
+		http.Error(w, "Quiz not found", http.StatusNotFound)
+		return
+	}
+	
+	// Check if user can access this quiz
+	canAccess, err := models.CanAccessQuiz(enrollment.Id, quiz.ModuleId)
+	if err != nil {
+		log.Error("Error checking quiz access: ", err)
+		http.Error(w, "Error checking access", http.StatusInternalServerError)
+		return
+	}
+	
+	if !canAccess {
+		log.Errorf("User %d cannot access quiz %d - prerequisites not met", user.Id, quizId)
+		http.Error(w, "Complete previous modules before taking this quiz", http.StatusForbidden)
+		return
+	}
+	
+	// Get user's previous attempts
+	attempts, err := models.GetQuizAttempts(enrollment.Id, quizId)
+	if err != nil {
+		log.Error("Error getting quiz attempts: ", err)
+		attempts = []models.QuizAttempt{} // Continue with empty attempts
+	}
+	
+	// Create template params
+	baseParams := newTemplateParams(r)
+	params := struct {
+		templateParams
+		Course     models.Course
+		Quiz       models.CourseQuiz
+		Attempts   []models.QuizAttempt
+		Enrollment models.CourseEnrollment
+	}{
+		templateParams: baseParams,
+		Course:         course,
+		Quiz:           quiz,
+		Attempts:       attempts,
+		Enrollment:     enrollment,
+	}
+	params.Title = "Quiz: " + quiz.Name
+	
+	getTemplate(w, "user_quiz").ExecuteTemplate(w, "base", params)
+}
+
+// UserStartQuiz handles the quiz start page
+func (as *AdminServer) UserStartQuiz(w http.ResponseWriter, r *http.Request) {
+	// This could redirect to the quiz interface or be combined with it
+	// For now, redirect to the quiz interface
+	vars := mux.Vars(r)
+	courseId := vars["courseId"]
+	quizId := vars["quizId"]
+	http.Redirect(w, r, fmt.Sprintf("/user/courses/%s/quiz/%s", courseId, quizId), http.StatusFound)
+}
+
+// UserSubmitQuiz handles quiz result display
+func (as *AdminServer) UserSubmitQuiz(w http.ResponseWriter, r *http.Request) {
+	// This could show quiz results or redirect back to course
+	// For now, redirect back to course
+	vars := mux.Vars(r)
+	courseId := vars["courseId"]
+	http.Redirect(w, r, fmt.Sprintf("/user/courses/%s", courseId), http.StatusFound)
 }
 
 // Impersonate allows an admin to login to a user account without needing the password

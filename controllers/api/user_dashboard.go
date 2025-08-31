@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sort"
@@ -585,5 +586,222 @@ func (as *Server) UserCompleteModule(w http.ResponseWriter, r *http.Request) {
 		}
 		
 		JSONResponse(w, models.Response{Success: true, Message: "Module completed"}, http.StatusOK)
+	}
+}
+
+// UserGetQuizQuestions retrieves quiz questions for a user (randomized if configured)
+func (as *Server) UserGetQuizQuestions(w http.ResponseWriter, r *http.Request) {
+	switch {
+	case r.Method == "GET":
+		vars := mux.Vars(r)
+		courseId, err := strconv.ParseInt(vars["courseId"], 0, 64)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid course ID"}, http.StatusBadRequest)
+			return
+		}
+		
+		quizId, err := strconv.ParseInt(vars["quizId"], 0, 64)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid quiz ID"}, http.StatusBadRequest)
+			return
+		}
+		
+		user := ctx.Get(r, "user").(models.User)
+		
+		// Verify user enrollment
+		enrollment, err := models.GetCourseEnrollment(user.Id, courseId)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Enrollment not found"}, http.StatusNotFound)
+			return
+		}
+		
+		// Get quiz with questions
+		quiz, err := models.GetQuizWithQuestions(quizId, courseId)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Quiz not found"}, http.StatusNotFound)
+			return
+		}
+		
+		// Check if user can access this quiz (previous modules completed)
+		canAccess, err := models.CanAccessQuiz(enrollment.Id, quiz.ModuleId)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: err.Error()}, http.StatusInternalServerError)
+			return
+		}
+		
+		if !canAccess {
+			JSONResponse(w, models.Response{Success: false, Message: "Complete previous modules before taking this quiz"}, http.StatusForbidden)
+			return
+		}
+		
+		// Randomize questions if configured
+		questions := quiz.Questions
+		if quiz.ShuffleQuestions {
+			models.ShuffleQuestions(&questions)
+		}
+		
+		// Remove correct answers from response (for security)
+		for i := range questions {
+			for j := range questions[i].Options {
+				questions[i].Options[j].IsCorrect = false
+			}
+		}
+		
+		JSONResponse(w, map[string]interface{}{
+			"quiz":      quiz,
+			"questions": questions,
+		}, http.StatusOK)
+	}
+}
+
+// UserStartQuizAPI starts a new quiz attempt
+func (as *Server) UserStartQuizAPI(w http.ResponseWriter, r *http.Request) {
+	switch {
+	case r.Method == "POST":
+		vars := mux.Vars(r)
+		courseId, err := strconv.ParseInt(vars["courseId"], 0, 64)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid course ID"}, http.StatusBadRequest)
+			return
+		}
+		
+		quizId, err := strconv.ParseInt(vars["quizId"], 0, 64)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid quiz ID"}, http.StatusBadRequest)
+			return
+		}
+		
+		user := ctx.Get(r, "user").(models.User)
+		
+		// Verify user enrollment
+		enrollment, err := models.GetCourseEnrollment(user.Id, courseId)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Enrollment not found"}, http.StatusNotFound)
+			return
+		}
+		
+		// Create quiz attempt
+		attempt, err := models.StartQuizAttempt(enrollment.Id, quizId)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: err.Error()}, http.StatusInternalServerError)
+			return
+		}
+		
+		JSONResponse(w, map[string]interface{}{
+			"attempt_id": attempt.Id,
+			"started_at": attempt.StartedDate,
+		}, http.StatusOK)
+	}
+}
+
+// UserSubmitQuizAPI submits quiz responses and calculates score
+func (as *Server) UserSubmitQuizAPI(w http.ResponseWriter, r *http.Request) {
+	switch {
+	case r.Method == "POST":
+		vars := mux.Vars(r)
+		courseId, err := strconv.ParseInt(vars["courseId"], 0, 64)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid course ID"}, http.StatusBadRequest)
+			return
+		}
+		
+		quizId, err := strconv.ParseInt(vars["quizId"], 0, 64)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid quiz ID"}, http.StatusBadRequest)
+			return
+		}
+		
+		user := ctx.Get(r, "user").(models.User)
+		
+		// Parse submission data
+		type QuizSubmission struct {
+			AttemptId int64                    `json:"attempt_id"`
+			Responses []models.QuizResponseSubmission `json:"responses"`
+		}
+		
+		var submission QuizSubmission
+		err = json.NewDecoder(r.Body).Decode(&submission)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid submission format"}, http.StatusBadRequest)
+			return
+		}
+		
+		// Verify user enrollment
+		enrollment, err := models.GetCourseEnrollment(user.Id, courseId)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Enrollment not found"}, http.StatusNotFound)
+			return
+		}
+		
+		// Process quiz submission
+		result, err := models.SubmitQuizAttempt(submission.AttemptId, submission.Responses, enrollment.Id, quizId)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: err.Error()}, http.StatusInternalServerError)
+			return
+		}
+		
+		// If quiz passed and this is a module quiz, mark module complete
+		if result.Passed {
+			quiz, err := models.GetQuizWithQuestions(quizId, courseId)
+			if err == nil && quiz.ModuleId > 0 {
+				err = models.CompleteModule(enrollment.Id, quiz.ModuleId)
+				if err != nil {
+					log.Error("Error completing module after quiz success: ", err)
+				} else {
+					// Check for course completion
+					courseCompleted, err := models.CheckAndUpdateCourseCompletion(enrollment.Id)
+					if err != nil {
+						log.Error("Error checking course completion: ", err)
+					} else if courseCompleted && enrollment.CampaignId > 0 {
+						updatedEnrollment, err := models.GetCourseEnrollment(user.Id, courseId)
+						if err == nil {
+							err = models.CreateCourseCompletionEvent(updatedEnrollment, enrollment.CampaignId)
+							if err != nil {
+								log.Error("Error creating course completion event: ", err)
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		JSONResponse(w, result, http.StatusOK)
+	}
+}
+
+// UserGetQuizAttempts retrieves user's quiz attempts and scores
+func (as *Server) UserGetQuizAttempts(w http.ResponseWriter, r *http.Request) {
+	switch {
+	case r.Method == "GET":
+		vars := mux.Vars(r)
+		courseId, err := strconv.ParseInt(vars["courseId"], 0, 64)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid course ID"}, http.StatusBadRequest)
+			return
+		}
+		
+		quizId, err := strconv.ParseInt(vars["quizId"], 0, 64)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid quiz ID"}, http.StatusBadRequest)
+			return
+		}
+		
+		user := ctx.Get(r, "user").(models.User)
+		
+		// Verify user enrollment
+		enrollment, err := models.GetCourseEnrollment(user.Id, courseId)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Enrollment not found"}, http.StatusNotFound)
+			return
+		}
+		
+		// Get quiz attempts
+		attempts, err := models.GetQuizAttempts(enrollment.Id, quizId)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: err.Error()}, http.StatusInternalServerError)
+			return
+		}
+		
+		JSONResponse(w, attempts, http.StatusOK)
 	}
 }

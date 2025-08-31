@@ -107,6 +107,11 @@ func (as *Server) registerRoutes() {
 	root.HandleFunc("/api/user/courses/{id:[0-9]+}/modules/progress", mid.Use(as.UserModuleProgress, mid.RequireLogin))
 	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/modules/{moduleId:[0-9]+}/start", mid.Use(as.UserStartModule, mid.RequireLogin))
 	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/modules/{moduleId:[0-9]+}/complete", mid.Use(as.UserCompleteModule, mid.RequireLogin))
+	// Quiz API endpoints for users
+	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/quiz/{quizId:[0-9]+}/questions", mid.Use(as.UserGetQuizQuestions, mid.RequireLogin))
+	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/quiz/{quizId:[0-9]+}/start", mid.Use(as.UserStartQuizAPI, mid.RequireLogin))
+	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/quiz/{quizId:[0-9]+}/submit", mid.Use(as.UserSubmitQuizAPI, mid.RequireLogin))
+	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/quiz/{quizId:[0-9]+}/attempts", mid.Use(as.UserGetQuizAttempts, mid.RequireLogin))
 	
 	as.handler = root
 }
