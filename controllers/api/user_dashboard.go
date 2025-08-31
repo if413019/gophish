@@ -565,6 +565,25 @@ func (as *Server) UserCompleteModule(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		
+		// Check if the course is now completed and create timeline event if needed
+		courseCompleted, err := models.CheckAndUpdateCourseCompletion(enrollment.Id)
+		if err != nil {
+			log.Error("Error checking course completion: ", err)
+			// Don't fail the request, just log the error
+		} else if courseCompleted && enrollment.CampaignId > 0 {
+			// Create a course completion timeline event
+			// Reload enrollment to get updated data
+			updatedEnrollment, err := models.GetCourseEnrollment(user.Id, courseId)
+			if err == nil {
+				err = models.CreateCourseCompletionEvent(updatedEnrollment, enrollment.CampaignId)
+				if err != nil {
+					log.Error("Error creating course completion event: ", err)
+				} else {
+					log.Infof("Created course completion event for user %s in campaign %d", user.Username, enrollment.CampaignId)
+				}
+			}
+		}
+		
 		JSONResponse(w, models.Response{Success: true, Message: "Module completed"}, http.StatusOK)
 	}
 }

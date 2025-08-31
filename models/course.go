@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -538,4 +539,143 @@ func CompleteModule(enrollmentId, moduleId int64) error {
 	}
 	
 	return db.Save(&progress).Error
+}
+
+// CheckAndUpdateCourseCompletion checks if a course is fully completed and updates enrollment status
+// Returns true if course was just completed (to trigger events)
+func CheckAndUpdateCourseCompletion(enrollmentId int64) (bool, error) {
+	// Get the enrollment
+	var enrollment CourseEnrollment
+	err := db.Where("id = ?", enrollmentId).First(&enrollment).Error
+	if err != nil {
+		return false, err
+	}
+	
+	// If already completed, no need to check again
+	if enrollment.Status == EnrollmentStatusCompleted {
+		return false, nil
+	}
+	
+	// Get the course with modules
+	var course Course
+	err = db.Where("id = ?", enrollment.CourseId).Preload("Modules").First(&course).Error
+	if err != nil {
+		return false, err
+	}
+	
+	// Get all module progress for this enrollment
+	var moduleProgresses []ModuleProgress
+	err = db.Where("enrollment_id = ?", enrollmentId).Find(&moduleProgresses).Error
+	if err != nil {
+		return false, err
+	}
+	
+	// Create a map of completed modules
+	completedModules := make(map[int64]bool)
+	for _, progress := range moduleProgresses {
+		if progress.CompletedDate != nil {
+			completedModules[progress.ModuleId] = true
+		}
+	}
+	
+	// Count total modules and required modules
+	totalModules := len(course.Modules)
+	completedCount := len(completedModules)
+	requiredModules := 0
+	
+	for _, module := range course.Modules {
+		if module.MustComplete {
+			requiredModules++
+		}
+	}
+	
+	// Check if course is completed
+	// Course is completed if either:
+	// 1. All modules are completed, OR
+	// 2. All required modules are completed (if there are any)
+	isCompleted := false
+	if requiredModules > 0 {
+		// Check if all required modules are completed
+		requiredCompleted := 0
+		for _, module := range course.Modules {
+			if module.MustComplete && completedModules[module.Id] {
+				requiredCompleted++
+			}
+		}
+		isCompleted = (requiredCompleted == requiredModules)
+	} else {
+		// All modules must be completed if no specific requirements
+		isCompleted = (completedCount == totalModules)
+	}
+	
+	if isCompleted {
+		// Calculate completion percentage
+		completionPercentage := 100
+		if totalModules > 0 {
+			completionPercentage = (completedCount * 100) / totalModules
+		}
+		
+		// Update enrollment status
+		err = UpdateEnrollmentProgress(enrollmentId, completionPercentage, EnrollmentStatusCompleted)
+		if err != nil {
+			return false, err
+		}
+		
+		return true, nil // Course was just completed
+	}
+	
+	// Update progress percentage even if not completed
+	completionPercentage := 0
+	if totalModules > 0 {
+		completionPercentage = (completedCount * 100) / totalModules
+	}
+	
+	status := EnrollmentStatusInProgress
+	if completedCount == 0 {
+		status = EnrollmentStatusEnrolled
+	}
+	
+	err = UpdateEnrollmentProgress(enrollmentId, completionPercentage, status)
+	return false, err
+}
+
+// CreateCourseCompletionEvent creates a timeline event for course completion
+func CreateCourseCompletionEvent(enrollment CourseEnrollment, campaignId int64) error {
+	// Get course details
+	var course Course
+	err := db.Where("id = ?", enrollment.CourseId).First(&course).Error
+	if err != nil {
+		return err
+	}
+	
+	// Get user details
+	var user User
+	err = db.Where("id = ?", enrollment.UserId).First(&user).Error
+	if err != nil {
+		return err
+	}
+	
+	// Create the event
+	event := Event{
+		CampaignId: campaignId,
+		Email:      user.Username, // Username is the email for enrolled users
+		Time:       time.Now().UTC(),
+		Message:    EventCourseCompleted,
+	}
+	
+	// Add details
+	details := map[string]interface{}{
+		"course_id":     course.Id,
+		"course_name":   course.Name,
+		"enrollment_id": enrollment.Id,
+		"progress":      enrollment.Progress,
+	}
+	
+	detailsJSON, err := json.Marshal(details)
+	if err != nil {
+		return err
+	}
+	event.Details = string(detailsJSON)
+	
+	return AddEvent(&event, campaignId)
 }

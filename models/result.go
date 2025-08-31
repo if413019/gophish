@@ -139,6 +139,20 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
 				log.Errorf("Failed to enroll user in course: %v", err)
 			} else {
 				log.Infof("User %s automatically enrolled in course %d from campaign %d", r.Email, campaign.CourseId, r.CampaignId)
+				
+				// Create enrollment event for timeline
+				course, courseErr := GetCourse(campaign.CourseId, campaign.UserId)
+				if courseErr == nil {
+					_, eventErr := r.createEvent(EventCourseEnrolled, map[string]interface{}{
+						"course_id": campaign.CourseId,
+						"course_name": course.Name,
+						"enrollment_trigger": "Clicked Link",
+					})
+					if eventErr != nil {
+						log.Errorf("Failed to create enrollment event: %v", eventErr)
+					}
+				}
+				
 				// Send enrollment notification email
 				log.Infof("Sending enrollment notification to user: %s", r.Email)
 				err = r.sendEnrollmentNotification(user, campaign)
@@ -179,6 +193,20 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
 				log.Errorf("Failed to enroll user in course: %v", err)
 			} else {
 				log.Infof("User %s automatically enrolled in course %d from campaign %d (form submit)", r.Email, campaign.CourseId, r.CampaignId)
+				
+				// Create enrollment event for timeline
+				course, courseErr := GetCourse(campaign.CourseId, campaign.UserId)
+				if courseErr == nil {
+					_, eventErr := r.createEvent(EventCourseEnrolled, map[string]interface{}{
+						"course_id": campaign.CourseId,
+						"course_name": course.Name,
+						"enrollment_trigger": "Submitted Data",
+					})
+					if eventErr != nil {
+						log.Errorf("Failed to create enrollment event: %v", eventErr)
+					}
+				}
+				
 				// Send enrollment notification email
 				log.Infof("Sending enrollment notification to user: %s (form submit)", r.Email)
 				err = r.sendEnrollmentNotification(user, campaign)

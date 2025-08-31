@@ -49,6 +49,18 @@ var statuses = {
         icon: "fa-bullhorn",
         point: "ct-point-reported"
     },
+    "Course Enrolled": {
+        color: "#9b59b6",
+        label: "label-enrolled",
+        icon: "fa-graduation-cap",
+        point: "ct-point-enrolled"
+    },
+    "Course Completed": {
+        color: "#27ae60",
+        label: "label-completed",
+        icon: "fa-trophy",
+        point: "ct-point-completed"
+    },
     "Error": {
         color: "#6c7a89",
         label: "label-default",
@@ -397,6 +409,22 @@ function renderTimeline(data) {
                     if (deviceView) {
                         results += deviceView
                     }
+                }
+                if (event.message == "Course Enrolled") {
+                    results += '<div class="timeline-enrollment-details">'
+                    results += '<div class="enrollment-course-info">'
+                    results += '<strong>Course:</strong> ' + escapeHtml(details.course_name || 'Unknown Course') + '<br>'
+                    results += '<strong>Triggered by:</strong> ' + escapeHtml(details.enrollment_trigger || 'Unknown') + '<br>'
+                    results += '<strong>Course ID:</strong> ' + escapeHtml(details.course_id || 'N/A')
+                    results += '</div></div>'
+                }
+                if (event.message == "Course Completed") {
+                    results += '<div class="timeline-completion-details">'
+                    results += '<div class="completion-course-info">'
+                    results += '<strong>Course:</strong> ' + escapeHtml(details.course_name || 'Unknown Course') + '<br>'
+                    results += '<strong>Progress:</strong> ' + escapeHtml(details.progress || '0') + '%<br>'
+                    results += '<strong>Course ID:</strong> ' + escapeHtml(details.course_id || 'N/A')
+                    results += '</div></div>'
                 }
                 if (event.message == "Submitted Data") {
                     results += '<div class="timeline-replay-button"><button onclick="replay(' + i + ')" class="btn btn-success">'

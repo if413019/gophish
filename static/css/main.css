@@ -602,6 +602,56 @@ td.details-control {
     font-size: 1.5em;
 }
 
+.timeline-enrollment-details {
+    font-size: 0.9em;
+    margin-top: 10px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #9b59b6;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.enrollment-course-info {
+    color: #495057;
+}
+
+.enrollment-course-info strong {
+    color: #9b59b6;
+}
+
+.label-enrolled {
+    background-color: #9b59b6 !important;
+}
+
+.ct-point-enrolled {
+    fill: #9b59b6 !important;
+}
+
+.timeline-completion-details {
+    font-size: 0.9em;
+    margin-top: 10px;
+    background-color: #f8fff8;
+    border-left: 4px solid #27ae60;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.completion-course-info {
+    color: #495057;
+}
+
+.completion-course-info strong {
+    color: #27ae60;
+}
+
+.label-completed {
+    background-color: #27ae60 !important;
+}
+
+.ct-point-completed {
+    fill: #27ae60 !important;
+}
+
 i.fa-vendor-icon {
     font-size: .6em;
 }

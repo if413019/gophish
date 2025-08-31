@@ -1,89 +1,311 @@
 {{define "body"}}
-<!-- Custom layout for course preview without sidebar -->
-<div class="container-fluid full-width-preview"
-    style="padding: 0; margin: 0; width: 100%; height: 100vh; overflow-x: hidden;">
-<!-- Override the nav sidebar for preview mode -->
+<div class="main">
+<div class="user-course-detail">
 <style>
-/* Hide admin sidebar completely */
-.sidebar { 
-    display: none !important; 
-    visibility: hidden !important;
-    width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
+/* Modern course preview styling matching user dashboard */
+.user-course-detail {
+    padding: 2rem;
+    background: #f8f9fa;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Reset main content area */
-.main { 
-    margin-left: 0 !important; 
-    padding: 0 !important; 
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-/* Override container layout */
-.container-fluid .row {
-    margin: 0 !important;
+.course-title-section {
+    flex: 1;
 }
 
-.col-sm-3, .col-md-2 {
-    display: none !important;
+.course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 1rem 0;
+    line-height: 1.2;
 }
 
-/* Fix body layout */
-body { 
-    margin: 0; 
-    padding: 0; 
-    overflow-x: hidden;
+.course-description {
+    color: #4a5568;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin: 0;
 }
 
-/* Fix for header overlap */
-.full-width-preview {
-    margin-top: 70px !important; /* Account for fixed header height */
-    padding-top: 20px;
+.course-meta {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.back-button {
+    margin-left: auto;
+}
+
+.progress-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    align-self: center;
+}
+
+.progress-circle {
     position: relative;
-    z-index: 1;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(from 0deg, #667eea 0%, #764ba2 var(--progress, 0%), #e2e8f0 var(--progress, 0%), #e2e8f0 100%);
+    border-radius: 50%;
 }
 
-.full-width-preview .alert-info {
-    margin-bottom: 20px;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
+.progress-inner {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Ensure content is visible */
-.html-content {
-    display: block !important;
-    visibility: visible !important;
+.progress-text {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
 }
 
-/* Module display control */
-.course-module {
+.progress-label {
+    font-size: 0.85rem;
+    color: #718096;
+    text-align: center;
+}
+
+/* Main content layout */
+.course-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.modules-sidebar {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.module-nav-item {
+    display: block;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #4a5568;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.module-nav-item:hover {
+    background: #f7fafc;
+    border-color: #667eea;
+    text-decoration: none;
+    color: #2d3748;
+}
+
+.module-nav-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+}
+
+.module-nav-item.completed {
+    background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+    border-color: #45b7d1;
+    color: white;
+}
+
+.module-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.module-status {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* Main content area */
+.course-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.content-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8f9fa;
+}
+
+.module-header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+}
+
+.module-actions {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
     display: none;
 }
 
+.course-module.active .module-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-modern {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-success-modern {
+    background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+    color: white;
+}
+
+.btn-success-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(69, 183, 209, 0.4);
+}
+
+/* Content display */
+.course-module {
+    display: none;
+    padding: 2rem;
+    position: relative;
+    min-height: 400px;
+}
+
 .course-module.active {
-    display: block !important;
+    display: block;
 }
 
-/* No default display rules - JavaScript will handle initial state */
-
-/* Force full width for preview content */
-.full-width-preview .col-md-3,
-.full-width-preview .col-md-9 {
-    width: 100% !important;
-    float: none !important;
-    padding: 15px;
+.html-content {
+    line-height: 1.7;
+    color: #2d3748;
+    padding-bottom: 80px; /* Space for floating button */
 }
 
-/* Adjust course navigation sidebar in preview */
-.full-width-preview .col-md-3 {
-    width: 25% !important;
-    float: right !important;
+/* Modern Alert Component for preview mode */
+.modern-alert {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    color: white;
+    box-shadow: 0 4px 20px rgba(78, 205, 196, 0.2);
+    position: relative;
+    overflow: hidden;
 }
 
-.full-width-preview .col-md-9 {
-    width: 75% !important;
-    float: left !important;
+.modern-alert-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.modern-alert-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.modern-alert-text {
+    flex: 1;
+}
+
+.modern-alert-text h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.modern-alert-text p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.9;
 }
 
 /* Corporate video player styles */
@@ -91,357 +313,290 @@ body {
     width: 100%;
     height: auto;
     background: #000;
-    border-radius: 4px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Hide fast-forward controls by customizing the video player */
+/* Hide fast-forward controls */
 .corporate-video::-webkit-media-controls-seek-forward-button,
 .corporate-video::-webkit-media-controls-seek-back-button {
     display: none !important;
 }
 
-.corporate-video::-webkit-media-controls-rewind-button,
-.corporate-video::-webkit-media-controls-return-to-realtime-button {
-    display: none !important;
+/* Panel and form styling */
+.panel-default {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin-bottom: 1rem;
 }
 
-/* Firefox controls */
-.corporate-video::-moz-media-controls .moz-media-controls-seek-forward,
-.corporate-video::-moz-media-controls .moz-media-controls-seek-back {
-    display: none !important;
+.panel-heading {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 12px 12px 0 0;
+    padding: 1rem 1.5rem;
 }
 
-/* Custom video overlay for additional control */
-.video-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    z-index: 10;
+.panel-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+    font-size: 1.1rem;
 }
 
-.video-container {
-    position: relative;
+.panel-body {
+    padding: 1.5rem;
 }
 
-/* Tab visibility warning */
-.tab-warning {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0,0,0,0.9);
-    color: white;
-    padding: 30px;
+.panel-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 0 0 12px 12px;
+    padding: 1rem 1.5rem;
+}
+
+.label {
+    border-radius: 6px;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.btn {
     border-radius: 8px;
-    display: none;
-    z-index: 9999;
-    text-align: center;
-    border: 2px solid #fff;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    max-width: 400px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+    border: none;
 }
 </style>
+
     {{ if .IsPreview }}
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="alert alert-info">
-                <div class="row">
-                    <div class="col-md-8">
-                        <i class="fa fa-eye"></i>
-                        <strong>Preview Mode:</strong> This is how the course will appear to users. This is for admin review only.
-                    </div>
-                    <div class="col-md-4 text-right">
-                        <a href="/courses" class="btn btn-sm btn-default">
-                            <i class="fa fa-arrow-left"></i> Back to Courses
-                        </a>
-                    </div>
-                </div>
+    <!-- Modern Preview Alert -->
+    <div class="modern-alert">
+        <div class="modern-alert-content">
+            <div class="modern-alert-icon">
+                <i class="fa fa-eye"></i>
             </div>
+            <div class="modern-alert-text">
+                <h4>Preview Mode</h4>
+                <p>This is how the course will appear to users. This is for admin review only.</p>
+            </div>
+        </div>
+        <div style="margin-top: 1rem;">
+            <a href="/courses" class="btn-modern btn-primary-modern">
+                <i class="fa fa-arrow-left"></i>
+                Back to Courses
+            </a>
         </div>
     </div>
     {{ end }}
-    
-    <!-- Course Header (Compact) -->
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="course-header" style="margin-bottom: 8px;">
-                <h2 style="margin-bottom: 8px;">{{ .Course.Name }}</h2>
-                {{ if .Course.Description }}
-                <p class="text-muted" style="margin-bottom: 0; font-size: 14px;">{{ .Course.Description }}</p>
-                {{ end }}
+
+    <!-- Modern Course Header -->
+    <div class="course-header">
+        <div class="course-title-section">
+            <h1 class="course-title">{{ .Course.Name }}</h1>
+            {{ if .Course.Description }}
+            <p class="course-description">{{ .Course.Description }}</p>
+            {{ end }}
+            
+            <!-- Course Meta Information -->
+            <div class="course-meta">
+                <div class="meta-item">
+                    <i class="fa fa-list-ol"></i>
+                    <span>{{ len .Course.Modules }} Modules</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fa fa-graduation-cap"></i>
+                    <span>Security Training</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fa fa-eye"></i>
+                    <span>Preview Mode</span>
+                </div>
             </div>
+        </div>
+        <div class="progress-section">
+            <div class="progress-circle" id="progressCircle">
+                <div class="progress-inner">
+                    <div class="progress-text" id="courseProgressText">0%</div>
+                </div>
+            </div>
+            <div class="progress-label">Course Progress</div>
         </div>
     </div>
     
-    <div class="row">
-        <div class="col-md-9">
+    <!-- Modern Content Grid -->
+    <div class="course-content-grid">
+        <!-- Main Content -->
+        <div class="course-content">
+            <div class="content-header">
+                <h2 class="module-header-title" id="currentModuleTitle">Select a module to preview</h2>
+            </div>
             
             <!-- Module Content Area -->
-            <div class="module-content-area">
-                {{ range $index, $module := .Course.Modules }}
-                <div class="course-module panel panel-default" data-module-id="{{ $module.Id }}" data-module-index="{{ $index }}">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            <span class="module-icon">
-                                {{ if eq $module.ModuleType "html" }}
-                                    <i class="fa fa-file-text-o"></i>
-                                {{ else if eq $module.ModuleType "video" }}
-                                    <i class="fa fa-play-circle"></i>
-                                {{ else if eq $module.ModuleType "presentation" }}
-                                    <i class="fa fa-bar-chart"></i>
-                                {{ else if eq $module.ModuleType "quiz" }}
-                                    <i class="fa fa-question-circle"></i>
-                                {{ end }}
-                            </span>
-                            {{ $module.Name }}
-                            <span class="label label-info module-type-label">{{ $module.ModuleType }}</span>
-                        </h3>
-                        {{ if $module.Description }}
-                        <p class="module-description">{{ $module.Description }}</p>
+            {{ range $index, $module := .Course.Modules }}
+            <div class="course-module" data-module-id="{{ $module.Id }}" data-module-index="{{ $index }}">
+                {{ if eq $module.ModuleType "html" }}
+                    <!-- HTML Content Module -->
+                    <div class="html-content">
+                        {{ if $module.Content }}
+                            {{ $module.Content | safehtml }}
+                        {{ else }}
+                            <div style="padding: 20px; text-align: center; color: #666;">
+                                <i class="fa fa-file-text-o fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+                                <h4>Security Awareness Training Module</h4>
+                                <p>This module contains important security awareness content to help protect you and your organization from cyber threats.</p>
+                                <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #007bff; text-align: left;">
+                                    <h5>Key Topics Covered:</h5>
+                                    <ul style="margin: 10px 0;">
+                                        <li>Recognizing phishing emails and suspicious links</li>
+                                        <li>Best practices for password security</li>
+                                        <li>Safe browsing and email habits</li>
+                                        <li>Reporting security incidents</li>
+                                    </ul>
+                                </div>
+                            </div>
                         {{ end }}
                     </div>
                     
-                    <div class="panel-body">
-                        {{ if eq $module.ModuleType "html" }}
-                            <!-- HTML Content Module -->
-                            <div class="html-content">
-                                {{ if $module.Content }}
-                                    {{ $module.Content | safehtml }}
-                                {{ else }}
-                                    <p><em>No content available for this module.</em></p>
-                                {{ end }}
-                            </div>
-                            
-                        {{ else if eq $module.ModuleType "video" }}
-                            <div class="video-container">
-                                {{ if $module.VideoFilePath }}
-                                <!-- Local video file with strict controls -->
-                                <video class="corporate-video" controls preload="metadata" data-min-time="{{ $module.MinTimeSpent }}" data-module-id="{{ $module.Id }}">
-                                    <source src="/api/courses/files/video/{{ base $module.VideoFilePath }}" type="{{ $module.MimeType }}">
-                                    Your browser does not support the video tag.
-                                </video>
-                                {{ else if $module.VideoURL }}
-                                <!-- External video URL -->
-                                <div class="embed-responsive embed-responsive-16by9">
-                                    <iframe class="embed-responsive-item" src="{{ $module.VideoURL }}" allowfullscreen></iframe>
-                                </div>
-                                {{ else }}
-                                <div class="alert alert-warning">
-                                    <i class="fa fa-exclamation-triangle"></i>
-                                    No video configured for this module.
-                                </div>
-                                {{ end }}
-                            </div>
-
-                            <!-- Video Module -->
-                            {{ if $module.Content }}
-                            <div class="video-guidelines">
-                                <h4>About this video:</h4>
-                                <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
-                            </div>
-                            {{ end }}
-                            
-                            {{ if $module.MinTimeSpent }}
-                            <div class="video-timer alert alert-info">
-                                <i class="fa fa-clock-o"></i>
-                                <strong>Minimum viewing time:</strong> {{ $module.MinTimeSpent }} seconds
-                            </div>
-                            {{ end }}
-                            
-                        {{ else if eq $module.ModuleType "presentation" }}
-                            <div class="presentation-container">
-                                {{ if $module.PresentationFilePath }}
-                                <!-- Local presentation file -->
-                                <div class="presentation-viewer">
-                                    <!-- PDF viewer for presentation files with custom settings -->
-                                    <div class="pdf-embed">
-                                        <iframe src="/api/courses/files/presentation/{{ base $module.PresentationFilePath }}#toolbar=1&navpanes=0&scrollbar=1&zoom=80&view=FitH" 
-                                                width="100%" height="700px" style="border: 1px solid #ddd; border-radius: 4px;">
-                                        </iframe>
-                                    </div>
-                                </div>
-                                {{ else if $module.PresentationURL }}
-                                <!-- External presentation URL -->
-                                <div class="embed-responsive embed-responsive-16by9">
-                                    <iframe class="embed-responsive-item" src="{{ $module.PresentationURL }}" allowfullscreen></iframe>
-                                </div>
-                                {{ else }}
-                                <div class="alert alert-warning">
-                                    <i class="fa fa-exclamation-triangle"></i>
-                                    No presentation configured for this module.
-                                </div>
-                                {{ end }}
-                            </div>
-
-                            <!-- Presentation Module -->
-                            {{ if $module.Content }}
-                            <div class="presentation-guidelines">
-                                <h4>About this presentation:</h4>
-                                <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
-                            </div>
-                            {{ end }}
-                            
-                        {{ else if eq $module.ModuleType "quiz" }}
-                            <!-- Quiz Module -->
-                            {{ if $module.Content }}
-                            <div class="quiz-guidelines">
-                                <h4>Quiz Instructions:</h4>
-                                <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
-                            </div>
-                            {{ end }}
-                            
-                            <div class="quiz-container">
-                                <!-- Find linked quiz -->
-                                {{ range $.Course.Quizzes }}
-                                    {{ if eq .ModuleId $module.Id }}
-                                    <div class="quiz-info alert alert-info">
-                                        <h4><i class="fa fa-question-circle"></i> {{ .Name }}</h4>
-                                        {{ if .Description }}
-                                        <p>{{ .Description }}</p>
-                                        {{ end }}
-                                        <ul class="quiz-details">
-                                            {{ if .PassingScore }}<li><strong>Passing Score:</strong> {{ .PassingScore }}%</li>{{ end }}
-                                            {{ if .TimeLimit }}<li><strong>Time Limit:</strong> {{ .TimeLimit }} minutes</li>{{ end }}
-                                            {{ if .MaxAttempts }}<li><strong>Maximum Attempts:</strong> {{ .MaxAttempts }}</li>{{ end }}
-                                            <li><strong>Questions:</strong> {{ len .Questions }}</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="quiz-questions">
-                                        {{ range $qIndex, $question := .Questions }}
-                                        <div class="question-preview panel panel-default">
-                                            <div class="panel-heading">
-                                                <h5>Question {{ add $qIndex 1 }} 
-                                                    <span class="label label-default">{{ $question.QuestionType }}</span>
-                                                    {{ if $question.Points }}<span class="label label-primary">{{ $question.Points }} pts</span>{{ end }}
-                                                </h5>
-                                            </div>
-                                            <div class="panel-body">
-                                                <p><strong>{{ $question.Question }}</strong></p>
-                                                
-                                                {{ if $question.Options }}
-                                                <div class="question-options">
-                                                    {{ range $option := $question.Options }}
-                                                    <div class="option">
-                                                        <label class="radio-inline">
-                                                            <input type="radio" name="q{{ $qIndex }}" disabled>
-                                                            {{ $option.Option }}
-                                                            {{ if $option.IsCorrect }}
-                                                            <span class="label label-success">Correct</span>
-                                                            {{ end }}
-                                                        </label>
-                                                    </div>
-                                                    {{ end }}
-                                                </div>
-                                                {{ end }}
-                                                
-                                                {{ if $question.Explanation }}
-                                                <div class="question-explanation alert alert-info">
-                                                    <strong>Explanation:</strong> {{ $question.Explanation }}
-                                                </div>
-                                                {{ end }}
-                                            </div>
-                                        </div>
-                                        {{ end }}
-                                    </div>
-                                    {{ end }}
-                                {{ end }}
-                            </div>
-                        {{ end }}
-                        
-                        <!-- Module Completion Requirements -->
-                        {{ if $module.MustComplete }}
-                        <div class="completion-requirements alert alert-warning">
-                            <i class="fa fa-exclamation-circle"></i>
-                            <strong>Required:</strong> This module must be completed to proceed to the next module.
-                            {{ if $module.MinTimeSpent }}
-                            <br><strong>Minimum time:</strong> {{ $module.MinTimeSpent }} seconds
-                            {{ end }}
+                {{ else if eq $module.ModuleType "video" }}
+                    <div class="video-container">
+                        {{ if $module.VideoFilePath }}
+                        <!-- Local video file with strict controls -->
+                        <video class="corporate-video" controls preload="metadata" data-min-time="{{ $module.MinTimeSpent }}" data-module-id="{{ $module.Id }}">
+                            <source src="/api/courses/files/video/{{ base $module.VideoFilePath }}" type="{{ $module.MimeType }}">
+                            Your browser does not support the video tag.
+                        </video>
+                        {{ else if $module.VideoURL }}
+                        <!-- External video URL -->
+                        <div class="embed-responsive embed-responsive-16by9">
+                            <iframe class="embed-responsive-item" src="{{ $module.VideoURL }}" allowfullscreen></iframe>
+                        </div>
+                        {{ else }}
+                        <div style="padding: 20px; text-align: center; color: #666; background: #f8f9fa;">
+                            <i class="fa fa-play-circle fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+                            <h4>Security Awareness Video</h4>
+                            <p>This video module will help you understand important security concepts and best practices.</p>
                         </div>
                         {{ end }}
                     </div>
+
+                    <!-- Video Module -->
+                    {{ if $module.Content }}
+                    <div class="video-guidelines">
+                        <h4>About this video:</h4>
+                        <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
+                    </div>
+                    {{ end }}
                     
-                    <div class="panel-footer">
-                        <div class="module-navigation">
-                            {{ if ne $index 0 }}
-                            <button class="btn btn-default prev-module" data-target="{{ sub $index 1 }}">
-                                <i class="fa fa-arrow-left"></i> Previous
-                            </button>
-                            {{ end }}
-                            
-                            {{ if lt $index (sub (len $.Course.Modules) 1) }}
-                            <button class="btn btn-primary next-module pull-right" data-target="{{ add $index 1 }}">
-                                Next <i class="fa fa-arrow-right"></i>
-                            </button>
-                            {{ else }}
-                            <button class="btn btn-success complete-course pull-right">
-                                <i class="fa fa-check"></i> Complete Course
-                            </button>
-                            {{ end }}
+                {{ else if eq $module.ModuleType "presentation" }}
+                    <div class="presentation-container">
+                        {{ if $module.PresentationFilePath }}
+                        <!-- Local presentation file -->
+                        <div class="presentation-viewer">
+                            <div class="pdf-embed">
+                                <iframe src="/api/courses/files/presentation/{{ base $module.PresentationFilePath }}#toolbar=1&navpanes=0&scrollbar=1&zoom=80&view=FitH" 
+                                        width="100%" height="700px" style="border: 1px solid #ddd; border-radius: 4px;">
+                                </iframe>
+                            </div>
+                        </div>
+                        {{ else if $module.PresentationURL }}
+                        <!-- External presentation URL -->
+                        <div class="embed-responsive embed-responsive-16by9">
+                            <iframe class="embed-responsive-item" src="{{ $module.PresentationURL }}" allowfullscreen></iframe>
+                        </div>
+                        {{ else }}
+                        <div style="padding: 20px; text-align: center; color: #666; background: #f8f9fa;">
+                            <i class="fa fa-bar-chart fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+                            <h4>Security Training Presentation</h4>
+                            <p>This presentation covers essential security awareness topics.</p>
+                        </div>
+                        {{ end }}
+                    </div>
+
+                    <!-- Presentation Module -->
+                    {{ if $module.Content }}
+                    <div class="presentation-guidelines">
+                        <h4>About this presentation:</h4>
+                        <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
+                    </div>
+                    {{ end }}
+                    
+                {{ else if eq $module.ModuleType "quiz" }}
+                    <!-- Quiz Module -->
+                    {{ if $module.Content }}
+                    <div class="quiz-guidelines">
+                        <h4>Quiz Instructions:</h4>
+                        <div class="guidelines-content">{{ $module.Content | safehtml }}</div>
+                    </div>
+                    {{ end }}
+
+                    <div style="padding: 20px; text-align: center; color: #666; background: #f8f9fa;">
+                        <i class="fa fa-question-circle fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+                        <h4>Knowledge Check Quiz</h4>
+                        <p>Test your understanding of the security concepts covered in this course.</p>
+                        <div class="modern-alert" style="margin: 20px 0;">
+                            <div class="modern-alert-content">
+                                <div class="modern-alert-icon">
+                                    <i class="fa fa-info-circle"></i>
+                                </div>
+                                <div class="modern-alert-text">
+                                    <p>Complete the previous modules before taking this quiz.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                {{ end }}
+                
+                <!-- Module Navigation -->
+                <div class="module-actions">
+                    {{ if ne $index 0 }}
+                    <button class="btn-modern btn-primary-modern prev-module" data-target="{{ sub $index 1 }}">
+                        <i class="fa fa-arrow-left"></i> Previous
+                    </button>
+                    {{ end }}
+                    
+                    {{ if lt $index (sub (len $.Course.Modules) 1) }}
+                    <button class="btn-modern btn-primary-modern next-module" data-target="{{ add $index 1 }}">
+                        Next <i class="fa fa-arrow-right"></i>
+                    </button>
+                    {{ else }}
+                    <button class="btn-modern btn-success-modern complete-course">
+                        <i class="fa fa-check"></i> Course Preview Complete
+                    </button>
+                    {{ end }}
                 </div>
+            </div>
+            {{ end }}
+        </div>
+        
+        <!-- Modules Sidebar -->
+        <div class="modules-sidebar">
+            <div class="sidebar-title">
+                <i class="fa fa-list"></i>
+                Course Modules
+            </div>
+            <div class="modules-nav">
+                {{ range $index, $module := .Course.Modules }}
+                <a href="#" class="module-nav-item" data-module-id="{{ $module.Id }}" data-index="{{ $index }}">
+                    <div class="module-title">{{ add $index 1 }}. {{ $module.Name }}</div>
+                    <div class="module-status">Preview Mode</div>
+                </a>
                 {{ end }}
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <!-- Course Navigation Sidebar -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <i class="fa fa-book"></i> Course Navigation
-                    </h4>
-                </div>
-                <div class="panel-body">
-                    <div class="course-progress">
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-success" style="width: 0%">
-                                <span class="sr-only">0% Complete</span>
-                            </div>
-                        </div>
-                        <small>0% Complete</small>
-                    </div>
-                    
-                    <div class="module-list">
-                        {{ range $index, $module := .Course.Modules }}
-                        <div class="module-nav-item" data-module-id="{{ $module.Id }}" data-index="{{ $index }}">
-                            <div class="module-nav-header">
-                                <span class="module-number">{{ add $index 1 }}</span>
-                                <span class="module-icon">
-                                    {{ if eq $module.ModuleType "html" }}
-                                        <i class="fa fa-file-text-o"></i>
-                                    {{ else if eq $module.ModuleType "video" }}
-                                        <i class="fa fa-play-circle"></i>
-                                    {{ else if eq $module.ModuleType "presentation" }}
-                                        <i class="fa fa-bar-chart"></i>
-                                    {{ else if eq $module.ModuleType "quiz" }}
-                                        <i class="fa fa-question-circle"></i>
-                                    {{ end }}
-                                </span>
-                                <span class="module-name">{{ $module.Name }}</span>
-                                <span class="module-status pull-right">
-                                    <i class="fa fa-circle-o text-muted"></i>
-                                </span>
-                            </div>
-                            {{ if $module.Description }}
-                            <div class="module-description">{{ $module.Description }}</div>
-                            {{ end }}
-                        </div>
-                        {{ end }}
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
+</div>
 </div>
 {{end}}
 
@@ -451,38 +606,28 @@ $(document).ready(function() {
     var currentModule = 0;
     var totalModules = {{ len .Course.Modules }};
     
-    // Helper functions for template math
-    function add(a, b) { return a + b; }
-    function sub(a, b) { return a - b; }
-    
     // Module navigation - using event delegation
     $(document).on('click', '.module-nav-item', function(e) {
         e.preventDefault();
         var targetIndex = $(this).data('index');
-        console.log('Sidebar nav clicked, target index:', targetIndex);
         showModule(targetIndex);
     });
     
     $(document).on('click', '.next-module', function(e) {
         e.preventDefault();
         var targetIndex = $(this).data('target');
-        console.log('Next button clicked, target index:', targetIndex);
         showModule(targetIndex);
     });
     
     $(document).on('click', '.prev-module', function(e) {
         e.preventDefault();
         var targetIndex = $(this).data('target');
-        console.log('Previous button clicked, target index:', targetIndex);
         showModule(targetIndex);
     });
     
     function showModule(index) {
-        console.log('Switching to module index:', index);
-        
         // Validate index
         if (index < 0 || index >= totalModules) {
-            console.error('Invalid module index:', index);
             return;
         }
         
@@ -494,337 +639,32 @@ $(document).ready(function() {
         
         // Show target module with active class
         var targetModule = $('.course-module').eq(index);
-        var moduleId = targetModule.attr('data-module-id');
-        console.log('Showing module:', moduleId, 'Element:', targetModule.length, 'Index:', index);
-        
-        if (!moduleId) {
-            console.error('Module ID is undefined for index:', index, 'Element:', targetModule[0]);
-            console.error('All module elements:');
-            $('.course-module').each(function(i) {
-                console.error('  Index', i, 'ID:', $(this).attr('data-module-id'), 'Type:', $(this).attr('data-module-index'));
-            });
-        }
-        
         targetModule.addClass('active');
         
         // Update navigation active state
         $('.module-nav-item').eq(index).addClass('active');
         
-        // Update progress bar
+        // Update header title
+        var moduleName = $('.module-nav-item').eq(index).find('.module-title').text();
+        $('#currentModuleTitle').text(moduleName);
+        
+        // Update progress circle
         var progress = ((index + 1) / totalModules) * 100;
-        $('.progress-bar').css('width', progress + '%');
-        $('.progress').next('small').text(Math.round(progress) + '% Complete');
+        $('#progressCircle').css('--progress', progress + '%');
+        $('#courseProgressText').text(Math.round(progress) + '%');
         
         // Update current module tracker
         currentModule = index;
-        
-        console.log('Module switch complete. Current module:', currentModule);
     }
     
-    // Initialize first module after a short delay to ensure DOM is ready
+    // Initialize first module
     setTimeout(function() {
         showModule(0);
     }, 100);
     
     $('.complete-course').click(function() {
-        alert('Course completed! In the actual implementation, this would record completion and redirect.');
+        alert('Course preview completed! This shows how the course will appear to users.');
     });
-    
-    // Strict video controls implementation
-    function initCorporateVideoControls() {
-        var videos = $('.corporate-video');
-        var isPageVisible = true;
-        var videoStates = {};
-        
-        // Create tab visibility warning
-        if ($('.tab-warning').length === 0) {
-            $('body').append('<div class="tab-warning"><h3>Video Paused</h3><p>Please return to this tab to continue watching the video.<br>Videos cannot be played in background tabs.</p></div>');
-        }
-        
-        videos.each(function(index) {
-            var video = this;
-            var $video = $(video);
-            var videoId = $video.data('module-id') || 'video-' + index;
-            var minTime = parseInt($video.data('min-time')) || 0;
-            var startTime = 0;
-            var totalWatchTime = 0;
-            var lastPosition = 0;
-            
-            // Initialize video state
-            videoStates[videoId] = {
-                watchTime: 0,
-                minTime: minTime,
-                completed: false,
-                lastPosition: 0
-            };
-            
-            // Disable right-click context menu
-            $video.on('contextmenu', function(e) {
-                e.preventDefault();
-                return false;
-            });
-            
-            // Disable keyboard shortcuts for seeking
-            $video.on('keydown', function(e) {
-                var key = e.which || e.keyCode;
-                // Disable arrow keys (left: 37, right: 39), space (32), home (36), end (35)
-                if ([37, 39, 32, 36, 35].indexOf(key) !== -1) {
-                    e.preventDefault();
-                    return false;
-                }
-            });
-            
-            // Track watch time
-            video.addEventListener('timeupdate', function() {
-                if (isPageVisible && !video.paused) {
-                    var currentTime = video.currentTime;
-                    
-                    // Only count if playing forward (prevent seeking back)
-                    if (currentTime > lastPosition) {
-                        totalWatchTime += (currentTime - lastPosition);
-                        videoStates[videoId].watchTime = totalWatchTime;
-                    }
-                    
-                    lastPosition = currentTime;
-                    videoStates[videoId].lastPosition = currentTime;
-                    
-                    // Check if minimum time is reached
-                    if (minTime > 0 && totalWatchTime >= minTime) {
-                        videoStates[videoId].completed = true;
-                    }
-                }
-            });
-            
-            // Prevent seeking by monitoring position changes
-            video.addEventListener('seeked', function() {
-                var currentTime = video.currentTime;
-                var lastPos = videoStates[videoId].lastPosition;
-                
-                // If user seeks forward more than 2 seconds, reset to last position
-                if (currentTime > lastPos + 2) {
-                    video.currentTime = lastPos;
-                    alert('Fast-forwarding is not allowed. Please watch the entire video.');
-                }
-                // If user seeks backward, allow it but don't count the rewatched time
-                else if (currentTime < lastPos) {
-                    lastPosition = currentTime;
-                    videoStates[videoId].lastPosition = currentTime;
-                }
-            });
-            
-            // Handle playback rate changes (prevent speed adjustment)
-            video.addEventListener('ratechange', function() {
-                if (video.playbackRate !== 1.0) {
-                    video.playbackRate = 1.0;
-                    alert('Changing playback speed is not allowed.');
-                }
-            });
-            
-            // Pause when video loses focus
-            video.addEventListener('blur', function() {
-                if (!video.paused) {
-                    video.pause();
-                }
-            });
-        });
-        
-        // Page visibility detection
-        function handleVisibilityChange() {
-            var wasVisible = isPageVisible;
-            
-            if (document.hidden || document.webkitHidden || document.mozHidden || document.msHidden) {
-                isPageVisible = false;
-                var hadActiveVideo = false;
-                // Pause all videos when tab becomes hidden
-                videos.each(function() {
-                    if (!this.paused) {
-                        this.pause();
-                        hadActiveVideo = true;
-                    }
-                });
-                // Show warning if we're in a video module and there was a playing video
-                var isVideo = isCurrentModuleVideo();
-                console.log('Tab hidden - isVideo:', isVideo, 'hadActiveVideo:', hadActiveVideo);
-                if (isVideo && hadActiveVideo) {
-                    console.log('Showing video warning popup');
-                    $('.tab-warning').show();
-                } else {
-                    console.log('Not showing popup - isVideo:', isVideo, 'hadActiveVideo:', hadActiveVideo);
-                }
-            } else {
-                isPageVisible = true;
-                $('.tab-warning').hide();
-                
-                // Auto-resume is not allowed - user must manually click play
-                // This ensures they are actively watching
-            }
-        }
-        
-        // Listen for page visibility changes
-        document.addEventListener('visibilitychange', handleVisibilityChange, false);
-        document.addEventListener('webkitvisibilitychange', handleVisibilityChange, false);
-        document.addEventListener('mozvisibilitychange', handleVisibilityChange, false);
-        document.addEventListener('msvisibilitychange', handleVisibilityChange, false);
-        
-        // Helper function to check if current module is a video module
-        function isCurrentModuleVideo() {
-            var currentModule = $('.course-module.active');
-            return currentModule.find('.corporate-video').length > 0;
-        }
-        
-        // Window focus/blur events as backup
-        $(window).on('focus', function() {
-            isPageVisible = true;
-            $('.tab-warning').hide();
-        }).on('blur', function() {
-            isPageVisible = false;
-            var hadActiveVideo = false;
-            videos.each(function() {
-                if (!this.paused) {
-                    this.pause();
-                    hadActiveVideo = true;
-                }
-            });
-            // Show warning if we're in a video module and there was a playing video
-            var isVideo = isCurrentModuleVideo();
-            console.log('Window blur - isVideo:', isVideo, 'hadActiveVideo:', hadActiveVideo);
-            if (isVideo && hadActiveVideo) {
-                console.log('Showing video warning popup (blur)');
-                $('.tab-warning').show();
-            } else {
-                console.log('Not showing popup (blur) - isVideo:', isVideo, 'hadActiveVideo:', hadActiveVideo);
-            }
-        });
-    }
-    
-    // Initialize corporate video controls after modules are loaded
-    setTimeout(function() {
-        initCorporateVideoControls();
-    }, 500);
 });
 </script>
-
-<style>
-.full-width-preview {
-    padding: 0;
-}
-
-.full-width-preview .row {
-    margin: 0;
-}
-
-.full-width-preview .col-md-3, 
-.full-width-preview .col-md-9 {
-    padding: 15px;
-}
-
-.course-header {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.html-content {
-    line-height: 1.6;
-}
-
-.html-content h1, .html-content h2, .html-content h3 {
-    color: #333;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-.html-content .alert {
-    margin: 15px 0;
-}
-
-.html-content ul, .html-content ol {
-    margin: 10px 0;
-    padding-left: 30px;
-}
-
-.module-nav-item {
-    padding: 10px;
-    margin-bottom: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.module-nav-item:hover {
-    background-color: #f5f5f5;
-}
-
-.module-nav-item.active {
-    background-color: #337ab7;
-    color: white;
-    border-color: #2e6da4;
-}
-
-.module-nav-header {
-    font-weight: bold;
-}
-
-.module-number {
-    background-color: #ccc;
-    color: #333;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: inline-block;
-    text-align: center;
-    line-height: 24px;
-    font-size: 12px;
-    margin-right: 8px;
-}
-
-.module-nav-item.active .module-number {
-    background-color: #fff;
-    color: #337ab7;
-}
-
-.module-description {
-    font-size: 12px;
-    color: #666;
-    margin-top: 5px;
-}
-
-.module-nav-item.active .module-description {
-    color: #ccc;
-}
-
-.module-type-label {
-    text-transform: capitalize;
-}
-
-.video-container, .presentation-container {
-    margin: 20px 0;
-}
-
-.quiz-details {
-    margin: 10px 0;
-    padding-left: 20px;
-}
-
-.question-preview {
-    margin-bottom: 15px;
-}
-
-.question-options .option {
-    margin: 5px 0;
-}
-
-.completion-requirements {
-    margin-top: 15px;
-}
-
-.course-progress {
-    margin-bottom: 20px;
-}
-
-.module-navigation {
-    overflow: hidden;
-}
-</style>
 {{end}}
