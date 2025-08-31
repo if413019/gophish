@@ -1,63 +1,459 @@
 {{define "body"}}
-<!-- User course view with sidebar visible -->
 <div class="main">
-<div class="container-fluid course-view"
-    style="padding: 20px; margin: 0; width: 100%; min-height: 100vh;">
-<!-- Course view specific styles -->
+<div class="user-course-detail">
 <style>
-/* Ensure main content area works with sidebar */
-.course-view .main { 
-    margin-left: 256px; 
-    padding: 20px; 
+/* Modern course detail styling matching user dashboard */
+.user-course-detail {
+    padding: 2rem;
+    background: #f8f9fa;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Override container layout */
-.container-fluid .row {
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.course-title-section {
+    flex: 1;
+}
+
+.course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 1rem 0;
+    line-height: 1.2;
+}
+
+.course-description {
+    color: #4a5568;
+    font-size: 1.2rem;
+    line-height: 1.6;
     margin: 0;
 }
 
-/* Course content area styling */
-.course-view {
+.course-meta {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.back-button {
+    margin-left: auto;
+}
+
+.progress-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    align-self: center;
+}
+
+.progress-circle {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(from 0deg, #667eea 0%, #764ba2 var(--progress, 0%), #e2e8f0 var(--progress, 0%), #e2e8f0 100%);
+    border-radius: 50%;
+}
+
+.progress-inner {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-text {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.progress-label {
+    font-size: 0.85rem;
+    color: #718096;
+    text-align: center;
+}
+
+/* Main content layout */
+.course-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.modules-sidebar {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.module-nav-item {
+    display: block;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #4a5568;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.module-nav-item:hover {
+    background: #f7fafc;
+    border-color: #667eea;
+    text-decoration: none;
+    color: #2d3748;
+}
+
+.module-nav-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+}
+
+.module-nav-item.locked {
     background: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-color: #e2e8f0;
+    color: #a0aec0;
+    cursor: not-allowed;
 }
 
-.course-view .alert-info {
-    margin-bottom: 20px;
-    border-radius: 6px;
+.module-nav-item.completed {
+    background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+    border-color: #45b7d1;
+    color: white;
 }
 
-/* Ensure content is visible */
-.html-content {
-    display: block !important;
-    visibility: visible !important;
+.module-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
 }
 
-/* Module display control */
-.course-module {
+.module-status {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* Main content area */
+.course-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.content-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8f9fa;
+}
+
+.module-header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+}
+
+.module-actions {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
     display: none;
 }
 
+.course-module.active .module-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-modern {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-success-modern {
+    background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+    color: white;
+}
+
+.btn-success-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(69, 183, 209, 0.4);
+}
+
+/* Content display */
+.course-module {
+    display: none;
+    padding: 2rem;
+    position: relative;
+    min-height: 400px;
+}
+
 .course-module.active {
-    display: block !important;
+    display: block;
 }
 
-/* Course layout adjustments */
-.course-view .col-md-3,
-.course-view .col-md-9 {
-    padding: 15px;
+.html-content {
+    line-height: 1.7;
+    color: #2d3748;
+    padding-bottom: 80px; /* Space for floating button */
 }
 
-/* Course navigation sidebar */
-.course-view .col-md-3 {
-    width: 25%;
-    float: right;
+/* Modern Video Timer Component */
+.video-timer-component {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    color: white;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+    position: relative;
+    overflow: hidden;
 }
 
-.course-view .col-md-9 {
-    width: 75%;
-    float: left;
+.video-timer-component::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        rgba(255,255,255,0.3) 0%, 
+        rgba(255,255,255,0.6) 50%, 
+        rgba(255,255,255,0.3) 100%);
+    animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.video-timer-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.video-timer-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.video-timer-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: white;
+}
+
+.video-timer-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.video-timer-text {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.video-timer-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.video-timer-progress {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.video-timer-progress-bar {
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+/* Alternative Warning Style */
+.video-timer-component.warning {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.2);
+}
+
+/* Alternative Success Style */  
+.video-timer-component.success {
+    background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+    box-shadow: 0 4px 20px rgba(69, 183, 209, 0.2);
+}
+
+/* Alternative Info Style */
+.video-timer-component.info {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+    box-shadow: 0 4px 20px rgba(78, 205, 196, 0.2);
+}
+
+/* General Modern Alert Component (reusable) */
+.modern-alert {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    color: white;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.modern-alert.alert-info {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+    box-shadow: 0 4px 20px rgba(78, 205, 196, 0.2);
+}
+
+.modern-alert.alert-success {
+    background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+    box-shadow: 0 4px 20px rgba(69, 183, 209, 0.2);
+}
+
+.modern-alert.alert-warning {
+    background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+    box-shadow: 0 4px 20px rgba(254, 202, 87, 0.2);
+}
+
+.modern-alert.alert-danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.2);
+}
+
+.modern-alert-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.modern-alert-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.modern-alert-text {
+    flex: 1;
+}
+
+.modern-alert-text h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.modern-alert-text p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.9;
 }
 
 /* Corporate video player styles */
@@ -65,7 +461,8 @@
     width: 100%;
     height: auto;
     background: #000;
-    border-radius: 4px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Hide fast-forward controls by customizing the video player */
@@ -189,66 +586,57 @@
 }
 </style>
 
-    <!-- User Course Banner -->
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="alert alert-info">
-                <div class="row">
-                    <div class="col-md-8">
-                        <i class="fa fa-graduation-cap"></i>
-                        <strong>Course Learning:</strong> Complete each module in order to track your progress.
-                    </div>
-                    <div class="col-md-4 text-right">
-                        <a href="/user/courses" class="btn btn-sm btn-default">
-                            <i class="fa fa-arrow-left"></i> Back to My Courses
-                        </a>
-                    </div>
+    <!-- Modern Course Header -->
+    <div class="course-header">
+        <div class="course-title-section">
+            <h1 class="course-title">{{ .Course.Name }}</h1>
+            {{ if .Course.Description }}
+            <p class="course-description">{{ .Course.Description }}</p>
+            {{ end }}
+            
+            <!-- Course Meta Information -->
+            <div class="course-meta">
+                <div class="meta-item">
+                    <i class="fa fa-list-ol"></i>
+                    <span>{{ len .Course.Modules }} Modules</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fa fa-graduation-cap"></i>
+                    <span>Security Training</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fa fa-clock-o"></i>
+                    <span>Self-paced Learning</span>
+                </div>
+                <div class="back-button">
+                    <a href="/user/courses" class="btn-modern btn-primary-modern">
+                        <i class="fa fa-arrow-left"></i>
+                        Back to Courses
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Course Header (Compact) -->
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="course-header" style="margin-bottom: 8px;">
-                <h2 style="margin-bottom: 8px;">{{ .Course.Name }}</h2>
-                {{ if .Course.Description }}
-                <p class="text-muted" style="margin-bottom: 0; font-size: 14px;">{{ .Course.Description }}</p>
-                {{ end }}
+        <div class="progress-section">
+            <div class="progress-circle" id="progressCircle">
+                <div class="progress-inner">
+                    <div class="progress-text" id="courseProgressText">0%</div>
+                </div>
             </div>
+            <div class="progress-label">Course Progress</div>
         </div>
     </div>
     
-    <div class="row">
-        <div class="col-md-9">
+    <!-- Modern Content Grid -->
+    <div class="course-content-grid">
+        <!-- Main Content -->
+        <div class="course-content">
+            <div class="content-header">
+                <h2 class="module-header-title" id="currentModuleTitle">Select a module to start learning</h2>
+            </div>
             
             <!-- Module Content Area -->
-            <div class="module-content-area">
-                {{ range $index, $module := .Course.Modules }}
-                <div class="course-module panel panel-default" data-module-id="{{ $module.Id }}" data-module-index="{{ $index }}">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            <span class="module-icon">
-                                {{ if eq $module.ModuleType "html" }}
-                                    <i class="fa fa-file-text-o"></i>
-                                {{ else if eq $module.ModuleType "video" }}
-                                    <i class="fa fa-play-circle"></i>
-                                {{ else if eq $module.ModuleType "presentation" }}
-                                    <i class="fa fa-bar-chart"></i>
-                                {{ else if eq $module.ModuleType "quiz" }}
-                                    <i class="fa fa-question-circle"></i>
-                                {{ end }}
-                            </span>
-                            Module {{ add $index 1 }}: {{ $module.Name }}
-                            <span class="label label-info module-type-label">{{ $module.ModuleType }}</span>
-                        </h3>
-                        {{ if $module.Description }}
-                        <p class="module-description">{{ $module.Description }}</p>
-                        {{ end }}
-                    </div>
-                    
-                    <div class="panel-body">
+            {{ range $index, $module := .Course.Modules }}
+            <div class="course-module" data-module-id="{{ $module.Id }}" data-module-index="{{ $index }}">
                         {{ if eq $module.ModuleType "html" }}
                             <!-- HTML Content Module -->
                             <div class="html-content">
@@ -274,6 +662,28 @@
                             
                         {{ else if eq $module.ModuleType "video" }}
                             <div class="video-container">
+                                <!-- Modern Video Timer Component -->
+                                <div class="video-timer-component" id="videoTimer{{ $module.Id }}" style="display: none;">
+                                    <div class="video-timer-header">
+                                        <div class="video-timer-icon">
+                                            <i class="fa fa-play-circle"></i>
+                                        </div>
+                                        <h4 class="video-timer-title">Security Training Video</h4>
+                                    </div>
+                                    <div class="video-timer-content">
+                                        <p class="video-timer-text">
+                                            Please watch the complete video to proceed. This ensures you receive all important security information.
+                                        </p>
+                                        <div class="video-timer-badge">
+                                            <i class="fa fa-clock-o"></i>
+                                            <span id="timerDisplay{{ $module.Id }}">0:00 / {{ $module.MinTimeSpent }}:00</span>
+                                        </div>
+                                    </div>
+                                    <div class="video-timer-progress">
+                                        <div class="video-timer-progress-bar" id="progressBar{{ $module.Id }}"></div>
+                                    </div>
+                                </div>
+                                
                                 {{ if $module.VideoFilePath }}
                                 <!-- Local video file with strict controls -->
                                 <video class="corporate-video" controls preload="metadata" data-min-time="{{ $module.MinTimeSpent }}" data-module-id="{{ $module.Id }}">
@@ -362,45 +772,30 @@
                             </div>
                         {{ end }}
                         
-                        <!-- Module Completion Button -->
-                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-                            <button class="complete-module-btn" data-module-id="{{ $module.Id }}" onclick="completeModule({{ $module.Id }})">
-                                <i class="fa fa-check"></i> Mark Module as Complete
+                        <!-- Module Action Button -->
+                        <div class="module-actions">
+                            <button class="btn-modern btn-success-modern module-complete-btn" data-module-id="{{ $module.Id }}" onclick="completeModule({{ $module.Id }})">
+                                <i class="fa fa-check"></i>
+                                Mark Complete
                             </button>
                         </div>
-                    </div>
-                </div>
-                {{ end }}
             </div>
+            {{ end }}
         </div>
-
-        <div class="col-md-3">
-            <!-- Course Navigation Sidebar -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <i class="fa fa-book"></i> Course Navigation
-                    </h4>
-                </div>
-                <div class="panel-body">
-                    <div class="course-progress">
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-success" id="courseProgressBar" style="width: 0%">
-                                <span class="sr-only">0% Complete</span>
-                            </div>
-                        </div>
-                        <small id="courseProgressText">0% Complete</small>
-                    </div>
-                    
-                    <div class="module-list">
-                        {{ range $index, $module := .Course.Modules }}
-                        <div class="module-nav-item" data-module-id="{{ $module.Id }}" data-index="{{ $index }}">
-                            <div class="module-title">{{ add $index 1 }}. {{ $module.Name }}</div>
-                            <div class="module-status" id="moduleStatus{{ $module.Id }}">Not Started</div>
-                        </div>
-                        {{ end }}
-                    </div>
-                </div>
+        
+        <!-- Modules Sidebar -->
+        <div class="modules-sidebar">
+            <div class="sidebar-title">
+                <i class="fa fa-list"></i>
+                Course Modules
+            </div>
+            <div class="modules-nav">
+                {{ range $index, $module := .Course.Modules }}
+                <a href="#" class="module-nav-item" data-module-id="{{ $module.Id }}" data-index="{{ $index }}">
+                    <div class="module-title">{{ add $index 1 }}. {{ $module.Name }}</div>
+                    <div class="module-status" id="moduleStatus{{ $module.Id }}">Not Started</div>
+                </a>
+                {{ end }}
             </div>
         </div>
     </div>
@@ -410,15 +805,15 @@
 
 {{define "scripts"}}
 <script>
+var currentModuleId = null;
+
 $(document).ready(function() {
     var courseId = {{ .Course.Id }};
     var totalModules = {{ len .Course.Modules }};
     
-    loadModuleProgress();
     initializeModuleNavigation();
-    
-    // Show first available module
-    showFirstAvailableModule();
+    initializeVideoTimers();
+    loadModuleProgress(); // This will call showFirstAvailableModule() when done
 });
 
 function loadModuleProgress() {
@@ -447,14 +842,26 @@ function loadModuleProgress() {
             // Enable modules based on sequential progression
             enableSequentialModules(completedIds);
             
+            // Update button states for all modules after loading progress
+            $('.module-nav-item').each(function() {
+                var moduleId = parseInt($(this).data('module-id'));
+                var isCompleted = $(this).hasClass('completed');
+                updateModuleButton(moduleId, isCompleted);
+            });
+            
             // Update progress display
             var percentage = {{ len .Course.Modules }} > 0 ? Math.round((completedModules / {{ len .Course.Modules }}) * 100) : 0;
             updateProgressDisplay(percentage);
+            
+            // Show first available module after progress is loaded
+            showFirstAvailableModule();
         })
         .fail(function() {
             console.error('Failed to load module progress');
             // Enable first module by default
             $('.module-nav-item:first').removeClass('locked');
+            // Still show first module even on failure
+            showFirstAvailableModule();
         });
 }
 
@@ -476,8 +883,9 @@ function enableSequentialModules(completedIds) {
 }
 
 function updateProgressDisplay(percentage) {
-    $('#courseProgressBar').css('width', percentage + '%');
-    $('#courseProgressText').text(percentage + '% Complete');
+    $('#courseProgressText').text(percentage + '%');
+    // Update the progress circle
+    $('#progressCircle').css('--progress', percentage + '%');
 }
 
 function initializeModuleNavigation() {
@@ -495,11 +903,21 @@ function initializeModuleNavigation() {
 }
 
 function showModule(moduleId, moduleIndex) {
-    // Start module via API
-    $.post('/api/user/courses/{{ .Course.Id }}/modules/' + moduleId + '/start')
-        .done(function() {
-            $('#moduleStatus' + moduleId).text('In Progress');
-        });
+    currentModuleId = moduleId;
+    
+    // Check if module is already completed
+    var moduleNavItem = $('.module-nav-item[data-module-id="' + moduleId + '"]');
+    var isCompleted = moduleNavItem.hasClass('completed');
+    
+    if (!isCompleted) {
+        // Start module via API only if not completed
+        $.post('/api/user/courses/{{ .Course.Id }}/modules/' + moduleId + '/start')
+            .done(function() {
+                if (!moduleNavItem.hasClass('completed')) {
+                    $('#moduleStatus' + moduleId).text('In Progress');
+                }
+            });
+    }
     
     // Hide all modules
     $('.course-module').removeClass('active');
@@ -508,6 +926,39 @@ function showModule(moduleId, moduleIndex) {
     // Show selected module
     $('.course-module[data-module-id="' + moduleId + '"]').addClass('active');
     $('.module-nav-item[data-module-id="' + moduleId + '"]').addClass('active');
+    
+    // Update header title
+    var moduleName = $('.module-nav-item[data-module-id="' + moduleId + '"] .module-title').text();
+    $('#currentModuleTitle').text(moduleName);
+    
+    // Update button based on completion status
+    updateModuleButton(moduleId, isCompleted);
+}
+
+function updateModuleButton(moduleId, isCompleted) {
+    var completeBtn = $('.course-module[data-module-id="' + moduleId + '"] .module-complete-btn');
+    
+    if (isCompleted) {
+        // Find next module
+        var currentNav = $('.module-nav-item[data-module-id="' + moduleId + '"]');
+        var nextNav = currentNav.next('.module-nav-item:not(.locked):not(.completed)');
+        
+        if (nextNav.length > 0) {
+            completeBtn.html('<i class="fa fa-arrow-right"></i> Next Module');
+            completeBtn.removeClass('btn-success-modern').addClass('btn-primary-modern');
+            completeBtn.attr('onclick', 'goToNextModule(' + moduleId + ')');
+        } else {
+            completeBtn.html('<i class="fa fa-check-circle"></i> Course Complete');
+            completeBtn.removeClass('btn-primary-modern').addClass('btn-success-modern');
+            completeBtn.attr('onclick', '');
+            completeBtn.prop('disabled', true);
+        }
+    } else {
+        completeBtn.html('<i class="fa fa-check"></i> Mark Complete');
+        completeBtn.removeClass('btn-primary-modern').addClass('btn-success-modern');
+        completeBtn.attr('onclick', 'completeModule(' + moduleId + ')');
+        completeBtn.prop('disabled', false);
+    }
 }
 
 function showFirstAvailableModule() {
@@ -531,16 +982,10 @@ function completeModule(moduleId) {
                 // Reload progress
                 loadModuleProgress();
                 
-                // Show next module if available
+                // Update button state after completion
                 setTimeout(function() {
-                    var currentNav = $('.module-nav-item[data-module-id="' + moduleId + '"]');
-                    var nextNav = currentNav.next('.module-nav-item:not(.locked)');
-                    if (nextNav.length > 0) {
-                        var nextModuleId = nextNav.data('module-id');
-                        var nextModuleIndex = nextNav.data('index');
-                        showModule(nextModuleId, nextModuleIndex);
-                    } else {
-                        alert('Congratulations! You have completed all available modules in this course.');
+                    if (currentModuleId === moduleId) {
+                        updateModuleButton(moduleId, true);
                     }
                 }, 500);
             } else {
@@ -550,6 +995,93 @@ function completeModule(moduleId) {
         .fail(function() {
             alert('Error completing module. Please try again.');
         });
+}
+
+function completeCurrentModule() {
+    if (currentModuleId) {
+        completeModule(currentModuleId);
+    }
+}
+
+function goToNextModule(fromModuleId) {
+    var moduleId = fromModuleId || currentModuleId;
+    if (moduleId) {
+        var currentNav = $('.module-nav-item[data-module-id="' + moduleId + '"]');
+        var nextNav = currentNav.next('.module-nav-item:not(.locked):not(.completed)');
+        if (nextNav.length > 0) {
+            var nextModuleId = nextNav.data('module-id');
+            var nextModuleIndex = nextNav.data('index');
+            showModule(nextModuleId, nextModuleIndex);
+        }
+    }
+}
+
+function initializeVideoTimers() {
+    $('.corporate-video').each(function() {
+        var video = this;
+        var moduleId = $(video).data('module-id');
+        var minTime = $(video).data('min-time') || 0;
+        var timerId = '#videoTimer' + moduleId;
+        var progressBarId = '#progressBar' + moduleId;
+        var timerDisplayId = '#timerDisplay' + moduleId;
+        
+        var watchedTime = 0;
+        var updateInterval;
+        
+        // Show timer when video starts
+        $(video).on('play', function() {
+            $(timerId).slideDown(300);
+            
+            updateInterval = setInterval(function() {
+                if (!video.paused && !video.ended) {
+                    watchedTime += 0.1;
+                    var progress = Math.min((watchedTime / minTime) * 100, 100);
+                    var currentMinutes = Math.floor(watchedTime / 60);
+                    var currentSeconds = Math.floor(watchedTime % 60);
+                    
+                    $(progressBarId).css('width', progress + '%');
+                    $(timerDisplayId).text(currentMinutes + ':' + (currentSeconds < 10 ? '0' : '') + currentSeconds + ' / ' + minTime + ':00');
+                    
+                    // Change to success style when minimum time is reached
+                    if (watchedTime >= minTime) {
+                        $(timerId).removeClass('warning').addClass('success');
+                        $(timerId + ' .video-timer-title').text('Minimum Watch Time Completed!');
+                        $(timerId + ' .video-timer-text').text('You have watched the required amount of video content. You may now proceed to complete this module.');
+                        clearInterval(updateInterval);
+                    }
+                }
+            }, 100);
+        });
+        
+        // Update timer on pause
+        $(video).on('pause', function() {
+            if (watchedTime < minTime) {
+                $(timerId).removeClass('success').addClass('warning');
+                $(timerId + ' .video-timer-title').text('Video Paused');
+                $(timerId + ' .video-timer-text').text('Please continue watching to meet the minimum viewing requirement.');
+            }
+        });
+        
+        // Handle video end
+        $(video).on('ended', function() {
+            clearInterval(updateInterval);
+            if (watchedTime >= minTime) {
+                $(timerId).addClass('success');
+                $(timerId + ' .video-timer-title').text('Video Complete!');
+                $(timerId + ' .video-timer-text').text('Great! You have completed watching this training video.');
+            }
+        });
+        
+        // Handle seeking (prevent skipping ahead if not enough time watched)
+        $(video).on('seeked', function() {
+            if (video.currentTime > watchedTime + 5 && watchedTime < minTime) {
+                video.currentTime = Math.min(watchedTime, video.duration);
+                $(timerId).addClass('warning');
+                $(timerId + ' .video-timer-title').text('Cannot Skip Ahead');
+                $(timerId + ' .video-timer-text').text('Please watch the video content in order to meet training requirements.');
+            }
+        });
+    });
 }
 </script>
 {{end}}
