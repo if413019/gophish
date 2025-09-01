@@ -246,6 +246,19 @@ func GetCourse(id int64, uid int64) (Course, error) {
 		}
 	}
 	
+	// Link quizzes to their corresponding modules
+	for i := range c.Modules {
+		if c.Modules[i].ModuleType == ModuleTypeQuiz {
+			// Find the quiz that belongs to this module
+			for j := range c.Quizzes {
+				if c.Quizzes[j].ModuleId == c.Modules[i].Id {
+					c.Modules[i].QuizId = c.Quizzes[j].Id
+					break
+				}
+			}
+		}
+	}
+	
 	return c, nil
 }
 

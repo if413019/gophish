@@ -483,6 +483,149 @@
     margin: 0;
     font-size: 1rem;
 }
+
+/* Empty State Styles */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #718096;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 2px dashed #e2e8f0;
+}
+
+.empty-state .empty-icon {
+    margin-bottom: 1.5rem;
+}
+
+.empty-state .empty-icon i {
+    font-size: 3rem;
+    color: #cbd5e0;
+    display: block;
+}
+
+.empty-state h4 {
+    color: #2d3748;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+}
+
+.empty-state p {
+    margin: 0 0 2rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.empty-state .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 2px solid #667eea;
+    color: #667eea;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.empty-state .btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Error State Styles */
+.error-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #718096;
+    background: rgba(254, 242, 242, 0.8);
+    border-radius: 12px;
+    border: 2px solid #fed7d7;
+}
+
+.error-state .error-icon {
+    margin-bottom: 1.5rem;
+}
+
+.error-state .error-icon i {
+    font-size: 3rem;
+    color: #fc8181;
+    display: block;
+}
+
+.error-state h4 {
+    color: #c53030;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+}
+
+.error-state p {
+    margin: 0 0 2rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #744d4d;
+}
+
+.error-state .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 2px solid #e53e3e;
+    color: #e53e3e;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.error-state .btn:hover {
+    background: #e53e3e;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* View More Activity Styles */
+.view-more-activity {
+    text-align: center;
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 1rem;
+}
+
+.view-more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.view-more-link:hover {
+    color: #5a67d8;
+    transform: translateX(4px);
+}
+
+.view-more-link i {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.view-more-link:hover i {
+    transform: translateX(2px);
+}
 </style>
 {{end}}
 
@@ -509,6 +652,7 @@ function loadUserDashboard() {
 function loadUserStats() {
     $.get('/api/user/stats')
         .done(function(stats) {
+            console.log('User stats received:', stats);
             $('#phishedCount').text(stats.phished_count || 0);
             $('#reportedCount').text(stats.reported_count || 0);
             $('#courseCount').text(stats.assigned_courses || 0);
@@ -520,7 +664,8 @@ function loadUserStats() {
             updateStatusIndicator('#courseProgress', stats.course_status);
             updateStatusIndicator('#completionStatus', stats.completion_status);
         })
-        .fail(function() {
+        .fail(function(xhr, status, error) {
+            console.log('Failed to load user stats:', xhr, status, error);
             // Set default values on error
             $('.stat-content h3').text('0');
             $('.status-pending').text('Error loading');
@@ -533,7 +678,16 @@ function loadActiveCourses() {
             var container = $('#activeCourses');
             
             if (courses.length === 0) {
-                container.html('<div class="empty-state"><p>No active courses assigned yet.</p></div>');
+                container.html(`
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fa fa-graduation-cap"></i>
+                        </div>
+                        <h4>No Active Courses</h4>
+                        <p>You don't have any active courses assigned yet. Check back later or contact your administrator.</p>
+                        <a href="/user/courses" class="btn btn-outline">View All Courses</a>
+                    </div>
+                `);
                 return;
             }
             
@@ -557,7 +711,16 @@ function loadActiveCourses() {
             container.html(html);
         })
         .fail(function() {
-            $('#activeCourses').html('<div class="loading-state"><p>Error loading courses</p></div>');
+            $('#activeCourses').html(`
+                <div class="error-state">
+                    <div class="error-icon">
+                        <i class="fa fa-exclamation-triangle"></i>
+                    </div>
+                    <h4>Unable to Load Courses</h4>
+                    <p>There was an error loading your courses. Please try refreshing the page.</p>
+                    <button class="btn btn-outline" onclick="loadActiveCourses()">Try Again</button>
+                </div>
+            `);
         });
 }
 
@@ -567,12 +730,22 @@ function loadRecentActivity() {
             var container = $('#recentActivity');
             
             if (activities.length === 0) {
-                container.html('<div class="empty-state"><p>No recent activity.</p></div>');
+                container.html(`
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fa fa-clock-o"></i>
+                        </div>
+                        <h4>No Recent Activity</h4>
+                        <p>Your recent activity will appear here as you complete courses and training modules.</p>
+                    </div>
+                `);
                 return;
             }
             
+            // Limit to 3 most recent activities
+            var recentActivities = activities.slice(0, 3);
             var html = '';
-            activities.forEach(function(activity) {
+            recentActivities.forEach(function(activity) {
                 html += `
                     <div class="activity-item">
                         <div class="activity-icon">
@@ -587,10 +760,31 @@ function loadRecentActivity() {
                 `;
             });
             
+            // Add "View More" link if there are more than 3 activities
+            if (activities.length > 3) {
+                html += `
+                    <div class="view-more-activity">
+                        <a href="/user/activity" class="view-more-link">
+                            <i class="fa fa-chevron-right"></i>
+                            View All Activity (${activities.length})
+                        </a>
+                    </div>
+                `;
+            }
+            
             container.html(html);
         })
         .fail(function() {
-            $('#recentActivity').html('<div class="loading-state"><p>Error loading activity</p></div>');
+            $('#recentActivity').html(`
+                <div class="error-state">
+                    <div class="error-icon">
+                        <i class="fa fa-exclamation-triangle"></i>
+                    </div>
+                    <h4>Unable to Load Activity</h4>
+                    <p>There was an error loading your recent activity. Please try refreshing the page.</p>
+                    <button class="btn btn-outline" onclick="loadRecentActivity()">Try Again</button>
+                </div>
+            `);
         });
 }
 

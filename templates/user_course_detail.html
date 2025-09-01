@@ -737,6 +737,329 @@
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
 }
 
+/* Inline Quiz Interface Styles */
+.quiz-taking-interface {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin: 1rem 0;
+}
+
+.quiz-progress-section {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.progress-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.question-container {
+    margin-bottom: 2rem;
+}
+
+.question-block {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 2rem;
+    border-left: 4px solid #9b59b6;
+}
+
+.question-text {
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.question-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option-label:hover {
+    border-color: #9b59b6;
+    background: #f8f4fd;
+}
+
+.option-label input[type="radio"] {
+    margin: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.option-text {
+    flex: 1;
+    color: #495057;
+    line-height: 1.5;
+}
+
+.option-label input[type="radio"]:checked + .option-text {
+    color: #9b59b6;
+    font-weight: 500;
+}
+
+.quiz-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-quiz-nav {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-quiz-nav:hover:not(:disabled) {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.btn-quiz-nav:disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.btn-submit-quiz {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-submit-quiz:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+}
+
+.quiz-results-display {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.results-header {
+    margin-bottom: 2rem;
+}
+
+.results-header i {
+    font-size: 3rem;
+    color: #28a745;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.results-header h4 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.results-summary {
+    margin-bottom: 2rem;
+}
+
+.score-display-large {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.score-circle-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.score-circle-large.score-passed {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.score-circle-large.score-failed {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.score-text {
+    font-size: 1.125rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+.results-details {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.results-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-back-to-info {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-back-to-info:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.retake-info, .max-attempts-info {
+    background: #fff3cd;
+    color: #856404;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+    margin: 1rem 0;
+}
+
+.max-attempts-info {
+    background: #f8d7da;
+    color: #721c24;
+    border-left-color: #dc3545;
+}
+
+.quiz-timer-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.timer-circle {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.timer-svg {
+    transform: rotate(-90deg);
+}
+
+.timer-background {
+    fill: none;
+    stroke: #e9ecef;
+    stroke-width: 6;
+}
+
+.timer-progress {
+    fill: none;
+    stroke: #9b59b6;
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease-in-out;
+}
+
+.timer-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.timer-warning {
+    background: #fff3cd;
+    color: #856404;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border-left: 4px solid #ffc107;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .module-nav-item .module-title {
     font-weight: bold;
     margin-bottom: 2px;
@@ -948,25 +1271,49 @@
                             {{ end }}
 
                             <div class="quiz-module-content">
-                                <div class="quiz-header">
-                                    <i class="fa fa-question-circle quiz-icon"></i>
-                                    <h4>Knowledge Check Quiz</h4>
-                                    <p>Test your understanding of the security concepts covered in this course.</p>
-                                </div>
-                                
-                                <div class="quiz-info">
-                                    <div class="quiz-details">
-                                        <div class="quiz-detail-item">
-                                            <i class="fa fa-clock-o"></i>
-                                            <span id="quiz-time-limit-{{ $module.Id }}">Loading...</span>
+                                <!-- Quiz Information Panel -->
+                                <div class="quiz-info-section" id="quiz-info-section-{{ $module.Id }}">
+                                    <div class="quiz-header">
+                                        <i class="fa fa-question-circle quiz-icon"></i>
+                                        <h4>Knowledge Check Quiz</h4>
+                                        <p>Test your understanding of the security concepts covered in this course.</p>
+                                    </div>
+                                    
+                                    <div class="quiz-info">
+                                        <div class="quiz-details">
+                                            <div class="quiz-detail-item">
+                                                <i class="fa fa-clock-o"></i>
+                                                <span id="quiz-time-limit-{{ $module.Id }}">Loading...</span>
+                                            </div>
+                                            <div class="quiz-detail-item">
+                                                <i class="fa fa-list"></i>
+                                                <span id="quiz-question-count-{{ $module.Id }}">Loading...</span>
+                                            </div>
+                                            <div class="quiz-detail-item">
+                                                <i class="fa fa-trophy"></i>
+                                                <span id="quiz-passing-score-{{ $module.Id }}">Loading...</span>
+                                            </div>
+                                            <div class="quiz-detail-item">
+                                                <i class="fa fa-repeat"></i>
+                                                <span id="quiz-attempts-info-{{ $module.Id }}">Loading...</span>
+                                            </div>
                                         </div>
-                                        <div class="quiz-detail-item">
-                                            <i class="fa fa-list"></i>
-                                            <span id="quiz-question-count-{{ $module.Id }}">Loading...</span>
-                                        </div>
-                                        <div class="quiz-detail-item">
-                                            <i class="fa fa-trophy"></i>
-                                            <span id="quiz-passing-score-{{ $module.Id }}">Loading...</span>
+                                        
+                                        <!-- Timer Display -->
+                                        <div class="quiz-timer-display" id="quiz-timer-{{ $module.Id }}" style="display: none;">
+                                            <div class="timer-circle">
+                                                <svg class="timer-svg" width="80" height="80">
+                                                    <circle class="timer-background" cx="40" cy="40" r="35"></circle>
+                                                    <circle class="timer-progress" cx="40" cy="40" r="35" id="timer-progress-{{ $module.Id }}"></circle>
+                                                </svg>
+                                                <div class="timer-text">
+                                                    <span id="timer-minutes-{{ $module.Id }}">--</span>:<span id="timer-seconds-{{ $module.Id }}">--</span>
+                                                </div>
+                                            </div>
+                                            <div class="timer-warning" id="timer-warning-{{ $module.Id }}" style="display: none;">
+                                                <i class="fa fa-exclamation-triangle"></i>
+                                                Time is running out!
+                                            </div>
                                         </div>
                                     </div>
                                     
@@ -979,6 +1326,54 @@
                                     
                                     <div class="quiz-actions" id="quiz-actions-{{ $module.Id }}" style="display: none;">
                                         <!-- Actions will be populated by JavaScript -->
+                                    </div>
+                                </div>
+
+                                <!-- Quiz Taking Interface -->
+                                <div class="quiz-taking-interface" id="quiz-taking-{{ $module.Id }}" style="display: none;">
+                                    <div class="quiz-progress-section">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="progress-fill-{{ $module.Id }}"></div>
+                                        </div>
+                                        <div class="progress-text">
+                                            Question <span id="current-question-{{ $module.Id }}">1</span> of <span id="total-questions-{{ $module.Id }}">0</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="question-container" id="question-container-{{ $module.Id }}">
+                                        <!-- Questions will be loaded here -->
+                                    </div>
+
+                                    <div class="quiz-navigation">
+                                        <button class="btn-quiz-nav" id="prev-btn-{{ $module.Id }}" disabled onclick="navigateQuestion({{ $module.Id }}, -1)">
+                                            <i class="fa fa-chevron-left"></i>
+                                            Previous
+                                        </button>
+                                        <button class="btn-quiz-nav" id="next-btn-{{ $module.Id }}" onclick="navigateQuestion({{ $module.Id }}, 1)">
+                                            Next
+                                            <i class="fa fa-chevron-right"></i>
+                                        </button>
+                                        <button class="btn-submit-quiz" id="submit-btn-{{ $module.Id }}" style="display: none;" onclick="submitQuiz({{ $module.Id }})">
+                                            <i class="fa fa-check"></i>
+                                            Submit Quiz
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Quiz Results Display -->
+                                <div class="quiz-results-display" id="quiz-results-{{ $module.Id }}" style="display: none;">
+                                    <div class="results-header">
+                                        <i class="fa fa-flag-checkered"></i>
+                                        <h4>Quiz Complete!</h4>
+                                    </div>
+                                    <div class="results-content" id="results-content-{{ $module.Id }}">
+                                        <!-- Results will be displayed here -->
+                                    </div>
+                                    <div class="results-actions">
+                                        <button class="btn-back-to-info" onclick="backToQuizInfo({{ $module.Id }})">
+                                            <i class="fa fa-arrow-left"></i>
+                                            Back to Quiz Info
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -1356,8 +1751,8 @@ function displayQuizStatus(moduleId, quizId, courseId, quiz, attempts) {
     if (attempts.length === 0) {
         // No attempts yet
         statusHtml = '<div class="quiz-available-message"><i class="fa fa-check-circle"></i> Quiz is ready to take</div>';
-        actionsHtml = '<a href="/user/courses/' + courseId + '/quiz/' + quizId + '" class="btn-quiz-take">' +
-                     '<i class="fa fa-play"></i> Take Quiz</a>';
+        actionsHtml = '<button class="btn-quiz-take" onclick="startInlineQuiz(' + moduleId + ', ' + quizId + ', ' + courseId + ')">' +
+                     '<i class="fa fa-play"></i> Take Quiz</button>';
     } else {
         const latestAttempt = attempts[0]; // Already sorted by attempt_number desc
         
@@ -1371,8 +1766,8 @@ function displayQuizStatus(moduleId, quizId, courseId, quiz, attempts) {
                         '</div></div>';
                         
             if (attempts.length < quiz.max_attempts) {
-                actionsHtml = '<a href="/user/courses/' + courseId + '/quiz/' + quizId + '" class="btn-quiz-retake">' +
-                             '<i class="fa fa-repeat"></i> Retake Quiz</a>';
+                actionsHtml = '<button class="btn-quiz-retake" onclick="startInlineQuiz(' + moduleId + ', ' + quizId + ', ' + courseId + ')">' +
+                             '<i class="fa fa-repeat"></i> Retake Quiz</button>';
             }
         } else {
             // Failed or not completed
@@ -1390,8 +1785,8 @@ function displayQuizStatus(moduleId, quizId, courseId, quiz, attempts) {
                                  '</div>';
                 }
                 
-                actionsHtml = '<a href="/user/courses/' + courseId + '/quiz/' + quizId + '" class="btn-quiz-retake">' +
-                             '<i class="fa fa-repeat"></i> Retake Quiz</a>';
+                actionsHtml = '<button class="btn-quiz-retake" onclick="startInlineQuiz(' + moduleId + ', ' + quizId + ', ' + courseId + ')">' +
+                             '<i class="fa fa-repeat"></i> Retake Quiz</button>';
             } else {
                 // No more attempts
                 statusHtml = '<div class="quiz-locked-message">' +
@@ -1406,6 +1801,301 @@ function displayQuizStatus(moduleId, quizId, courseId, quiz, attempts) {
     
     statusContainer.html(statusHtml);
     actionsContainer.html(actionsHtml).show();
+}
+
+// Global variables for quiz session
+let currentQuizSession = {
+    moduleId: null,
+    quizId: null,
+    courseId: null,
+    questions: [],
+    currentQuestionIndex: 0,
+    answers: {},
+    timeRemaining: 0,
+    timerInterval: null,
+    quiz: null
+};
+
+// Start inline quiz interface
+function startInlineQuiz(moduleId, quizId, courseId) {
+    // Hide info section and show taking interface
+    $('#quiz-info-section-' + moduleId).hide();
+    $('#quiz-taking-' + moduleId).show();
+    
+    // Initialize session
+    currentQuizSession.moduleId = moduleId;
+    currentQuizSession.quizId = quizId;
+    currentQuizSession.courseId = courseId;
+    currentQuizSession.currentQuestionIndex = 0;
+    currentQuizSession.answers = {};
+    
+    // Start quiz attempt and load questions
+    $.ajax({
+        url: '/api/user/courses/' + courseId + '/quiz/' + quizId + '/start',
+        method: 'POST',
+        success: function(response) {
+            currentQuizSession.quiz = response.quiz;
+            loadQuizQuestions(moduleId, quizId);
+            startQuizTimer(moduleId, response.quiz.time_limit);
+        },
+        error: function(xhr) {
+            alert('Failed to start quiz: ' + xhr.responseJSON.message);
+            backToQuizInfo(moduleId);
+        }
+    });
+}
+
+// Load quiz questions
+function loadQuizQuestions(moduleId, quizId) {
+    $.ajax({
+        url: '/api/user/quiz/' + quizId + '/questions',
+        method: 'GET',
+        success: function(response) {
+            currentQuizSession.questions = response.questions;
+            $('#total-questions-' + moduleId).text(response.questions.length);
+            displayCurrentQuestion(moduleId);
+        },
+        error: function() {
+            alert('Failed to load quiz questions');
+            backToQuizInfo(moduleId);
+        }
+    });
+}
+
+// Display current question
+function displayCurrentQuestion(moduleId) {
+    const question = currentQuizSession.questions[currentQuizSession.currentQuestionIndex];
+    const questionContainer = $('#question-container-' + moduleId);
+    
+    let questionHtml = '<div class="question-block">';
+    questionHtml += '<h4 class="question-text">' + (currentQuizSession.currentQuestionIndex + 1) + '. ' + question.question + '</h4>';
+    
+    if (question.question_type === 'multiple_choice') {
+        questionHtml += '<div class="question-options">';
+        question.options.forEach(function(option, index) {
+            const isChecked = currentQuizSession.answers[question.id] === option.id ? 'checked' : '';
+            questionHtml += '<label class="option-label">' +
+                           '<input type="radio" name="question_' + question.id + '" value="' + option.id + '" ' + isChecked + ' onchange="saveAnswer(' + question.id + ', ' + option.id + ')">' +
+                           '<span class="option-text">' + option.option + '</span>' +
+                           '</label>';
+        });
+        questionHtml += '</div>';
+    } else if (question.question_type === 'true_false') {
+        const trueChecked = currentQuizSession.answers[question.id] === true ? 'checked' : '';
+        const falseChecked = currentQuizSession.answers[question.id] === false ? 'checked' : '';
+        questionHtml += '<div class="question-options">' +
+                       '<label class="option-label">' +
+                       '<input type="radio" name="question_' + question.id + '" value="true" ' + trueChecked + ' onchange="saveAnswer(' + question.id + ', true)">' +
+                       '<span class="option-text">True</span>' +
+                       '</label>' +
+                       '<label class="option-label">' +
+                       '<input type="radio" name="question_' + question.id + '" value="false" ' + falseChecked + ' onchange="saveAnswer(' + question.id + ', false)">' +
+                       '<span class="option-text">False</span>' +
+                       '</label>' +
+                       '</div>';
+    }
+    
+    questionHtml += '</div>';
+    questionContainer.html(questionHtml);
+    
+    // Update progress
+    const progress = ((currentQuizSession.currentQuestionIndex + 1) / currentQuizSession.questions.length) * 100;
+    $('#progress-fill-' + moduleId).css('width', progress + '%');
+    $('#current-question-' + moduleId).text(currentQuizSession.currentQuestionIndex + 1);
+    
+    // Update navigation buttons
+    updateNavigationButtons(moduleId);
+}
+
+// Save answer
+function saveAnswer(questionId, answerId) {
+    currentQuizSession.answers[questionId] = answerId;
+}
+
+// Navigate questions
+function navigateQuestion(moduleId, direction) {
+    const newIndex = currentQuizSession.currentQuestionIndex + direction;
+    if (newIndex >= 0 && newIndex < currentQuizSession.questions.length) {
+        currentQuizSession.currentQuestionIndex = newIndex;
+        displayCurrentQuestion(moduleId);
+    }
+}
+
+// Update navigation buttons
+function updateNavigationButtons(moduleId) {
+    const prevBtn = $('#prev-btn-' + moduleId);
+    const nextBtn = $('#next-btn-' + moduleId);
+    const submitBtn = $('#submit-btn-' + moduleId);
+    
+    prevBtn.prop('disabled', currentQuizSession.currentQuestionIndex === 0);
+    
+    if (currentQuizSession.currentQuestionIndex === currentQuizSession.questions.length - 1) {
+        nextBtn.hide();
+        submitBtn.show();
+    } else {
+        nextBtn.show();
+        submitBtn.hide();
+    }
+}
+
+// Start quiz timer
+function startQuizTimer(moduleId, timeLimit) {
+    currentQuizSession.timeRemaining = timeLimit * 60; // Convert to seconds
+    const timerDisplay = $('#quiz-timer-' + moduleId);
+    const timerProgress = $('#timer-progress-' + moduleId);
+    const timerWarning = $('#timer-warning-' + moduleId);
+    
+    timerDisplay.show();
+    
+    currentQuizSession.timerInterval = setInterval(function() {
+        const minutes = Math.floor(currentQuizSession.timeRemaining / 60);
+        const seconds = currentQuizSession.timeRemaining % 60;
+        
+        $('#timer-minutes-' + moduleId).text(minutes.toString().padStart(2, '0'));
+        $('#timer-seconds-' + moduleId).text(seconds.toString().padStart(2, '0'));
+        
+        // Update progress circle
+        const totalTime = timeLimit * 60;
+        const progressPercent = (currentQuizSession.timeRemaining / totalTime) * 100;
+        const circumference = 2 * Math.PI * 35;
+        const dasharray = circumference;
+        const dashoffset = circumference - (progressPercent / 100) * circumference;
+        
+        timerProgress.css({
+            'stroke-dasharray': dasharray,
+            'stroke-dashoffset': dashoffset
+        });
+        
+        // Warning when 2 minutes left
+        if (currentQuizSession.timeRemaining <= 120 && currentQuizSession.timeRemaining > 0) {
+            timerWarning.show();
+        }
+        
+        if (currentQuizSession.timeRemaining <= 0) {
+            clearInterval(currentQuizSession.timerInterval);
+            submitQuiz(moduleId, true); // Auto-submit when time runs out
+            return;
+        }
+        
+        currentQuizSession.timeRemaining--;
+    }, 1000);
+}
+
+// Submit quiz
+function submitQuiz(moduleId, timeExpired = false) {
+    if (!timeExpired && !confirm('Are you sure you want to submit the quiz?')) {
+        return;
+    }
+    
+    // Clear timer
+    if (currentQuizSession.timerInterval) {
+        clearInterval(currentQuizSession.timerInterval);
+    }
+    
+    const submissionData = {
+        answers: currentQuizSession.answers,
+        time_expired: timeExpired
+    };
+    
+    $.ajax({
+        url: '/api/user/courses/' + currentQuizSession.courseId + '/quiz/' + currentQuizSession.quizId + '/submit',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(submissionData),
+        success: function(response) {
+            displayQuizResults(moduleId, response);
+        },
+        error: function(xhr) {
+            alert('Failed to submit quiz: ' + xhr.responseJSON.message);
+        }
+    });
+}
+
+// Display quiz results
+function displayQuizResults(moduleId, results) {
+    // Hide taking interface and show results
+    $('#quiz-taking-' + moduleId).hide();
+    $('#quiz-results-' + moduleId).show();
+    
+    const resultsContent = $('#results-content-' + moduleId);
+    
+    let resultsHtml = '<div class="results-summary">';
+    resultsHtml += '<div class="score-display-large">';
+    resultsHtml += '<div class="score-circle-large score-' + (results.passed ? 'passed' : 'failed') + '">';
+    resultsHtml += results.score + '%';
+    resultsHtml += '</div>';
+    resultsHtml += '<div class="score-text">';
+    resultsHtml += results.passed ? 'Congratulations! You passed!' : 'Sorry, you did not pass this time.';
+    resultsHtml += '</div>';
+    resultsHtml += '</div>';
+    
+    resultsHtml += '<div class="results-details">';
+    resultsHtml += '<div class="result-item"><strong>Score:</strong> ' + results.score + '%</div>';
+    resultsHtml += '<div class="result-item"><strong>Passing Score:</strong> ' + results.passing_score + '%</div>';
+    resultsHtml += '<div class="result-item"><strong>Questions Correct:</strong> ' + results.correct_answers + ' of ' + results.total_questions + '</div>';
+    resultsHtml += '<div class="result-item"><strong>Attempt:</strong> ' + results.attempt_number + ' of ' + results.max_attempts + '</div>';
+    resultsHtml += '</div>';
+    
+    if (results.can_retake && !results.passed) {
+        resultsHtml += '<div class="retake-info">';
+        resultsHtml += '<p><i class="fa fa-info-circle"></i> You can retake this quiz to improve your score.</p>';
+        resultsHtml += '</div>';
+    } else if (!results.can_retake && !results.passed) {
+        resultsHtml += '<div class="max-attempts-info">';
+        resultsHtml += '<p><i class="fa fa-exclamation-triangle"></i> You have reached the maximum number of attempts for this quiz.</p>';
+        resultsHtml += '</div>';
+    }
+    
+    resultsHtml += '</div>';
+    resultsContent.html(resultsHtml);
+    
+    // Update results actions
+    const resultsActions = $('#quiz-results-' + moduleId + ' .results-actions');
+    let actionsHtml = '<button class="btn-quiz-nav" onclick="backToQuizInfo(' + moduleId + ')">';
+    actionsHtml += '<i class="fa fa-arrow-left"></i> Back to Quiz Info</button>';
+    
+    if (results.can_retake && !results.passed) {
+        actionsHtml += '<button class="btn-quiz-retake" onclick="startInlineQuiz(' + moduleId + ', ' + currentQuizSession.quizId + ', ' + currentQuizSession.courseId + ')">';
+        actionsHtml += '<i class="fa fa-repeat"></i> Retake Quiz</button>';
+    }
+    
+    resultsActions.html(actionsHtml);
+    
+    // Refresh course progress if passed
+    if (results.passed) {
+        loadCourseProgress();
+        loadQuizInformation(); // Reload quiz status
+    }
+}
+
+// Back to quiz info
+function backToQuizInfo(moduleId) {
+    // Hide all quiz interfaces
+    $('#quiz-taking-' + moduleId).hide();
+    $('#quiz-results-' + moduleId).hide();
+    $('#quiz-timer-' + moduleId).hide();
+    
+    // Show info section
+    $('#quiz-info-section-' + moduleId).show();
+    
+    // Clear session data
+    if (currentQuizSession.timerInterval) {
+        clearInterval(currentQuizSession.timerInterval);
+    }
+    currentQuizSession = {
+        moduleId: null,
+        quizId: null,
+        courseId: null,
+        questions: [],
+        currentQuestionIndex: 0,
+        answers: {},
+        timeRemaining: 0,
+        timerInterval: null,
+        quiz: null
+    };
+    
+    // Reload quiz status
+    loadQuizInformation();
 }
 
 // Initialize quiz information when page loads
