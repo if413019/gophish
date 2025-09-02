@@ -445,14 +445,51 @@ function serializeCourse() {
 }
 
 $(document).ready(function(){
-    // Setup the courses table
+    // Setup the courses table with modern configuration
     $("#courseTable").DataTable({
         columnDefs: [
             {
                 orderable: false,
                 targets: "no-sort"
             }
-        ]
+        ],
+        language: {
+            search: "",
+            searchPlaceholder: "Search courses...",
+            lengthMenu: "Show _MENU_ courses per page",
+            info: "Showing _START_ to _END_ of _TOTAL_ courses",
+            infoEmpty: "No courses available",
+            infoFiltered: "(filtered from _MAX_ total courses)",
+            paginate: {
+                first: "First",
+                last: "Last",
+                next: "Next",
+                previous: "Previous"
+            },
+            emptyTable: "No courses created yet"
+        },
+        pageLength: 10,
+        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+        dom: '<"dataTables_top_controls"<"dataTables_length"l><"dataTables_filter"f>>t<"dataTables_bottom_controls"<"dataTables_info"i><"dataTables_paginate"p>>',
+        drawCallback: function() {
+            // Add modern styling to pagination buttons after each draw
+            $('.dataTables_wrapper .paginate_button').each(function() {
+                var $btn = $(this);
+                if ($btn.hasClass('previous')) {
+                    $btn.html('<i class="fa fa-chevron-left"></i>');
+                } else if ($btn.hasClass('next')) {
+                    $btn.html('<i class="fa fa-chevron-right"></i>');
+                }
+            });
+        },
+        initComplete: function() {
+            // Add search icon and improve styling after initialization
+            $('.dataTables_filter label').prepend('<i class="fa fa-search" style="margin-right: 0.5rem; color: #9ca3af;"></i>');
+            $('.dataTables_filter input').attr('placeholder', 'Search courses...');
+            
+            // Add length menu icon
+            $('.dataTables_length label').prepend('<i class="fa fa-list" style="margin-right: 0.5rem; color: #9ca3af;"></i>');
+        }
     });
     load()
     
@@ -496,25 +533,43 @@ function load(){
             var quizCount = course.quizzes ? course.quizzes.length : 0
             
             courseRows.push([
-                escapeHtml(course.name),
-                escapeHtml(course.description),
-                moduleCount,
-                quizCount,
-                moment(course.created_date).format('MMMM Do YYYY, h:mm:ss a'),
-                moment(course.modified_date).format('MMMM Do YYYY, h:mm:ss a'),
-                "<div class='pull-right'><span data-toggle='tooltip' data-placement='left' title='Preview Course'><a href='/courses/" + course.id + "/preview' class='btn btn-info' target='_blank'>\
-                    <i class='fa fa-eye'></i>\
-                    </a></span>\
-                    <span data-toggle='tooltip' data-placement='left' title='Edit Course'><button class='btn btn-primary' data-toggle='modal' data-backdrop='static' data-target='#modal' onclick='save(" + i + ")'>\
-                    <i class='fa fa-pencil'></i>\
-                    </button></span>\
-                    <span data-toggle='tooltip' data-placement='left' title='Delete Course'><button class='btn btn-danger' onclick='deleteCourse(" + i + ")'>\
-                    <i class='fa fa-trash-o'></i>\
-                    </button></span></div>"
+                "<div class='course-name'>" + escapeHtml(course.name) + "</div>" +
+                "<div class='course-description' title='" + escapeHtml(course.description) + "'>" + escapeHtml(course.description) + "</div>",
+                "<div class='course-meta'>" +
+                    "<span class='meta-badge modules'><i class='fa fa-list-ol'></i> " + moduleCount + " Modules</span>" +
+                    "<span class='meta-badge quizzes'><i class='fa fa-question-circle'></i> " + quizCount + " Quizzes</span>" +
+                "</div>",
+                "<div class='course-date'>" + moment(course.created_date).format('MMM DD, YYYY') + "</div>",
+                "<div class='course-date'>" + moment(course.modified_date).format('MMM DD, YYYY') + "</div>",
+                "<div class='action-buttons'>" +
+                    "<button class='btn-sm-modern btn-secondary-modern' data-toggle='tooltip' data-placement='left' title='Preview Course' onclick='window.open(\"/courses/" + course.id + "/preview\", \"_blank\")'>" +
+                        "<i class='fa fa-eye'></i>" +
+                    "</button>" +
+                    "<button class='btn-sm-modern btn-primary-modern' data-toggle='tooltip' data-placement='left' title='Edit Course' onclick='save(" + i + ")'>" +
+                        "<i class='fa fa-pencil'></i>" +
+                    "</button>" +
+                    "<button class='btn-sm-modern btn-danger-modern' data-toggle='tooltip' data-placement='left' title='Delete Course' onclick='deleteCourse(" + i + ")'>" +
+                        "<i class='fa fa-trash-o'></i>" +
+                    "</button>" +
+                "</div>"
             ])
         })
-        $("#courseTable").DataTable().rows.add(courseRows).draw()
-        $('[data-toggle="tooltip"]').tooltip()
+        if (courseRows.length === 0) {
+            // Show empty state
+            $("#courseTable").parent().html(
+                "<div class='empty-state'>" +
+                    "<i class='fa fa-graduation-cap'></i>" +
+                    "<h3>No courses yet</h3>" +
+                    "<p>Get started by creating your first e-learning course</p>" +
+                    "<button class='btn-modern btn-primary-modern' onclick='newCourse()'>" +
+                        "<i class='fa fa-plus'></i> Create Your First Course" +
+                    "</button>" +
+                "</div>"
+            )
+        } else {
+            $("#courseTable").DataTable().rows.add(courseRows).draw()
+            $('[data-toggle="tooltip"]').tooltip()
+        }
     })
     .error(function(){
         errorFlash("Error fetching courses")

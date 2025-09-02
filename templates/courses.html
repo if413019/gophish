@@ -1,77 +1,709 @@
 {{define "body"}}
 <div class="main">
-            <div class="row">
-                <h1 class="page-header col-lg-10">
-                    E-Learning Courses
-                </h1>
-                <div class="pull-right">
-                    <button type="button" id="new_course_button" class="btn btn-primary" onclick="newCourse()" data-toggle="modal" data-backdrop="static" data-target="#modal">
-                        <i class="fa fa-plus"></i> New Course
-                    </button>
-                </div>
-            </div>
-            {{template "flashes" .Flashes}}
-            <div class="row">
-                <table id="courseTable" class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Modules</th>
-                            <th>Quizzes</th>
-                            <th>Created Date</th>
-                            <th>Modified Date</th>
-                            <th class="col-md-2 no-sort">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<div class="courses-page">
+<style>
+/* Modern course management styling matching user dashboard */
+.courses-page {
+    padding: 2rem;
+    background: #f8f9fa;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.page-header-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.page-subtitle {
+    color: #4a5568;
+    font-size: 1.1rem;
+    margin: 0.5rem 0 0 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.btn-modern {
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 1.125rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-success-modern {
+    background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+    color: white;
+}
+
+.btn-success-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(69, 183, 209, 0.4);
+    color: white;
+}
+
+.btn-danger-modern {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+}
+
+.btn-danger-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    color: white;
+}
+
+.btn-secondary-modern {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+}
+
+.btn-secondary-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+    color: white;
+}
+
+.courses-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+}
+
+.courses-table-wrapper {
+    overflow-x: auto;
+    padding: 1.5rem;
+}
+
+.courses-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    table-layout: fixed;
+}
+
+.courses-table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.courses-table th {
+    padding: 1.5rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #2d3748;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 1.125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+/* Column width specifications */
+.courses-table th:nth-child(1) {
+    width: 35%; /* Course Details - wider for better course name/description display */
+}
+
+.courses-table th:nth-child(2) {
+    width: 25%; /* Content - wider for modules/quizzes badges */
+}
+
+.courses-table th:nth-child(3) {
+    width: 12%; /* Created - smaller */
+}
+
+.courses-table th:nth-child(4) {
+    width: 12%; /* Modified - smaller */
+}
+
+.courses-table th:nth-child(5) {
+    width: 16%; /* Actions - adequate for 3 buttons */
+}
+
+.courses-table td {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #4a5568;
+    vertical-align: middle;
+    font-size: 1.125rem;
+    line-height: 1.6;
+}
+
+/* Corresponding cell widths */
+.courses-table td:nth-child(1) {
+    width: 35%;
+}
+
+.courses-table td:nth-child(2) {
+    width: 25%;
+}
+
+.courses-table td:nth-child(3) {
+    width: 12%;
+}
+
+.courses-table td:nth-child(4) {
+    width: 12%;
+}
+
+.courses-table td:nth-child(5) {
+    width: 16%;
+}
+
+.courses-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.courses-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.course-name {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.course-description {
+    color: #718096;
+    font-size: 1.125rem;
+    line-height: 1.5;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.course-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #4a5568;
+    font-size: 1.125rem;
+}
+
+.meta-badge {
+    background: #e2e8f0;
+    color: #4a5568;
+    padding: 0.625rem 1.25rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.meta-badge.modules {
+    background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+    color: #667eea;
+}
+
+.meta-badge.quizzes {
+    background: linear-gradient(135deg, #45b7d120 0%, #96c93d20 100%);
+    color: #45b7d1;
+}
+
+.course-date {
+    color: #718096;
+    font-size: 1.125rem;
+    white-space: nowrap;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-sm-modern {
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+    font-size: 1.125rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 48px;
+    justify-content: center;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #718096;
+}
+
+.empty-state i {
+    font-size: 5rem;
+    color: #cbd5e0;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    margin-bottom: 2rem;
+    font-size: 1.125rem;
+}
+
+/* Flash messages */
+.flash-messages {
+    margin-bottom: 2rem;
+}
+
+.alert-modern {
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    position: relative;
+}
+
+.alert-success-modern {
+    background: linear-gradient(135deg, #45b7d120 0%, #96c93d20 100%);
+    border-left-color: #45b7d1;
+    color: #1a365d;
+}
+
+.alert-danger-modern {
+    background: linear-gradient(135deg, #ff6b6b20 0%, #ee5a6f20 100%);
+    border-left-color: #ff6b6b;
+    color: #742a2a;
+}
+
+.alert-warning-modern {
+    background: linear-gradient(135deg, #feca5720 0%, #ff9ff320 100%);
+    border-left-color: #feca57;
+    color: #744210;
+}
+
+.alert-info-modern {
+    background: linear-gradient(135deg, #4ecdc420 0%, #44a08d20 100%);
+    border-left-color: #4ecdc4;
+    color: #234e52;
+}
+
+/* Modern DataTables styling inspired by shadcn/ui */
+.dataTables_wrapper {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    color: #1f2937 !important;
+}
+
+.dataTables_wrapper .dataTables_length {
+    margin-bottom: 0;
+}
+
+.dataTables_wrapper .dataTables_length label {
+    font-weight: 500;
+    color: #374151;
+    font-size: 1.125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    line-height: 1;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    border: 1px solid #d1d5db !important;
+    border-radius: 8px !important;
+    padding: 0.75rem !important;
+    font-size: 1.125rem !important;
+    background: white !important;
+    color: #374151 !important;
+    transition: all 0.2s ease !important;
+    margin: 0 !important;
+    min-width: 90px !important;
+    height: 48px !important;
+}
+
+.dataTables_wrapper .dataTables_length select:focus {
+    outline: none !important;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 0;
+    float: none !important;
+    text-align: left !important;
+}
+
+.dataTables_wrapper .dataTables_filter label {
+    font-weight: 500;
+    color: #374151;
+    font-size: 1.125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    margin: 0;
+    line-height: 1;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #d1d5db !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1.125rem !important;
+    background: white !important;
+    color: #374151 !important;
+    transition: all 0.2s ease !important;
+    margin: 0 !important;
+    min-width: 320px !important;
+    height: 48px !important;
+    box-sizing: border-box !important;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    outline: none !important;
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+.dataTables_wrapper .dataTables_filter input::placeholder {
+    color: #9ca3af;
+}
+
+.dataTables_wrapper .dataTables_info {
+    color: #6b7280 !important;
+    font-size: 1.125rem !important;
+    font-weight: 500 !important;
+    padding: 1rem 0 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 1.5rem !important;
+    text-align: center !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    color: #374151 !important;
+    padding: 0.75rem 1.25rem !important;
+    margin: 0 0.125rem !important;
+    border-radius: 8px !important;
+    font-size: 1.125rem !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 48px !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #f9fafb !important;
+    border-color: #d1d5db !important;
+    color: #1f2937 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: #667eea !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    background: #f9fafb !important;
+    border-color: #f3f4f6 !important;
+    color: #d1d5db !important;
+    cursor: not-allowed !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+    background: #f9fafb !important;
+    border-color: #f3f4f6 !important;
+    color: #d1d5db !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Table controls layout */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    display: flex;
+    align-items: center;
+}
+
+.dataTables_top_controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    min-height: 48px; /* Ensures consistent height */
+}
+
+.dataTables_bottom_controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Empty state improvements */
+.dataTables_empty {
+    text-align: center !important;
+    padding: 4rem 2rem !important;
+    color: #6b7280 !important;
+}
+
+.courses-table tbody tr.odd,
+.courses-table tbody tr.even {
+    background: transparent;
+}
+
+.courses-table tbody tr:hover {
+    background: #f8fafc !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .courses-page {
+        padding: 1rem;
+    }
+    
+    .page-header-modern {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        text-align: center;
+    }
+    
+    .header-actions {
+        justify-content: center;
+    }
+    
+    .courses-table th,
+    .courses-table td {
+        padding: 1rem 0.5rem;
+    }
+    
+    /* Adjust column widths for mobile */
+    .courses-table th:nth-child(1),
+    .courses-table td:nth-child(1) {
+        width: 40%; /* Course Details - even wider on mobile */
+    }
+    
+    .courses-table th:nth-child(2),
+    .courses-table td:nth-child(2) {
+        width: 30%; /* Content - wider */
+    }
+    
+    .courses-table th:nth-child(3),
+    .courses-table td:nth-child(3) {
+        width: 10%; /* Created - smaller */
+    }
+    
+    .courses-table th:nth-child(4),
+    .courses-table td:nth-child(4) {
+        width: 10%; /* Modified - smaller */
+    }
+    
+    .courses-table th:nth-child(5),
+    .courses-table td:nth-child(5) {
+        width: 10%; /* Actions - smaller on mobile */
+    }
+    
+    .course-description {
+        font-size: 1rem !important;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .dataTables_top_controls,
+    .dataTables_bottom_controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        min-width: 250px !important;
+        font-size: 1rem !important;
+    }
+    
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label {
+        font-size: 1rem !important;
+    }
+    
+    .dataTables_wrapper .dataTables_length select {
+        font-size: 1rem !important;
+        height: 44px !important;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate {
+        text-align: center !important;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        margin: 0.125rem !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 1rem !important;
+    }
+    
+    .dataTables_wrapper .dataTables_info {
+        font-size: 1rem !important;
+    }
+    
+    .course-name {
+        font-size: 1.25rem !important;
+    }
+    
+    .course-description {
+        font-size: 1rem !important;
+    }
+}
+</style>
+
+<!-- Modern Page Header -->
+<div class="page-header-modern">
+    <div>
+        <h1 class="page-title">E-Learning Courses</h1>
+        <p class="page-subtitle">Manage and create security training courses</p>
+    </div>
+    <div class="header-actions">
+        <button type="button" id="new_course_button" class="btn-modern btn-primary-modern" onclick="newCourse()" data-toggle="modal" data-backdrop="static" data-target="#modal">
+            <i class="fa fa-plus"></i> New Course
+        </button>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+<div class="flash-messages">
+    {{template "flashes" .Flashes}}
+</div>
+
+<!-- Modern Courses Container -->
+<div class="courses-container">
+    <div class="courses-table-wrapper">
+        <table id="courseTable" class="courses-table">
+            <thead>
+                <tr>
+                    <th>Course Details</th>
+                    <th>Content</th>
+                    <th>Created</th>
+                    <th>Modified</th>
+                    <th class="no-sort">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Content will be loaded via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
 </div>
 
 <!-- Modal for course creation/editing -->
 <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px 16px 0 0; border-bottom: none; padding: 2rem;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white; opacity: 0.8; font-size: 2rem; line-height: 1;">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="modalLabel">New Course</h4>
+                <h4 class="modal-title" id="modalLabel" style="font-size: 1.5rem; font-weight: 600; margin: 0;">New Course</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 2rem; background: #f8f9fa;">
                 <div class="row" id="modal.flashes"></div>
                 
                 <!-- Course Basic Info -->
-                <div class="nav-tabs-custom">
-                    <ul class="nav nav-tabs" role="tablist">
+                <div class="nav-tabs-custom" style="background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); overflow: hidden;">
+                    <ul class="nav nav-tabs" role="tablist" style="border-bottom: 2px solid #e2e8f0; margin: 0; background: white;">
                         <li role="presentation" class="active">
-                            <a href="#course-info" aria-controls="course-info" role="tab" data-toggle="tab">Course Info</a>
+                            <a href="#course-info" aria-controls="course-info" role="tab" data-toggle="tab" style="color: #4a5568; font-weight: 600; border: none; padding: 1rem 2rem; border-radius: 0; position: relative;">Course Info</a>
                         </li>
                         <li role="presentation">
-                            <a href="#course-modules" aria-controls="course-modules" role="tab" data-toggle="tab">Modules</a>
+                            <a href="#course-modules" aria-controls="course-modules" role="tab" data-toggle="tab" style="color: #4a5568; font-weight: 600; border: none; padding: 1rem 2rem; border-radius: 0;">Modules</a>
                         </li>
                         <li role="presentation">
-                            <a href="#course-quizzes" aria-controls="course-quizzes" role="tab" data-toggle="tab">Quizzes</a>
+                            <a href="#course-quizzes" aria-controls="course-quizzes" role="tab" data-toggle="tab" style="color: #4a5568; font-weight: 600; border: none; padding: 1rem 2rem; border-radius: 0;">Quizzes</a>
                         </li>
                     </ul>
 
-                    <div class="tab-content">
+                    <div class="tab-content" style="padding: 2rem;">
                         <!-- Course Info Tab -->
                         <div role="tabpanel" class="tab-pane active" id="course-info">
-                            <br>
                             <div class="form-group">
-                                <label for="name">Course Name:</label>
-                                <input type="text" class="form-control" name="name" id="name" placeholder="Course Name" autofocus/>
-                                <div class="help-block">The name of the course</div>
+                                <label for="name" style="color: #2d3748; font-weight: 600; margin-bottom: 0.5rem; display: block;">Course Name:</label>
+                                <input type="text" class="form-control" name="name" id="name" placeholder="Course Name" autofocus style="border: 2px solid #e2e8f0; border-radius: 8px; padding: 1rem; font-size: 1rem; transition: all 0.3s ease; background: white;"/>
+                                <div class="help-block" style="color: #718096; font-size: 0.875rem; margin-top: 0.5rem;">The name of the course</div>
                             </div>
                             
                             <div class="form-group">
-                                <label for="description">Description:</label>
-                                <textarea class="form-control" name="description" id="description" rows="3" placeholder="Course description"></textarea>
-                                <div class="help-block">Brief description of the course content</div>
+                                <label for="description" style="color: #2d3748; font-weight: 600; margin-bottom: 0.5rem; display: block;">Description:</label>
+                                <textarea class="form-control" name="description" id="description" rows="3" placeholder="Course description" style="border: 2px solid #e2e8f0; border-radius: 8px; padding: 1rem; font-size: 1rem; transition: all 0.3s ease; background: white; resize: vertical;"></textarea>
+                                <div class="help-block" style="color: #718096; font-size: 0.875rem; margin-top: 0.5rem;">Brief description of the course content</div>
                             </div>
                         </div>
 
@@ -109,9 +741,11 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="modalSubmit">Save Course</button>
+            <div class="modal-footer" style="background: white; border-top: 1px solid #e2e8f0; padding: 2rem; border-radius: 0 0 16px 16px;">
+                <button type="button" class="btn-modern btn-secondary-modern" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-modern btn-primary-modern" id="modalSubmit">
+                    <i class="fa fa-save"></i> Save Course
+                </button>
             </div>
         </div>
     </div>
