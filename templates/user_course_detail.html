@@ -1808,6 +1808,7 @@ let currentQuizSession = {
     moduleId: null,
     quizId: null,
     courseId: null,
+    attemptId: null,
     questions: [],
     currentQuestionIndex: 0,
     answers: {},
@@ -1834,6 +1835,7 @@ function startInlineQuiz(moduleId, quizId, courseId) {
         url: '/api/user/courses/' + courseId + '/quiz/' + quizId + '/start',
         method: 'POST',
         success: function(response) {
+            currentQuizSession.attemptId = response.attempt_id;
             currentQuizSession.quiz = response.quiz;
             loadQuizQuestions(moduleId, quizId);
             startQuizTimer(moduleId, response.quiz.time_limit);
@@ -1848,7 +1850,7 @@ function startInlineQuiz(moduleId, quizId, courseId) {
 // Load quiz questions
 function loadQuizQuestions(moduleId, quizId) {
     $.ajax({
-        url: '/api/user/quiz/' + quizId + '/questions',
+        url: '/api/user/courses/' + currentQuizSession.courseId + '/quiz/' + quizId + '/questions',
         method: 'GET',
         success: function(response) {
             currentQuizSession.questions = response.questions;
@@ -1992,9 +1994,18 @@ function submitQuiz(moduleId, timeExpired = false) {
         clearInterval(currentQuizSession.timerInterval);
     }
     
+    // Format responses correctly for submission
+    const responses = [];
+    for (const [questionId, selectedOptionId] of Object.entries(currentQuizSession.answers)) {
+        responses.push({
+            question_id: parseInt(questionId),
+            selected_option_id: parseInt(selectedOptionId)
+        });
+    }
+    
     const submissionData = {
-        answers: currentQuizSession.answers,
-        time_expired: timeExpired
+        attempt_id: currentQuizSession.attemptId,
+        responses: responses
     };
     
     $.ajax({

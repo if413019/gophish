@@ -352,3 +352,19 @@ func (as *Server) SubmitQuiz(w http.ResponseWriter, r *http.Request) {
 
 	JSONResponse(w, result, http.StatusOK)
 }
+
+// GetQuizQuestions handles getting quiz questions
+func (as *Server) GetQuizQuestions(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	quizId, _ := strconv.ParseInt(vars["quiz_id"], 0, 64)
+	
+	// Get quiz with questions
+	quiz, err := models.GetQuizWithQuestions(quizId, 0) // courseId not needed for questions
+	if err != nil {
+		JSONResponse(w, models.Response{Success: false, Message: "Quiz not found"}, http.StatusNotFound)
+		return
+	}
+	
+	// Return questions
+	JSONResponse(w, map[string]interface{}{"questions": quiz.Questions}, http.StatusOK)
+}
