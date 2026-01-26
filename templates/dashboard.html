@@ -1,70 +1,145 @@
 {{define "body"}}
 <div class="main">
-    <h1 class="page-header">
-        Dashboard
-    </h1>
-    <div id="loading">
-        <i class="fa fa-spinner fa-spin fa-4x"></i>
-    </div>
-    {{template "flashes" .Flashes}}
-    <div id="emptyMessage" style="display:none;">
-        <div class="alert alert-info">
-            No campaigns created yet. Let's create one!
+<div class="modern-page dashboard-page">
+    <!-- Modern Page Header -->
+    <div class="page-header-modern">
+        <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Overview of your phishing campaigns and security metrics</p>
         </div>
-    </div>
-    <div id="dashboard" style="display:none;">
-        <div class="row">
-            <div id="overview_chart" style="height:200px;" class="col-lg-12 col-md-12 col-sm-12 col-xs-12"></div>
-        </div>
-        <div class="row">
-            <div style="height:200px;" class="col-lg-1 col-md-1"></div>
-            <div id="sent_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="opened_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="clicked_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="submitted_data_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="email_reported_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div style="height:200px;" class="col-lg-1 col-md-1"></div>
-        </div>
-        <div class="row">
-            <h2>Recent Campaigns</h2>
-        </div>
-        <div class="row">
-            <a href="/campaigns">
-                <button type="button" class="btn btn-primary">View All</button>
+        <div class="header-actions">
+            <a href="/campaigns" class="btn-modern btn-primary-modern">
+                <i class="fa fa-list"></i> All Campaigns
             </a>
         </div>
-        &nbsp;&nbsp;
-        <div class="row">
-            <table id="campaignTable" class="table">
-                <thead>
-                    <tr>
-                        <th class="col-md-2 col-sm-2">Name</th>
-                        <th class="col-md-2 col-sm-2">Created Date</th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-envelope-o"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-envelope-open-o"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-mouse-pointer"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-exclamation-circle"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-bullhorn"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">Status</th>
-                        <th class="col-md-2 col-sm-2 no-sort"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+    </div>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {{template "flashes" .Flashes}}
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading-state">
+        <i class="fa fa-spinner fa-spin"></i>
+        <p>Loading dashboard data...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyMessage" style="display:none;">
+        <div class="empty-state">
+            <i class="fa fa-rocket"></i>
+            <h3>No Campaigns Yet</h3>
+            <p>Create your first phishing campaign to start tracking security awareness metrics.</p>
+            <a href="/campaigns/new" class="btn-modern btn-primary-modern">
+                <i class="fa fa-plus"></i> Create Campaign
+            </a>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div id="dashboard" style="display:none;">
+        <!-- Stats Cards with Mini Charts -->
+        <div class="stats-grid" id="statsGrid" role="region" aria-label="Campaign Statistics">
+            <div class="stat-card" id="stat-sent" aria-label="Emails sent statistics">
+                <div class="stat-card-icon sent" aria-hidden="true">
+                    <i class="fa fa-envelope"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="sent-count" aria-live="polite">0</h3>
+                    <p>Emails Sent</p>
+                </div>
+                <div class="stat-card-chart" id="sent_chart" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat-card" id="stat-opened" aria-label="Emails opened statistics">
+                <div class="stat-card-icon opened" aria-hidden="true">
+                    <i class="fa fa-envelope-open"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="opened-count" aria-live="polite">0</h3>
+                    <p>Emails Opened</p>
+                </div>
+                <div class="stat-card-chart" id="opened_chart" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat-card" id="stat-clicked" aria-label="Links clicked statistics">
+                <div class="stat-card-icon clicked" aria-hidden="true">
+                    <i class="fa fa-mouse-pointer"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="clicked-count" aria-live="polite">0</h3>
+                    <p>Clicked Link</p>
+                </div>
+                <div class="stat-card-chart" id="clicked_chart" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat-card" id="stat-submitted" aria-label="Data submitted statistics">
+                <div class="stat-card-icon submitted" aria-hidden="true">
+                    <i class="fa fa-exclamation-circle"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="submitted_data-count" aria-live="polite">0</h3>
+                    <p>Submitted Data</p>
+                </div>
+                <div class="stat-card-chart" id="submitted_data_chart" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat-card" id="stat-reported" aria-label="Phishing reported statistics">
+                <div class="stat-card-icon reported" aria-hidden="true">
+                    <i class="fa fa-flag"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="email_reported-count" aria-live="polite">0</h3>
+                    <p>Reported Phishing</p>
+                </div>
+                <div class="stat-card-chart" id="email_reported_chart" aria-hidden="true"></div>
+            </div>
+        </div>
+
+        <!-- Timeline Chart -->
+        <div class="chart-container">
+            <div class="chart-container-header">
+                <h3><i class="fa fa-line-chart"></i> Phishing Success Over Time</h3>
+            </div>
+            <div id="overview_chart" style="height:280px;"></div>
+        </div>
+
+        <!-- Recent Campaigns Section -->
+        <div class="modern-card">
+            <div class="modern-card-header">
+                <div class="section-header" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                    <h2><i class="fa fa-bullseye"></i> Recent Campaigns</h2>
+                    <a href="/campaigns" class="view-all-btn">View All</a>
+                </div>
+            </div>
+            <div class="modern-card-body">
+                <div class="modern-table-wrapper">
+                    <table id="campaignTable" class="modern-table" role="table" aria-label="Recent campaigns">
+                        <thead>
+                            <tr>
+                                <th scope="col">Campaign Name</th>
+                                <th scope="col">Created Date</th>
+                                <th scope="col"><i class="fa fa-envelope" aria-hidden="true"></i><span class="sr-only">Emails Sent</span></th>
+                                <th scope="col"><i class="fa fa-envelope-open" aria-hidden="true"></i><span class="sr-only">Emails Opened</span></th>
+                                <th scope="col"><i class="fa fa-mouse-pointer" aria-hidden="true"></i><span class="sr-only">Links Clicked</span></th>
+                                <th scope="col"><i class="fa fa-exclamation-circle" aria-hidden="true"></i><span class="sr-only">Data Submitted</span></th>
+                                <th scope="col"><i class="fa fa-flag" aria-hidden="true"></i><span class="sr-only">Reported</span></th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="no-sort">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-{{end}} {{define "scripts"}}
+</div>
+{{end}}
+
+{{define "scripts"}}
 <script src="/js/dist/app/dashboard.min.js"></script>
 {{end}}

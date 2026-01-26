@@ -1,83 +1,84 @@
 var campaigns = []
+
 // statuses is a helper map to point result statuses to ui classes
 var statuses = {
     "Email Sent": {
         color: "#1abc9c",
-        label: "label-success",
+        label: "label-success-modern",
         icon: "fa-envelope",
         point: "ct-point-sent"
     },
     "Emails Sent": {
         color: "#1abc9c",
-        label: "label-success",
+        label: "label-success-modern",
         icon: "fa-envelope",
         point: "ct-point-sent"
     },
     "In progress": {
-        label: "label-primary"
+        label: "label-primary-modern"
     },
     "Queued": {
-        label: "label-info"
+        label: "label-info-modern"
     },
     "Completed": {
-        label: "label-success"
+        label: "label-success-modern"
     },
     "Email Opened": {
         color: "#f9bf3b",
-        label: "label-warning",
-        icon: "fa-envelope",
+        label: "label-warning-modern",
+        icon: "fa-envelope-open",
         point: "ct-point-opened"
     },
     "Email Reported": {
         color: "#45d6ef",
-        label: "label-warning",
-        icon: "fa-bullhorne",
+        label: "label-info-modern",
+        icon: "fa-flag",
         point: "ct-point-reported"
     },
     "Clicked Link": {
         color: "#F39C12",
-        label: "label-clicked",
+        label: "label-warning-modern",
         icon: "fa-mouse-pointer",
         point: "ct-point-clicked"
     },
     "Success": {
         color: "#f05b4f",
-        label: "label-danger",
+        label: "label-danger-modern",
         icon: "fa-exclamation",
         point: "ct-point-clicked"
     },
     "Error": {
         color: "#6c7a89",
-        label: "label-default",
+        label: "label-secondary-modern",
         icon: "fa-times",
         point: "ct-point-error"
     },
     "Error Sending Email": {
         color: "#6c7a89",
-        label: "label-default",
+        label: "label-secondary-modern",
         icon: "fa-times",
         point: "ct-point-error"
     },
     "Submitted Data": {
         color: "#f05b4f",
-        label: "label-danger",
+        label: "label-danger-modern",
         icon: "fa-exclamation",
         point: "ct-point-clicked"
     },
     "Unknown": {
         color: "#6c7a89",
-        label: "label-default",
+        label: "label-secondary-modern",
         icon: "fa-question",
         point: "ct-point-error"
     },
     "Sending": {
         color: "#428bca",
-        label: "label-primary",
+        label: "label-primary-modern",
         icon: "fa-spinner",
         point: "ct-point-sending"
     },
     "Campaign Created": {
-        label: "label-success",
+        label: "label-success-modern",
         icon: "fa-rocket"
     }
 }
@@ -90,64 +91,75 @@ var statsMapping = {
     "submitted_data": "Submitted Data",
 }
 
-function deleteCampaign(idx) {
-    if (confirm("Delete " + campaigns[idx].name + "?")) {
-        api.campaignId.delete(campaigns[idx].id)
-            .success(function (data) {
-                successFlash(data.message)
-                location.reload()
-            })
-    }
+// Color mapping for stat cards
+var statColors = {
+    "sent": "#1abc9c",
+    "opened": "#f9bf3b",
+    "clicked": "#F39C12",
+    "submitted_data": "#f05b4f",
+    "email_reported": "#45d6ef"
 }
 
-/* Renders a pie chart using the provided chartops */
-function renderPieChart(chartopts) {
+function deleteCampaign(campaignId) {
+    var campaign = campaigns.find(function(c) { return c.id === campaignId; });
+    if (!campaign) {
+        errorFlash("Campaign not found");
+        return;
+    }
+
+    Swal.fire({
+        title: 'Delete Campaign?',
+        text: "Are you sure you want to delete " + campaign.name + "?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#667eea',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            api.campaignId.delete(campaignId)
+                .success(function (data) {
+                    successFlash(data.message)
+                    location.reload()
+                })
+                .error(function() {
+                    errorFlash("Error deleting campaign")
+                })
+        }
+    })
+}
+
+/* Renders a mini pie chart in stat cards */
+function renderMiniPieChart(chartopts) {
     return Highcharts.chart(chartopts['elemId'], {
         chart: {
             type: 'pie',
-            events: {
-                load: function () {
-                    var chart = this,
-                        rend = chart.renderer,
-                        pie = chart.series[0],
-                        left = chart.plotLeft + pie.center[0],
-                        top = chart.plotTop + pie.center[1];
-                    this.innerText = rend.text(chartopts['data'][0].count, left, top).
-                    attr({
-                        'text-anchor': 'middle',
-                        'font-size': '16px',
-                        'font-weight': 'bold',
-                        'fill': chartopts['colors'][0],
-                        'font-family': 'Helvetica,Arial,sans-serif'
-                    }).add();
-                },
-                render: function () {
-                    this.innerText.attr({
-                        text: chartopts['data'][0].count
-                    })
-                }
-            }
+            backgroundColor: 'transparent',
+            height: 80,
+            width: 80,
+            margin: [0, 0, 0, 0],
+            spacing: [0, 0, 0, 0]
         },
         title: {
-            text: chartopts['title']
-        },
-        plotOptions: {
-            pie: {
-                innerSize: '80%',
-                dataLabels: {
-                    enabled: false
-                }
-            }
+            text: null
         },
         credits: {
             enabled: false
         },
         tooltip: {
-            formatter: function () {
-                if (this.key == undefined) {
-                    return false
+            enabled: false
+        },
+        plotOptions: {
+            pie: {
+                innerSize: '70%',
+                dataLabels: {
+                    enabled: false
+                },
+                states: {
+                    hover: {
+                        enabled: false
+                    }
                 }
-                return '<span style="color:' + this.color + '">\u25CF</span>' + this.point.name + ': <b>' + this.y + '%</b><br/>'
             }
         },
         series: [{
@@ -158,7 +170,6 @@ function renderPieChart(chartopts) {
 }
 
 function generateStatsPieCharts(campaigns) {
-    var stats_data = []
     var stats_series_data = {}
     var total = 0
 
@@ -175,44 +186,44 @@ function generateStatsPieCharts(campaigns) {
             }
         })
     })
+
     $.each(stats_series_data, function (status, count) {
-        // I don't like this, but I guess it'll have to work.
-        // Turns submitted_data into Submitted Data
         if (!(status in statsMapping)) {
             return true
         }
-        status_label = statsMapping[status]
-        stats_data.push({
-            name: status_label,
-            y: Math.floor((count / total) * 100),
-            count: count
-        })
-        stats_data.push({
-            name: '',
-            y: 100 - Math.floor((count / total) * 100)
-        })
-        var stats_chart = renderPieChart({
-            elemId: status + '_chart',
-            title: status_label,
-            name: status,
-            data: stats_data,
-            colors: [statuses[status_label].color, "#dddddd"]
-        })
 
-        stats_data = []
+        // Update the count display
+        $('#' + status + '-count').text(count)
+
+        // Calculate percentage
+        var percentage = total > 0 ? Math.floor((count / total) * 100) : 0
+
+        // Render mini pie chart
+        var stats_data = [
+            { name: status, y: percentage },
+            { name: '', y: 100 - percentage }
+        ]
+
+        renderMiniPieChart({
+            elemId: status + '_chart',
+            data: stats_data,
+            colors: [statColors[status], "#e2e8f0"]
+        })
     });
 }
 
 function generateTimelineChart(campaigns) {
+    if (!campaigns || campaigns.length === 0) {
+        $('#overview_chart').html('<div class="empty-state" style="padding: 2rem;"><i class="fa fa-line-chart" style="font-size: 3rem; color: #cbd5e0; margin-bottom: 1rem;"></i><p style="color: #718096;">No campaign data to display yet</p></div>');
+        return;
+    }
+
     var overview_data = []
     $.each(campaigns, function (i, campaign) {
         var campaign_date = moment.utc(campaign.created_date).local()
-        // Add it to the chart data
         campaign.y = 0
-        // Clicked events also contain our data submitted events
         campaign.y += campaign.stats.clicked
         campaign.y = Math.floor((campaign.y / campaign.stats.total) * 100)
-        // Add the data to the overview chart
         overview_data.push({
             campaign_id: campaign.id,
             name: campaign.name,
@@ -220,13 +231,18 @@ function generateTimelineChart(campaigns) {
             y: campaign.y
         })
     })
+
     Highcharts.chart('overview_chart', {
         chart: {
             zoomType: 'x',
-            type: 'areaspline'
+            type: 'areaspline',
+            backgroundColor: 'transparent',
+            style: {
+                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+            }
         },
         title: {
-            text: 'Phishing Success Overview'
+            text: null
         },
         xAxis: {
             type: 'datetime',
@@ -237,31 +253,73 @@ function generateTimelineChart(campaigns) {
                 day: '%b %d, %Y',
                 week: '%b %d, %Y',
                 month: '%b %Y'
+            },
+            lineColor: '#e2e8f0',
+            tickColor: '#e2e8f0',
+            labels: {
+                style: {
+                    color: '#718096'
+                }
             }
         },
         yAxis: {
             min: 0,
             max: 100,
             title: {
-                text: "% of Success"
+                text: "Success Rate (%)",
+                style: {
+                    color: '#718096'
+                }
+            },
+            gridLineColor: '#e2e8f0',
+            labels: {
+                style: {
+                    color: '#718096'
+                }
             }
         },
         tooltip: {
+            backgroundColor: 'rgba(45, 55, 72, 0.95)',
+            borderColor: '#667eea',
+            borderRadius: 8,
+            style: {
+                color: '#ffffff'
+            },
             formatter: function () {
-                return Highcharts.dateFormat('%A, %b %d %l:%M:%S %P', new Date(this.x)) +
-                    '<br>' + this.point.name + '<br>% Success: <b>' + this.y + '%</b>'
+                return '<b>' + this.point.name + '</b><br/>' +
+                    Highcharts.dateFormat('%b %d, %Y', new Date(this.x)) +
+                    '<br/>Success Rate: <b>' + this.y + '%</b>'
             }
         },
         legend: {
             enabled: false
         },
         plotOptions: {
-            series: {
+            areaspline: {
+                fillColor: {
+                    linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops: [
+                        [0, 'rgba(102, 126, 234, 0.4)'],
+                        [1, 'rgba(102, 126, 234, 0.05)']
+                    ]
+                },
+                lineColor: '#667eea',
+                lineWidth: 3,
                 marker: {
                     enabled: true,
-                    symbol: 'circle',
-                    radius: 3
-                },
+                    fillColor: '#667eea',
+                    lineColor: '#ffffff',
+                    lineWidth: 2,
+                    radius: 5,
+                    symbol: 'circle'
+                }
+            },
+            series: {
                 cursor: 'pointer',
                 point: {
                     events: {
@@ -277,8 +335,7 @@ function generateTimelineChart(campaigns) {
         },
         series: [{
             data: overview_data,
-            color: "#f05b4f",
-            fillOpacity: 0.5
+            name: 'Success Rate'
         }]
     })
 }
@@ -289,14 +346,16 @@ $(document).ready(function () {
             useUTC: false
         }
     })
+
     api.campaigns.summary()
         .success(function (data) {
             $("#loading").hide()
             campaigns = data.campaigns
             if (campaigns.length > 0) {
                 $("#dashboard").show()
-                // Create the overview chart data
-                campaignTable = $("#campaignTable").DataTable({
+
+                // Initialize DataTable with modern styling
+                var campaignTable = $("#campaignTable").DataTable({
                     columnDefs: [{
                             orderable: false,
                             targets: "no-sort"
@@ -324,22 +383,46 @@ $(document).ready(function () {
                     ],
                     order: [
                         [1, "desc"]
-                    ]
+                    ],
+                    language: {
+                        emptyTable: "No campaigns found",
+                        info: "Showing _START_ to _END_ of _TOTAL_ campaigns",
+                        infoEmpty: "No campaigns to show",
+                        infoFiltered: "(filtered from _MAX_ total campaigns)",
+                        lengthMenu: "Show _MENU_ campaigns",
+                        search: "Search:",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
+                    },
+                    pageLength: 10,
+                    dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rt<"row"<"col-sm-6"i><"col-sm-6"p>>'
                 });
-                campaignRows = []
+
+                var campaignRows = []
                 $.each(campaigns, function (i, campaign) {
-                    var campaign_date = moment(campaign.created_date).format('MMMM Do YYYY, h:mm:ss a')
-                    var label = statuses[campaign.status].label || "label-default";
-                    //section for tooltips on the status of a campaign to show some quick stats
+                    var campaign_date = moment(campaign.created_date).format('MMM D, YYYY h:mm A')
+                    var label = statuses[campaign.status].label || "label-secondary-modern";
+
+                    // Quick stats tooltip
                     var launchDate;
                     if (moment(campaign.launch_date).isAfter(moment())) {
-                        launchDate = "Scheduled to start: " + moment(campaign.launch_date).format('MMMM Do YYYY, h:mm:ss a')
-                        var quickStats = launchDate + "<br><br>" + "Number of recipients: " + campaign.stats.total
+                        launchDate = "Scheduled: " + moment(campaign.launch_date).format('MMM D, YYYY h:mm A')
+                        var quickStats = launchDate + "<br>Recipients: " + campaign.stats.total
                     } else {
-                        launchDate = "Launch Date: " + moment(campaign.launch_date).format('MMMM Do YYYY, h:mm:ss a')
-                        var quickStats = launchDate + "<br><br>" + "Number of recipients: " + campaign.stats.total + "<br><br>" + "Emails opened: " + campaign.stats.opened + "<br><br>" + "Emails clicked: " + campaign.stats.clicked + "<br><br>" + "Submitted Credentials: " + campaign.stats.submitted_data + "<br><br>" + "Errors : " + campaign.stats.error + "<br><br>" + "Reported : " + campaign.stats.email_reported
+                        launchDate = "Launched: " + moment(campaign.launch_date).format('MMM D, YYYY h:mm A')
+                        var quickStats = launchDate +
+                            "<br>Recipients: " + campaign.stats.total +
+                            "<br>Opened: " + campaign.stats.opened +
+                            "<br>Clicked: " + campaign.stats.clicked +
+                            "<br>Submitted: " + campaign.stats.submitted_data +
+                            "<br>Errors: " + campaign.stats.error +
+                            "<br>Reported: " + campaign.stats.email_reported
                     }
-                    // Add it to the list
+
                     campaignRows.push([
                         escapeHtml(campaign.name),
                         campaign_date,
@@ -348,17 +431,23 @@ $(document).ready(function () {
                         campaign.stats.clicked,
                         campaign.stats.submitted_data,
                         campaign.stats.email_reported,
-                        "<span class=\"label " + label + "\" data-toggle=\"tooltip\" data-placement=\"right\" data-html=\"true\" title=\"" + quickStats + "\">" + campaign.status + "</span>",
-                        "<div class='pull-right'><a class='btn btn-primary' href='/campaigns/" + campaign.id + "' data-toggle='tooltip' data-placement='left' title='View Results'>\
-                    <i class='fa fa-bar-chart'></i>\
-                    </a>\
-                    <button class='btn btn-danger' onclick='deleteCampaign(" + i + ")' data-toggle='tooltip' data-placement='left' title='Delete Campaign'>\
-                    <i class='fa fa-trash-o'></i>\
-                    </button></div>"
+                        '<span class="label-modern ' + label + '" data-toggle="tooltip" data-placement="top" data-html="true" title="' + quickStats + '">' + campaign.status + '</span>',
+                        '<div class="action-buttons">' +
+                            '<a class="btn-modern btn-primary-modern btn-sm-modern" href="/campaigns/' + campaign.id + '" aria-label="View results for ' + escapeHtml(campaign.name) + '" data-toggle="tooltip" data-placement="top" title="View Results">' +
+                                '<i class="fa fa-bar-chart" aria-hidden="true"></i>' +
+                            '</a>' +
+                            '<button class="btn-modern btn-danger-modern btn-sm-modern" onclick="deleteCampaign(' + campaign.id + ')" aria-label="Delete ' + escapeHtml(campaign.name) + '" data-toggle="tooltip" data-placement="top" title="Delete Campaign">' +
+                                '<i class="fa fa-trash" aria-hidden="true"></i>' +
+                            '</button>' +
+                        '</div>'
                     ])
-                    $('[data-toggle="tooltip"]').tooltip()
                 })
+
                 campaignTable.rows.add(campaignRows).draw()
+
+                // Initialize tooltips
+                $('[data-toggle="tooltip"]').tooltip()
+
                 // Build the charts
                 generateStatsPieCharts(campaigns)
                 generateTimelineChart(campaigns)
@@ -367,6 +456,7 @@ $(document).ready(function () {
             }
         })
         .error(function () {
+            $("#loading").hide()
             errorFlash("Error fetching campaigns")
         })
 })
