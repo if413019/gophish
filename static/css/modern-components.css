@@ -763,6 +763,11 @@
     color: #4f46e5;
 }
 
+.label-secondary-modern {
+    background: rgba(108, 117, 125, 0.15);
+    color: #4b5563;
+}
+
 /* ================================
    Flash Messages Container
    ================================ */
@@ -844,4 +849,321 @@
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* ================================
+   Modern Tabs
+   ================================ */
+.modern-tabs-container {
+    border-bottom: 2px solid var(--modern-border);
+    background: var(--modern-bg-hover);
+    padding: 0 1.5rem;
+}
+
+.modern-nav-tabs {
+    border-bottom: none;
+    margin: 0;
+}
+
+.modern-nav-tabs > li {
+    margin-bottom: -2px;
+}
+
+.modern-nav-tabs > li > a {
+    border: none;
+    border-radius: 0;
+    color: var(--modern-text-muted);
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 1rem 1.5rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modern-nav-tabs > li > a:hover {
+    background: transparent;
+    color: var(--modern-primary);
+    border: none;
+}
+
+.modern-nav-tabs > li.active > a,
+.modern-nav-tabs > li.active > a:hover,
+.modern-nav-tabs > li.active > a:focus {
+    border: none;
+    border-bottom: 3px solid var(--modern-primary);
+    color: var(--modern-primary);
+    background: transparent;
+    font-weight: 600;
+}
+
+.modern-nav-tabs > li > a i {
+    font-size: 1rem;
+}
+
+.modern-tab-content {
+    padding: 1.5rem;
+}
+
+/* ================================
+   Modern Modal
+   ================================ */
+.modern-modal {
+    border-radius: var(--modern-radius-lg);
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.modern-modal-header {
+    background: var(--modern-primary-gradient);
+    color: white;
+    border-bottom: none;
+    padding: 1.5rem 2rem;
+}
+
+.modern-modal-header .modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modern-modal-header .modern-close {
+    color: white;
+    opacity: 0.8;
+    font-size: 1.75rem;
+    line-height: 1;
+    text-shadow: none;
+}
+
+.modern-modal-header .modern-close:hover {
+    opacity: 1;
+    color: white;
+}
+
+.modern-modal-body {
+    padding: 2rem;
+    background: var(--modern-bg-page);
+}
+
+.modern-modal-body .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.modern-modal-body .form-group label {
+    color: var(--modern-text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 1rem;
+}
+
+.modern-modal-body .form-control {
+    border: 2px solid var(--modern-border);
+    border-radius: var(--modern-radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+    color: var(--modern-text-primary);
+}
+
+.modern-modal-body .form-control:focus {
+    outline: none;
+    border-color: var(--modern-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.modern-modal-body .form-control::placeholder {
+    color: var(--modern-text-light);
+}
+
+.modern-modal-body .help-block {
+    color: var(--modern-text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.modern-modal-body .input-group {
+    display: flex;
+}
+
+.modern-modal-body .input-group .form-control {
+    border-radius: var(--modern-radius-sm) 0 0 var(--modern-radius-sm);
+}
+
+.modern-modal-body .input-group-btn {
+    display: flex;
+}
+
+.modern-modal-body .input-group-btn .btn-modern {
+    border-radius: 0 var(--modern-radius-sm) var(--modern-radius-sm) 0;
+}
+
+.modern-modal-footer {
+    background: white;
+    border-top: 1px solid var(--modern-border);
+    padding: 1.5rem 2rem;
+}
+
+/* ================================
+   Modern Dropdown
+   ================================ */
+.modern-dropdown {
+    border: 1px solid var(--modern-border);
+    border-radius: var(--modern-radius-sm);
+    box-shadow: var(--modern-shadow);
+    padding: 0.5rem 0;
+}
+
+.modern-dropdown > li > a {
+    padding: 0.75rem 1.5rem;
+    color: var(--modern-text-secondary);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.modern-dropdown > li > a:hover {
+    background: var(--modern-bg-hover);
+    color: var(--modern-primary);
+}
+
+.modern-dropdown > li > a i {
+    width: 1.25rem;
+    text-align: center;
+}
+
+/* ================================
+   Refresh Indicator
+   ================================ */
+.refresh-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--modern-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* ================================
+   Campaign Results Page Specific
+   ================================ */
+.campaign-results-page .header-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.campaign-results-page .btn-group {
+    display: inline-flex;
+}
+
+.campaign-results-page .btn-group .dropdown-toggle {
+    border-radius: var(--modern-radius-sm);
+}
+
+/* Timeline styling for results */
+.modern-page .timeline {
+    background: var(--modern-bg-card);
+    border-radius: var(--modern-radius);
+    padding: 1.5rem;
+    border: 1px solid var(--modern-border);
+    box-shadow: var(--modern-shadow-sm);
+}
+
+.modern-page .timeline h6 {
+    color: var(--modern-text-primary);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.modern-page .timeline .subtitle {
+    color: var(--modern-text-muted);
+    font-size: 0.9rem;
+}
+
+.modern-page .timeline-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modern-page .timeline-message {
+    font-size: 1rem;
+    color: var(--modern-text-secondary);
+}
+
+.modern-page .timeline-date {
+    color: var(--modern-text-muted);
+    font-size: 0.85rem;
+}
+
+.modern-page .timeline-event-details {
+    color: var(--modern-primary);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.modern-page .timeline-event-results {
+    background: var(--modern-bg-hover);
+    border-radius: var(--modern-radius-sm);
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.modern-page .timeline-replay-button .btn {
+    background: var(--modern-success-gradient);
+    border: none;
+    color: white;
+    border-radius: var(--modern-radius-sm);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* Well styling for timeline */
+.modern-page .well {
+    background: var(--modern-bg-card);
+    border: 1px solid var(--modern-border);
+    border-radius: var(--modern-radius);
+    box-shadow: var(--modern-shadow-sm);
+}
+
+/* ================================
+   Campaigns Page Specific
+   ================================ */
+.campaigns-page .modern-nav-tabs {
+    display: flex;
+}
+
+/* Modal Form Enhancements */
+.modern-modal-body .select2-container--bootstrap .select2-selection {
+    border: 2px solid var(--modern-border);
+    border-radius: var(--modern-radius-sm);
+    height: auto;
+    padding: 0.5rem;
+}
+
+.modern-modal-body .select2-container--bootstrap .select2-selection:focus {
+    border-color: var(--modern-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.modern-modal-body .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+    background: var(--modern-primary-gradient);
+    border: none;
+    color: white;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+}
+
+.modern-modal-body .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove {
+    color: white;
+    margin-right: 0.25rem;
 }

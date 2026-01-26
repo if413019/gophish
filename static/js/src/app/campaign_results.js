@@ -5,106 +5,106 @@ var doPoll = true;
 var statuses = {
     "Email Sent": {
         color: "#1abc9c",
-        label: "label-success",
+        label: "label-modern label-success-modern",
         icon: "fa-envelope",
         point: "ct-point-sent"
     },
     "Emails Sent": {
         color: "#1abc9c",
-        label: "label-success",
+        label: "label-modern label-success-modern",
         icon: "fa-envelope",
         point: "ct-point-sent"
     },
     "In progress": {
-        label: "label-primary"
+        label: "label-modern label-primary-modern"
     },
     "Queued": {
-        label: "label-info"
+        label: "label-modern label-info-modern"
     },
     "Completed": {
-        label: "label-success"
+        label: "label-modern label-success-modern"
     },
     "Email Opened": {
         color: "#f9bf3b",
-        label: "label-warning",
+        label: "label-modern label-warning-modern",
         icon: "fa-envelope-open",
         point: "ct-point-opened"
     },
     "Clicked Link": {
         color: "#F39C12",
-        label: "label-clicked",
+        label: "label-modern label-warning-modern",
         icon: "fa-mouse-pointer",
         point: "ct-point-clicked"
     },
     "Success": {
         color: "#f05b4f",
-        label: "label-danger",
+        label: "label-modern label-danger-modern",
         icon: "fa-exclamation",
         point: "ct-point-clicked"
     },
     //not a status, but is used for the campaign timeline and user timeline
     "Email Reported": {
         color: "#45d6ef",
-        label: "label-info",
+        label: "label-modern label-info-modern",
         icon: "fa-bullhorn",
         point: "ct-point-reported"
     },
     "Course Enrolled": {
         color: "#9b59b6",
-        label: "label-enrolled",
+        label: "label-modern label-primary-modern",
         icon: "fa-graduation-cap",
         point: "ct-point-enrolled"
     },
     "Course Completed": {
         color: "#27ae60",
-        label: "label-completed",
+        label: "label-modern label-success-modern",
         icon: "fa-trophy",
         point: "ct-point-completed"
     },
     "Error": {
         color: "#6c7a89",
-        label: "label-default",
+        label: "label-modern label-secondary-modern",
         icon: "fa-times",
         point: "ct-point-error"
     },
     "Error Sending Email": {
         color: "#6c7a89",
-        label: "label-default",
+        label: "label-modern label-secondary-modern",
         icon: "fa-times",
         point: "ct-point-error"
     },
     "Submitted Data": {
         color: "#f05b4f",
-        label: "label-danger",
+        label: "label-modern label-danger-modern",
         icon: "fa-exclamation",
         point: "ct-point-clicked"
     },
     "Unknown": {
         color: "#6c7a89",
-        label: "label-default",
+        label: "label-modern label-secondary-modern",
         icon: "fa-question",
         point: "ct-point-error"
     },
     "Sending": {
         color: "#428bca",
-        label: "label-primary",
+        label: "label-modern label-primary-modern",
         icon: "fa-spinner",
         point: "ct-point-sending"
     },
     "Retrying": {
         color: "#6c7a89",
-        label: "label-default",
+        label: "label-modern label-secondary-modern",
         icon: "fa-clock-o",
         point: "ct-point-error"
     },
     "Scheduled": {
         color: "#428bca",
-        label: "label-primary",
+        label: "label-modern label-primary-modern",
         icon: "fa-clock-o",
         point: "ct-point-sending"
     },
     "Campaign Created": {
-        label: "label-success",
+        label: "label-modern label-success-modern",
         icon: "fa-rocket"
     }
 }
@@ -144,7 +144,7 @@ function deleteCampaign() {
         animation: false,
         showCancelButton: true,
         confirmButtonText: "Delete Campaign",
-        confirmButtonColor: "#428bca",
+        confirmButtonColor: "#ff6b6b",
         reverseButtons: true,
         allowOutsideClick: false,
         showLoaderOnConfirm: true,
@@ -182,7 +182,7 @@ function completeCampaign() {
         animation: false,
         showCancelButton: true,
         confirmButtonText: "Complete Campaign",
-        confirmButtonColor: "#428bca",
+        confirmButtonColor: "#667eea",
         reverseButtons: true,
         allowOutsideClick: false,
         showLoaderOnConfirm: true,
@@ -475,10 +475,14 @@ var renderTimelineChart = function (chartopts) {
         chart: {
             zoomType: 'x',
             type: 'line',
-            height: "200px"
+            height: "200px",
+            backgroundColor: 'transparent',
+            style: {
+                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+            }
         },
         title: {
-            text: 'Campaign Timeline'
+            text: null
         },
         xAxis: {
             type: 'datetime',
@@ -489,6 +493,13 @@ var renderTimelineChart = function (chartopts) {
                 day: '%b %d, %Y',
                 week: '%b %d, %Y',
                 month: '%b %Y'
+            },
+            lineColor: '#e2e8f0',
+            tickColor: '#e2e8f0',
+            labels: {
+                style: {
+                    color: '#718096'
+                }
             }
         },
         yAxis: {
@@ -504,6 +515,12 @@ var renderTimelineChart = function (chartopts) {
             }
         },
         tooltip: {
+            backgroundColor: 'rgba(45, 55, 72, 0.95)',
+            borderColor: '#667eea',
+            borderRadius: 8,
+            style: {
+                color: '#ffffff'
+            },
             formatter: function () {
                 return Highcharts.dateFormat('%A, %b %d %l:%M:%S %P', new Date(this.x)) +
                     '<br>Event: ' + this.point.message + '<br>Email: <b>' + this.point.email + '</b>'
@@ -517,14 +534,16 @@ var renderTimelineChart = function (chartopts) {
                 marker: {
                     enabled: true,
                     symbol: 'circle',
-                    radius: 3
+                    radius: 5,
+                    lineWidth: 2,
+                    lineColor: '#ffffff'
                 },
                 cursor: 'pointer',
             },
             line: {
                 states: {
                     hover: {
-                        lineWidth: 1
+                        lineWidth: 2
                     }
                 }
             }
@@ -535,61 +554,48 @@ var renderTimelineChart = function (chartopts) {
         series: [{
             data: chartopts['data'],
             dashStyle: "shortdash",
-            color: "#cccccc",
-            lineWidth: 1,
+            color: "#667eea",
+            lineWidth: 2,
             turboThreshold: 0
         }]
     })
 }
 
-/* Renders a pie chart using the provided chartops */
+/* Renders a mini pie chart in stat cards */
 var renderPieChart = function (chartopts) {
+    // Update the count display
+    var countId = chartopts['elemId'].replace('_chart', '-count');
+    $('#' + countId).text(chartopts['data'][0].count);
+
     return Highcharts.chart(chartopts['elemId'], {
         chart: {
             type: 'pie',
-            events: {
-                load: function () {
-                    var chart = this,
-                        rend = chart.renderer,
-                        pie = chart.series[0],
-                        left = chart.plotLeft + pie.center[0],
-                        top = chart.plotTop + pie.center[1];
-                    this.innerText = rend.text(chartopts['data'][0].count, left, top).
-                    attr({
-                        'text-anchor': 'middle',
-                        'font-size': '24px',
-                        'font-weight': 'bold',
-                        'fill': chartopts['colors'][0],
-                        'font-family': 'Helvetica,Arial,sans-serif'
-                    }).add();
-                },
-                render: function () {
-                    this.innerText.attr({
-                        text: chartopts['data'][0].count
-                    })
-                }
-            }
+            backgroundColor: 'transparent',
+            height: 80,
+            width: 80,
+            margin: [0, 0, 0, 0],
+            spacing: [0, 0, 0, 0]
         },
         title: {
-            text: chartopts['title']
-        },
-        plotOptions: {
-            pie: {
-                innerSize: '80%',
-                dataLabels: {
-                    enabled: false
-                }
-            }
+            text: null
         },
         credits: {
             enabled: false
         },
         tooltip: {
-            formatter: function () {
-                if (this.key == undefined) {
-                    return false
+            enabled: false
+        },
+        plotOptions: {
+            pie: {
+                innerSize: '70%',
+                dataLabels: {
+                    enabled: false
+                },
+                states: {
+                    hover: {
+                        enabled: false
+                    }
                 }
-                return '<span style="color:' + this.color + '">\u25CF</span>' + this.point.name + ': <b>' + this.y + '%</b><br/>'
             }
         },
         series: [{

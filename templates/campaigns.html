@@ -1,131 +1,180 @@
 {{define "body"}}
 <div class="main">
-    <div class="row">
-        <h1 class="page-header">
-            Campaigns
-        </h1>
-    </div>
-    <div id="flashes" class="row"></div>
-    <div class="row">
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-backdrop="static" data-target="#modal"
-            onclick="edit('new')">
-            <i class="fa fa-plus"></i> New Campaign</button>
-    </div>
-    &nbsp;
-
-    <ul class="nav nav-tabs" role="tablist">
-        <li class="active" role="activeCampaigns"><a href="#activeCampaigns" aria-controls="activeCampaigns" role="tab"
-                data-toggle="tab">Active Campaigns</a></li>
-        <li role="archivedCampaigns"><a href="#archivedCampaigns" aria-controls="archivedCampaigns" role="tab"
-                data-toggle="tab">Archived Campaigns</a></li>
-    </ul>
-    </br>
-    <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="activeCampaigns">
-            <div id="flashes" class="row"></div>
-            &nbsp;
-            <div id="loading">
-                <i class="fa fa-spinner fa-spin fa-4x"></i>
-            </div>
-            <div id="emptyMessage" class="row" style="display:none;">
-                <div class="alert alert-info">
-                    No campaigns created yet. Let's create one!
-                </div>
-            </div>
-            <div class="row">
-                <table id="campaignTable" class="table" style="display:none;">
-                    <thead>
-                        <tr>
-                            <th class="col-md-3">Name</th>
-                            <th class="col-md-4">Created Date</th>
-                            <th class="col-md-2">Status</th>
-                            <th class="col-md-3 no-sort"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
+<div class="modern-page campaigns-page">
+    <!-- Modern Page Header -->
+    <div class="page-header-modern">
+        <div>
+            <h1 class="page-title">Campaigns</h1>
+            <p class="page-subtitle">Create and manage phishing simulation campaigns</p>
         </div>
-        <div role="tabpanel" class="tab-pane" id="archivedCampaigns">
-            </br>
-            <div id="emptyMessage" class="row" style="display:none;">
-                </br>
-                <div class="alert alert-info">
-                    No archived campaigns.
+        <div class="header-actions">
+            <button type="button" class="btn-modern btn-primary-modern" data-toggle="modal" data-backdrop="static" data-target="#modal" onclick="edit('new')">
+                <i class="fa fa-plus"></i> New Campaign
+            </button>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        <div id="flashes"></div>
+    </div>
+
+    <!-- Modern Tabs -->
+    <div class="modern-card">
+        <div class="modern-tabs-container">
+            <ul class="nav modern-nav-tabs" role="tablist">
+                <li class="active" role="presentation">
+                    <a href="#activeCampaigns" aria-controls="activeCampaigns" role="tab" data-toggle="tab">
+                        <i class="fa fa-play-circle"></i> Active Campaigns
+                    </a>
+                </li>
+                <li role="presentation">
+                    <a href="#archivedCampaigns" aria-controls="archivedCampaigns" role="tab" data-toggle="tab">
+                        <i class="fa fa-archive"></i> Archived Campaigns
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-content modern-tab-content">
+            <!-- Active Campaigns Tab -->
+            <div role="tabpanel" class="tab-pane active" id="activeCampaigns">
+                <div id="loading" class="loading-state">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    <p>Loading campaigns...</p>
+                </div>
+                <div id="emptyMessage" style="display:none;">
+                    <div class="empty-state">
+                        <i class="fa fa-rocket"></i>
+                        <h3>No Active Campaigns</h3>
+                        <p>Create your first phishing campaign to start testing security awareness.</p>
+                        <button type="button" class="btn-modern btn-primary-modern" data-toggle="modal" data-backdrop="static" data-target="#modal" onclick="edit('new')">
+                            <i class="fa fa-plus"></i> Create Campaign
+                        </button>
+                    </div>
+                </div>
+                <div class="modern-table-wrapper">
+                    <table id="campaignTable" class="modern-table" style="display:none;" role="table" aria-label="Active campaigns">
+                        <thead>
+                            <tr>
+                                <th scope="col">Campaign Name</th>
+                                <th scope="col">Created Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="no-sort">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="row">
-                <table id="campaignTableArchive" class="table" style="display:none;">
-                    <thead>
-                        <tr>
-                            <th class="col-md-3">Name</th>
-                            <th class="col-md-4">Created Date</th>
-                            <th class="col-md-2">Status</th>
-                            <th class="col-md-3 no-sort"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+
+            <!-- Archived Campaigns Tab -->
+            <div role="tabpanel" class="tab-pane" id="archivedCampaigns">
+                <div id="emptyMessageArchived" style="display:none;">
+                    <div class="empty-state">
+                        <i class="fa fa-archive"></i>
+                        <h3>No Archived Campaigns</h3>
+                        <p>Completed campaigns will appear here.</p>
+                    </div>
+                </div>
+                <div class="modern-table-wrapper">
+                    <table id="campaignTableArchive" class="modern-table" style="display:none;" role="table" aria-label="Archived campaigns">
+                        <thead>
+                            <tr>
+                                <th scope="col">Campaign Name</th>
+                                <th scope="col">Created Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="no-sort">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Modal -->
-<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="dismiss()">
+</div>
+
+<!-- Campaign Modal -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="campaignModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-modal-header">
+                <button type="button" class="close modern-close" data-dismiss="modal" aria-label="Close" onclick="dismiss()">
                     <span aria-hidden="true">&times;</span>
                 </button>
                 <h4 class="modal-title" id="campaignModalLabel">New Campaign</h4>
             </div>
-            <div class="modal-body" id="modal_body">
+            <div class="modal-body modern-modal-body" id="modal_body">
                 <div class="row" id="modal.flashes"></div>
+
                 <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input type="text" class="form-control" id="name" placeholder="Campaign name" autofocus>
-                    <label class="control-label" for="template">Email Template:</label>
-                    <select class="form-control" placeholder="Template Name" id="template" />
-                    <option></option>
+                    <label for="name">Campaign Name:</label>
+                    <input type="text" class="form-control" id="name" placeholder="Enter campaign name" autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="template">Email Template:</label>
+                    <select class="form-control" placeholder="Template Name" id="template">
+                        <option></option>
                     </select>
-                    <label class="control-label" for="page">Landing Page:</label>
-                    <select class="form-control" placeholder="Landing Page" id="page" />
-                    <option></option>
+                </div>
+
+                <div class="form-group">
+                    <label for="page">Landing Page:</label>
+                    <select class="form-control" placeholder="Landing Page" id="page">
+                        <option></option>
                     </select>
-                    <label class="control-label" for="url">URL:
+                </div>
+
+                <div class="form-group">
+                    <label for="url">URL:
                         <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="Location of Gophish listener (must be reachable by targets!)"></i>
                     </label>
                     <input type="text" class="form-control" placeholder="http://192.168.1.1" id="url" />
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="control-label" for="url">Launch Date </label>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="launch_date">Launch Date:</label>
                             <input type="text" class="form-control" id="launch_date" />
                         </div>
-                        <div class="col-md-6">
-                            <label class="control-label" for="delay">Send Emails By (Optional)
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="send_by_date">Send Emails By (Optional):
                                 <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="If specified, Gophish will send emails evenly between the campaign launch and this date."></i>
                             </label>
-                            <input type="text" class="form-control" id="send_by_date" autocomplete="random-data"/> <!--Chrome ignores autocomplete="off".-->
+                            <input type="text" class="form-control" id="send_by_date" autocomplete="off"/>
                         </div>
                     </div>
-                    <label class="control-label" for="profile">Sending Profile:</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="profile">Sending Profile:</label>
                     <div class="input-group">
-                        <select class="form-control" placeholder="Sending Profile" id="profile" />
-                        <option></option>
+                        <select class="form-control" placeholder="Sending Profile" id="profile">
+                            <option></option>
                         </select>
                         <span class="input-group-btn">
-                            <button type="button" data-toggle="modal" data-backdrop="static" data-target="#sendTestEmailModal"
-                                class="btn btn-primary button">
-                                <i class="fa fa-envelope"></i> Send Test Email</button>
+                            <button type="button" data-toggle="modal" data-backdrop="static" data-target="#sendTestEmailModal" class="btn-modern btn-info-modern btn-sm-modern">
+                                <i class="fa fa-envelope"></i> Send Test
+                            </button>
                         </span>
                     </div>
-                    <label class="control-label" for="users">Groups:</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="users">Groups:</label>
                     <select class="form-control" id="users" multiple="multiple"></select>
-                    
-                    <label class="control-label" for="course">Auto-enroll Course (Optional):
+                </div>
+
+                <div class="form-group">
+                    <label for="course">Auto-enroll Course (Optional):
                         <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="Users who click the campaign link will be automatically enrolled in this course"></i>
                     </label>
                     <select class="form-control" placeholder="Select Course" id="course">
@@ -133,54 +182,69 @@
                     </select>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="dismiss()">Close</button>
-                <button type="button" id="launchButton" class="btn btn-primary" onclick="launch()">
-                    <i class="fa fa-rocket"></i> Launch Campaign</button>
+            <div class="modal-footer modern-modal-footer">
+                <button type="button" class="btn-modern btn-secondary-modern" data-dismiss="modal" onclick="dismiss()">Cancel</button>
+                <button type="button" id="launchButton" class="btn-modern btn-primary-modern" onclick="launch()">
+                    <i class="fa fa-rocket"></i> Launch Campaign
+                </button>
             </div>
         </div>
     </div>
 </div>
+
 <!-- Send Test Email Modal -->
-<div class="modal" id="sendTestEmailModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
+<div class="modal" id="sendTestEmailModal" tabindex="-1" role="dialog" aria-labelledby="sendTestEmailModalTitle">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- New Email Modal -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-modal-header">
+                <button type="button" class="close modern-close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
                 <h4 class="modal-title" id="sendTestEmailModalTitle">Send Test Email</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body modern-modal-body">
                 <div class="row" id="sendTestEmailModal.flashes"></div>
+                <p class="help-text" style="margin-bottom: 1.5rem; color: #718096;">Send a test email to verify your template and sending profile are configured correctly.</p>
                 <div class="row">
-                    <div class="col-sm-12">
-                        <label class="control-label" for="to">Send Test Email to:</label>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>First Name:</label>
+                            <input type="text" class="form-control" placeholder="First Name" name="to_first_name">
+                        </div>
                     </div>
-                    <br>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control" placeholder="First Name" name="to_first_name">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Last Name:</label>
+                            <input type="text" class="form-control" placeholder="Last Name" name="to_last_name">
+                        </div>
                     </div>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control" placeholder="Last Name" name="to_last_name">
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Email Address:</label>
+                            <input type="email" class="form-control" placeholder="Email" name="to_email" required>
+                        </div>
                     </div>
-                    <div class="col-sm-4">
-                        <input type="email" class="form-control" placeholder="Email" name="to_email" required>
-                    </div>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control" placeholder="Position" name="to_position">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Position:</label>
+                            <input type="text" class="form-control" placeholder="Position" name="to_position">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
-                <button type="button" class="btn btn-primary" id="sendTestModalSubmit" onclick="sendTestEmail()">
-                    <i class="fa fa-envelope"></i> Send</button>
+            <div class="modal-footer modern-modal-footer">
+                <button type="button" data-dismiss="modal" class="btn-modern btn-secondary-modern">Cancel</button>
+                <button type="button" class="btn-modern btn-primary-modern" id="sendTestModalSubmit" onclick="sendTestEmail()">
+                    <i class="fa fa-envelope"></i> Send Test Email
+                </button>
             </div>
         </div>
     </div>
 </div>
-{{end}} {{define "scripts"}}
+{{end}}
+
+{{define "scripts"}}
 <script src="/js/dist/app/campaigns.min.js"></script>
 {{end}}

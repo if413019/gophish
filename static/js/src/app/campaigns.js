@@ -1,11 +1,11 @@
 // labels is a map of campaign statuses to
 // CSS classes
 var labels = {
-    "In progress": "label-primary",
-    "Queued": "label-info",
-    "Completed": "label-success",
-    "Emails Sent": "label-success",
-    "Error": "label-danger"
+    "In progress": "label-modern label-primary-modern",
+    "Queued": "label-modern label-info-modern",
+    "Completed": "label-modern label-success-modern",
+    "Emails Sent": "label-modern label-success-modern",
+    "Error": "label-modern label-danger-modern"
 }
 
 var campaigns = []
@@ -134,20 +134,26 @@ function dismiss() {
     $("#modal").modal('hide');
 }
 
-function deleteCampaign(idx) {
+function deleteCampaign(campaignId) {
+    var campaign = campaigns.find(function(c) { return c.id === campaignId; });
+    if (!campaign) {
+        errorFlash("Campaign not found");
+        return;
+    }
+
     Swal.fire({
         title: "Are you sure?",
         text: "This will delete the campaign. This can't be undone!",
         type: "warning",
         animation: false,
         showCancelButton: true,
-        confirmButtonText: "Delete " + campaigns[idx].name,
-        confirmButtonColor: "#428bca",
+        confirmButtonText: "Delete " + campaign.name,
+        confirmButtonColor: "#667eea",
         reverseButtons: true,
         allowOutsideClick: false,
         preConfirm: function () {
             return new Promise(function (resolve, reject) {
-                api.campaignId.delete(campaigns[idx].id)
+                api.campaignId.delete(campaignId)
                     .success(function (msg) {
                         resolve()
                     })
@@ -421,17 +427,21 @@ $(document).ready(function () {
 
                     var row = [
                         escapeHtml(campaign.name),
-                        moment(campaign.created_date).format('MMMM Do YYYY, h:mm:ss a'),
-                        "<span class=\"label " + label + "\" data-toggle=\"tooltip\" data-placement=\"right\" data-html=\"true\" title=\"" + quickStats + "\">" + campaign.status + "</span>",
-                        "<div class='pull-right'><a class='btn btn-primary' href='/campaigns/" + campaign.id + "' data-toggle='tooltip' data-placement='left' title='View Results'>\
-                    <i class='fa fa-bar-chart'></i>\
-                    </a>\
-            <span data-toggle='modal' data-backdrop='static' data-target='#modal'><button class='btn btn-primary' data-toggle='tooltip' data-placement='left' title='Copy Campaign' onclick='copy(" + i + ")'>\
-                    <i class='fa fa-copy'></i>\
-                    </button></span>\
-                    <button class='btn btn-danger' onclick='deleteCampaign(" + i + ")' data-toggle='tooltip' data-placement='left' title='Delete Campaign'>\
-                    <i class='fa fa-trash-o'></i>\
-                    </button></div>"
+                        moment(campaign.created_date).format('MMM D, YYYY h:mm A'),
+                        "<span class=\"" + label + "\" data-toggle=\"tooltip\" data-placement=\"right\" data-html=\"true\" title=\"" + quickStats + "\">" + campaign.status + "</span>",
+                        "<div class='action-buttons'>" +
+                            "<a class='btn-modern btn-primary-modern btn-sm-modern' href='/campaigns/" + campaign.id + "' data-toggle='tooltip' data-placement='top' title='View Results' aria-label='View results for " + escapeHtml(campaign.name) + "'>" +
+                                "<i class='fa fa-bar-chart' aria-hidden='true'></i>" +
+                            "</a>" +
+                            "<span data-toggle='modal' data-backdrop='static' data-target='#modal'>" +
+                                "<button class='btn-modern btn-info-modern btn-sm-modern' data-toggle='tooltip' data-placement='top' title='Copy Campaign' onclick='copy(" + i + ")' aria-label='Copy " + escapeHtml(campaign.name) + "'>" +
+                                    "<i class='fa fa-copy' aria-hidden='true'></i>" +
+                                "</button>" +
+                            "</span>" +
+                            "<button class='btn-modern btn-danger-modern btn-sm-modern' onclick='deleteCampaign(" + campaign.id + ")' data-toggle='tooltip' data-placement='top' title='Delete Campaign' aria-label='Delete " + escapeHtml(campaign.name) + "'>" +
+                                "<i class='fa fa-trash' aria-hidden='true'></i>" +
+                            "</button>" +
+                        "</div>"
                     ]
                     if (campaign.status == 'Completed') {
                         rows['archived'].push(row)

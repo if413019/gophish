@@ -1,91 +1,162 @@
 {{define "body"}}
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-    <div id="loading">
-        <i class="fa fa-spinner fa-spin fa-4x"></i>
+<div class="main">
+<div class="modern-page campaign-results-page">
+    <!-- Loading State -->
+    <div id="loading" class="loading-state">
+        <i class="fa fa-spinner fa-spin"></i>
+        <p>Loading campaign results...</p>
     </div>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        <div id="flashes"></div>
+    </div>
+
+    <!-- Campaign Results Content -->
     <div style="display:none;" id="campaignResults">
-        <div class="row">
-            <h1 class="page-header" id="page-title">Results for campaign.name</h1>
-        </div>
-        <div class="row">
-            <a href="/campaigns" class="btn btn-default">
-                <i class="fa fa-arrow-circle-o-left fa-lg"></i> Back
-            </a>
-            <div class="btn-group">
-                <button type="button" id="exportButton" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="true">
-                    <i class="fa fa-file-excel-o"></i> Export CSV
-                    <i class="fa fa-caret-down"></i>
+        <!-- Modern Page Header -->
+        <div class="page-header-modern">
+            <div>
+                <h1 class="page-title" id="page-title">Campaign Results</h1>
+                <p class="page-subtitle">View detailed results and analytics for this campaign</p>
+            </div>
+            <div class="header-actions">
+                <a href="/campaigns" class="btn-modern btn-secondary-modern btn-sm-modern">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
+                <div class="btn-group">
+                    <button type="button" id="exportButton" class="btn-modern btn-info-modern btn-sm-modern dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-download"></i> Export CSV <i class="fa fa-caret-down"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right modern-dropdown">
+                        <li><a href="#" onclick="exportAsCSV('results')"><i class="fa fa-table"></i> Export Results</a></li>
+                        <li><a href="#" onclick="exportAsCSV('events')"><i class="fa fa-list"></i> Export Raw Events</a></li>
+                    </ul>
+                </div>
+                <button id="complete_button" type="button" class="btn-modern btn-success-modern btn-sm-modern" onclick="completeCampaign()">
+                    <i class="fa fa-flag-checkered"></i> Complete
                 </button>
-                <ul class="dropdown-menu" aria-labelledby="exportButton">
-                    <li>
-                        <a href="#" onclick="exportAsCSV('results')">Results</a>
-                    </li>
-                    <li>
-                        <a href="#" onclick="exportAsCSV('events')">Raw Events</a>
-                    </li>
-                </ul>
-            </div>
-            <button id="complete_button" type="button" class="btn btn-blue" data-toggle="tooltip" onclick="completeCampaign()">
-                <i class="fa fa-flag-checkered"></i> Complete
-            </button>
-            <button type="button" class="btn btn-danger" data-toggle="tooltip" onclick="deleteCampaign()">
-                <i class="fa fa-trash-o fa-lg"></i> Delete
-            </button>
-            <button id="refresh_btn" type="button" class="btn btn-blue" data-toggle="tooltip" onclick="refresh()">
-                <i class="fa fa-refresh fa-lg"></i> Refresh
-            </button>
-            <span id="refresh_message">
-                <i class="fa fa-spin fa-spinner"></i> Refreshing
-            </span>
-        </div>
-        <br />
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div id="timeline_chart"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div style="height:200px;" class="col-lg-1 col-md-1"></div>
-                    <div id="sent_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div id="opened_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div id="clicked_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div id="submitted_data_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div id="reported_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div style="height:200px;" class="col-lg-1 col-md-1"></div>
-                </div>
-                <div class="row" id="resultsMapContainer">
-                    <div class="col-md-6">
-                        <p style="text-align:center;">Targets Map</p>
-                        <div id="resultsMap"></div>
-                    </div>
-                </div>
+                <button type="button" class="btn-modern btn-danger-modern btn-sm-modern" onclick="deleteCampaign()">
+                    <i class="fa fa-trash"></i> Delete
+                </button>
+                <button id="refresh_btn" type="button" class="btn-modern btn-primary-modern btn-sm-modern" onclick="refresh()">
+                    <i class="fa fa-refresh"></i> Refresh
+                </button>
+                <span id="refresh_message" style="display:none;" class="refresh-indicator">
+                    <i class="fa fa-spin fa-spinner"></i> Refreshing...
+                </span>
             </div>
         </div>
-        <div class="row">
-            <h2>Details</h2>
-            <table id="resultsTable" class="table">
-                <thead>
-                    <tr>
-                        <th>Result ID</th>
-                        <th class="no-sort"></th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Email</th>
-                        <th>Position</th>
-                        <th>Status</th>
-                        <th class="text-center">Reported</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+
+        <!-- Stats Cards with Mini Charts -->
+        <div class="stats-grid" id="statsGrid" role="region" aria-label="Campaign Statistics">
+            <div class="stat-card" aria-label="Emails sent statistics">
+                <div class="stat-card-icon sent" aria-hidden="true">
+                    <i class="fa fa-envelope"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="sent-count">0</h3>
+                    <p>Emails Sent</p>
+                </div>
+                <div class="stat-card-chart" id="sent_chart" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat-card" aria-label="Emails opened statistics">
+                <div class="stat-card-icon opened" aria-hidden="true">
+                    <i class="fa fa-envelope-open"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="opened-count">0</h3>
+                    <p>Emails Opened</p>
+                </div>
+                <div class="stat-card-chart" id="opened_chart" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat-card" aria-label="Links clicked statistics">
+                <div class="stat-card-icon clicked" aria-hidden="true">
+                    <i class="fa fa-mouse-pointer"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="clicked-count">0</h3>
+                    <p>Clicked Link</p>
+                </div>
+                <div class="stat-card-chart" id="clicked_chart" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat-card" aria-label="Data submitted statistics">
+                <div class="stat-card-icon submitted" aria-hidden="true">
+                    <i class="fa fa-exclamation-circle"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="submitted_data-count">0</h3>
+                    <p>Submitted Data</p>
+                </div>
+                <div class="stat-card-chart" id="submitted_data_chart" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat-card" aria-label="Phishing reported statistics">
+                <div class="stat-card-icon reported" aria-hidden="true">
+                    <i class="fa fa-flag"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 id="reported-count">0</h3>
+                    <p>Reported</p>
+                </div>
+                <div class="stat-card-chart" id="reported_chart" aria-hidden="true"></div>
+            </div>
+        </div>
+
+        <!-- Timeline Chart -->
+        <div class="chart-container">
+            <div class="chart-container-header">
+                <h3><i class="fa fa-clock-o"></i> Campaign Timeline</h3>
+            </div>
+            <div id="timeline_chart" style="height:200px;"></div>
+        </div>
+
+        <!-- Map Container (if enabled) -->
+        <div class="modern-card" id="resultsMapContainer" style="display:none; margin-bottom: 2rem;">
+            <div class="modern-card-header">
+                <h3><i class="fa fa-map-marker"></i> Targets Map</h3>
+            </div>
+            <div class="modern-card-body">
+                <div id="resultsMap" style="height: 400px;"></div>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="modern-card">
+            <div class="modern-card-header">
+                <div class="section-header" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                    <h2><i class="fa fa-users"></i> Target Details</h2>
+                </div>
+            </div>
+            <div class="modern-card-body">
+                <div class="modern-table-wrapper">
+                    <table id="resultsTable" class="modern-table" role="table" aria-label="Campaign results">
+                        <thead>
+                            <tr>
+                                <th scope="col">Result ID</th>
+                                <th scope="col" class="no-sort"></th>
+                                <th scope="col">First Name</th>
+                                <th scope="col">Last Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Position</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-center">Reported</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-    <div id="flashes" class="row"></div>
 </div>
-{{end}} {{define "scripts"}}
+</div>
+{{end}}
+
+{{define "scripts"}}
 <script src="/js/dist/app/campaign_results.min.js"></script>
 {{end}}
