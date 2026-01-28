@@ -43,40 +43,49 @@ const saveWebhook = (id) => {
 
 const load = () => {
     $("#webhookTable").hide();
+    $("#webhooksCard").hide();
+    $("#emptyMessage").hide();
     $("#loading").show();
     api.webhooks.get()
         .success((whs) => {
             webhooks = whs;
             $("#loading").hide()
-            $("#webhookTable").show()
-            let webhookTable = $("#webhookTable").DataTable({
-                destroy: true,
-                columnDefs: [{
-                    orderable: false,
-                    targets: "no-sort"
-                }]
-            });
-            webhookTable.clear();
-            $.each(webhooks, (i, webhook) => {
-                webhookTable.row.add([
-                    escapeHtml(webhook.name),
-                    escapeHtml(webhook.url),
-                    escapeHtml(webhook.is_active),
-                    `
-                      <div class="pull-right">
-                        <button class="btn btn-primary ping_button" data-webhook-id="${webhook.id}">
-                          Ping
-                        </button>
-                        <button class="btn btn-primary edit_button" data-toggle="modal" data-backdrop="static" data-target="#modal" data-webhook-id="${webhook.id}">
-                          <i class="fa fa-pencil"></i>
-                        </button>
-                        <button class="btn btn-danger delete_button" data-webhook-id="${webhook.id}">
-                          <i class="fa fa-trash-o"></i>
-                        </button>
-                      </div>
-                    `
-                ]).draw()
-            })
+            if (webhooks.length > 0) {
+                $("#webhooksCard").show()
+                $("#webhookTable").show()
+                let webhookTable = $("#webhookTable").DataTable({
+                    destroy: true,
+                    columnDefs: [{
+                        orderable: false,
+                        targets: "no-sort"
+                    }]
+                });
+                webhookTable.clear();
+                $.each(webhooks, (i, webhook) => {
+                    const statusLabel = webhook.is_active
+                        ? '<span class="label-modern label-success-modern"><i class="fa fa-check"></i> Active</span>'
+                        : '<span class="label-modern label-secondary-modern"><i class="fa fa-pause"></i> Inactive</span>';
+                    webhookTable.row.add([
+                        escapeHtml(webhook.name),
+                        `<span class="webhook-url">${escapeHtml(webhook.url)}</span>`,
+                        statusLabel,
+                        `<div class="pull-right action-buttons">
+                            <button class="btn-modern btn-icon-modern btn-success-modern ping_button" data-webhook-id="${webhook.id}" title="Test Webhook" aria-label="Ping ${escapeHtml(webhook.name)}">
+                                <i class="fa fa-bolt" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn-modern btn-icon-modern btn-primary-modern edit_button" data-toggle="modal" data-backdrop="static" data-target="#modal" data-webhook-id="${webhook.id}" title="Edit Webhook" aria-label="Edit ${escapeHtml(webhook.name)}">
+                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn-modern btn-icon-modern btn-danger-modern delete_button" data-webhook-id="${webhook.id}" title="Delete Webhook" aria-label="Delete ${escapeHtml(webhook.name)}">
+                                <i class="fa fa-trash-o" aria-hidden="true"></i>
+                            </button>
+                        </div>`
+                    ]).draw()
+                })
+                $('[data-toggle="tooltip"]').tooltip()
+            } else {
+                $("#emptyMessage").show()
+            }
         })
         .error(() => {
             errorFlash("Error fetching webhooks")
@@ -171,6 +180,9 @@ $(document).ready(function() {
         dismiss();
     });
     $("#new_button").on("click", function() {
+        editWebhook(-1);
+    });
+    $("#empty_new_button").on("click", function() {
         editWebhook(-1);
     });
     $("#webhookTable").on("click", ".edit_button", function(e) {

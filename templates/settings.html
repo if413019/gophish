@@ -1,249 +1,340 @@
 {{define "body"}}
 <div class="main">
-    <div class="row">
-        <h1 class="page-header">Settings</h1>
+<div class="modern-page settings-page">
+    <!-- Modern Page Header -->
+    <div class="page-header-modern">
+        <div>
+            <h1 class="page-title">Settings</h1>
+            <p class="page-subtitle">Manage your account and application preferences</p>
+        </div>
     </div>
-    <div id="flashes" class="row"></div>
-    {{template "flashes" .Flashes}}
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs" role="tablist">
-        <li class="active" role="mainSettings"><a href="#mainSettings" aria-controls="mainSettings" role="tab"
-                data-toggle="tab">Account Settings</a></li>
-        <li role="uiSettings"><a href="#uiSettings" aria-controls="uiSettings" role="tab" data-toggle="tab">UI
-                Settings</a></li>
-        <li role="reportingSettings"><a href="#reportingSettings" aria-controls="reportingSettings" role="tab" id="reporttab"
-            data-toggle="tab">Reporting Settings</a></li>
-    </ul>
-    <!-- Tab Panes -->
-    <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="mainSettings">
-            <br />
-            {{if .ModifySystem }}
-            <div class="row">
-                <label class="col-sm-2 control-label form-label">Gophish version</label>
-                <div class="col-md-6">
-                    <label class="form-label">{{.Version}}</label>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        <div id="flashes"></div>
+        {{template "flashes" .Flashes}}
+    </div>
+
+    <!-- Settings Card with Tabs -->
+    <div class="modern-card settings-card">
+        <!-- Nav tabs -->
+        <div class="modern-tabs-container">
+            <ul class="nav nav-tabs modern-nav-tabs" role="tablist">
+                <li class="active" role="mainSettings">
+                    <a href="#mainSettings" aria-controls="mainSettings" role="tab" data-toggle="tab">
+                        <i class="fa fa-user"></i> Account Settings
+                    </a>
+                </li>
+                <li role="uiSettings">
+                    <a href="#uiSettings" aria-controls="uiSettings" role="tab" data-toggle="tab">
+                        <i class="fa fa-desktop"></i> UI Settings
+                    </a>
+                </li>
+                <li role="reportingSettings">
+                    <a href="#reportingSettings" aria-controls="reportingSettings" role="tab" id="reporttab" data-toggle="tab">
+                        <i class="fa fa-envelope-open"></i> Reporting Settings
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tab Panes -->
+        <div class="tab-content modern-tab-content">
+            <!-- Account Settings Tab -->
+            <div role="tabpanel" class="tab-pane active" id="mainSettings">
+                <div class="settings-section">
+                    {{if .ModifySystem }}
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <label>Gophish Version</label>
+                        </div>
+                        <div class="settings-value">
+                            <span class="version-badge">{{.Version}}</span>
+                        </div>
+                    </div>
+                    {{end}}
+
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <label for="api_key">API Key</label>
+                            <p class="settings-help">Use this key to authenticate API requests</p>
+                        </div>
+                        <div class="settings-value">
+                            <div class="api-key-container">
+                                <input type="text" id="api_key" onclick="this.select();" value="{{.User.ApiKey}}" class="form-control" readonly />
+                                <form id="apiResetForm" class="api-reset-form">
+                                    <button class="btn-modern btn-info-modern btn-sm-modern" type="submit">
+                                        <i class="fa fa-refresh"></i> Reset
+                                    </button>
+                                    <input type="hidden" name="csrf_token" value="{{.Token}}" />
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <i class="fa fa-lock"></i> Change Credentials
+                    </h3>
+
+                    <form id="settingsForm">
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="username">Username</label>
+                            </div>
+                            <div class="settings-value">
+                                <input type="text" id="username" name="username" value="{{.User.Username}}" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="current_password">Current Password</label>
+                            </div>
+                            <div class="settings-value">
+                                <input type="password" id="current_password" name="current_password" autocomplete="off" class="form-control" placeholder="Enter current password" />
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="password">New Password</label>
+                            </div>
+                            <div class="settings-value">
+                                <input type="password" id="password" name="new_password" autocomplete="new-password" class="form-control" placeholder="Enter new password" />
+                                <div class="hidden" id="password-strength-container">
+                                    <div class="progress password-strength-progress" id="password-strength">
+                                        <div id="password-strength-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <span id="password-strength-description" class="password-strength-text"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="confirm_new_password">Confirm New Password</label>
+                            </div>
+                            <div class="settings-value">
+                                <input type="password" id="confirm_new_password" name="confirm_new_password" autocomplete="off" class="form-control" placeholder="Confirm new password" />
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="csrf_token" value="{{.Token}}" />
+
+                        <div class="settings-actions">
+                            <button class="btn-modern btn-primary-modern" type="submit">
+                                <i class="fa fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-            <br />
-            {{end}}
-            <div class="row">
-                <label for="api_key" class="col-sm-2 control-label form-label">API Key:</label>
-                <div class="col-md-6">
-                    <input type="text" id="api_key" onclick="this.select();" value="{{.User.ApiKey}}"
-                        class="form-control" readonly />
+
+            <!-- UI Settings Tab -->
+            <div role="tabpanel" class="tab-pane" id="uiSettings">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <i class="fa fa-eye"></i> Display Preferences
+                    </h3>
+
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <label for="use_map">Campaign Results Map</label>
+                            <p class="settings-help">Show geographic map visualization for campaign results</p>
+                        </div>
+                        <div class="settings-value">
+                            <div class="modern-checkbox">
+                                <input id="use_map" type="checkbox">
+                                <label for="use_map">Enable map view</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <form id="apiResetForm">
-                    <button class="btn btn-primary"><i class="fa fa-refresh" type="submit"></i> Reset</button>
-                    <input type="hidden" name="csrf_token" value="{{.Token}}" />
+            </div>
+
+            <!-- Reporting Settings Tab -->
+            <div role="tabpanel" class="tab-pane" id="reportingSettings">
+                <form id="imapForm">
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa fa-envelope-open"></i> Email Monitoring
+                        </h3>
+                        <p class="settings-description">Monitor an IMAP account for emails reported by users.</p>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="use_imap">Enable Monitoring</label>
+                                <p class="settings-help">Automatically track reported phishing emails</p>
+                            </div>
+                            <div class="settings-value">
+                                <div class="modern-checkbox">
+                                    <input id="use_imap" type="checkbox">
+                                    <label for="use_imap">Enable Email Account Monitoring</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa fa-server"></i> IMAP Configuration
+                        </h3>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="imaphost">IMAP Host</label>
+                            </div>
+                            <div class="settings-value">
+                                <input type="text" id="imaphost" name="imaphost" placeholder="imap.example.com" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="imapport">IMAP Port</label>
+                            </div>
+                            <div class="settings-value">
+                                <input type="text" id="imapport" name="imapport" placeholder="993" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="imapusername">Username</label>
+                            </div>
+                            <div class="settings-value">
+                                <input type="text" id="imapusername" name="imapusername" placeholder="Username" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="imappassword">Password</label>
+                            </div>
+                            <div class="settings-value">
+                                <input type="password" id="imappassword" name="imappassword" placeholder="Password" autocomplete="off" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="use_tls">Use TLS</label>
+                                <p class="settings-help">Enable secure connection</p>
+                            </div>
+                            <div class="settings-value">
+                                <div class="modern-checkbox">
+                                    <input id="use_tls" type="checkbox">
+                                    <label for="use_tls">Enable TLS encryption</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings -->
+                    <div id="advancedarea" style="display: none;">
+                        <div class="settings-divider"></div>
+
+                        <div class="settings-section">
+                            <h3 class="settings-section-title">
+                                <i class="fa fa-cogs"></i> Advanced Options
+                            </h3>
+
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <label for="folder">Folder</label>
+                                    <p class="settings-help">Leave blank for default INBOX</p>
+                                </div>
+                                <div class="settings-value">
+                                    <input type="text" id="folder" name="folder" placeholder="INBOX" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <label for="imapfreq">Polling Frequency</label>
+                                    <p class="settings-help">How often to check for new emails (minimum 30 seconds)</p>
+                                </div>
+                                <div class="settings-value">
+                                    <input type="number" id="imapfreq" name="imapfreq" placeholder="60" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <label for="restrictdomain">Restrict to Domain</label>
+                                    <p class="settings-help">Only check emails from this domain</p>
+                                </div>
+                                <div class="settings-value">
+                                    <input type="text" id="restrictdomain" name="restrictdomain" placeholder="example.com" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <label for="ignorecerterrors">Ignore Certificate Errors</label>
+                                    <p class="settings-help">Use carefully - exposes you to MiTM attacks</p>
+                                </div>
+                                <div class="settings-value">
+                                    <div class="modern-checkbox">
+                                        <input id="ignorecerterrors" type="checkbox">
+                                        <label for="ignorecerterrors">Ignore SSL/TLS errors</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <label for="deletecampaign">Delete Campaign Emails</label>
+                                    <p class="settings-help">Delete emails after they've been reported</p>
+                                </div>
+                                <div class="settings-value">
+                                    <div class="modern-checkbox">
+                                        <input id="deletecampaign" type="checkbox">
+                                        <label for="deletecampaign">Auto-delete reported emails</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-row" id="lastlogindiv">
+                                <div class="settings-label">
+                                    <label for="lastlogin">Last Successful Login</label>
+                                </div>
+                                <div class="settings-value">
+                                    <input type="text" id="lastlogin" name="lastlogin" placeholder="Checking..." disabled class="form-control" />
+                                </div>
+                            </div>
+                            <input type="hidden" id="lastloginraw" name="lastloginraw" value="">
+                        </div>
+                    </div>
+
+                    <div class="settings-actions-row">
+                        <button class="btn-modern btn-outline-modern btn-sm-modern" id="advanced" type="button">
+                            <i class="fa fa-cog"></i> Advanced Settings
+                        </button>
+                        <div class="settings-actions">
+                            <button class="btn-modern btn-info-modern" id="validateimap" type="button">
+                                <i class="fa fa-wrench"></i> Test Settings
+                            </button>
+                            <button class="btn-modern btn-primary-modern" id="savesettings" type="button">
+                                <i class="fa fa-save"></i> Save Settings
+                            </button>
+                        </div>
+                    </div>
                 </form>
             </div>
-            <br />
-            <form id="settingsForm">
-                <div class="row">
-                    <label for="username" class="col-sm-2 control-label form-label">Username:</label>
-                    <div class="col-md-6">
-                        <input type="text" id="username" name="username" value="{{.User.Username}}"
-                            class="form-control" />
-                    </div>
-                </div>
-                <br />
-                <div class="row">
-                    <label for="current_password" class="col-sm-2 control-label form-label">Old Password:</label>
-                    <div class="col-md-6">
-                        <input type="password" id="current_password" name="current_password" autocomplete="off"
-                            class="form-control" />
-                    </div>
-                </div>
-                <br />
-                <div class="row">
-                    <label for="new_password" class="col-sm-2 control-label form-label">New Password:</label>
-                    <div class="col-md-6">
-                        <input type="password" id="password" name="new_password" autocomplete="new-password"
-                            class="form-control" />
-                        <div class="hidden" id="password-strength-container">
-                            <div class="progress" id="password-strength">
-                                <div id="password-strength-bar" class="progress-bar" role="progressbar"
-                                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <span id="password-strength-description"></span>
-                        </div>
-                    </div>
-                </div>
-                <br />
-                <div class="row">
-                    <label for="confirm_new_password" class="col-sm-2 control-label form-label">Confirm New
-                        Password:</label>
-                    <div class="col-md-6">
-                        <input type="password" id="confirm_new_password" name="confirm_new_password" autocomplete="off"
-                            class="form-control" />
-                    </div>
-                </div>
-                <input type="hidden" name="csrf_token" value="{{.Token}}" />
-                <br />
-                <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Save</button>
-            </form>
-            <br />
         </div>
-        <div role="tabpanel" class="tab-pane" id="uiSettings">
-            <br />
-            <div class="checkbox checkbox-primary">
-                <input id="use_map" type="checkbox">
-                <label for="use_map">Show campaign results map</label>
-            </div>
-        </div>
-        <!-- Reporting Settings Begin -->
-        <div role="tabpanel" class="tab-pane" id="reportingSettings">
-            <form id="imapForm" >
-            <br />
-            <div class="row">
-                <div class="col-md-6">
-                    Monitor an IMAP account for emails reported by users.
-                </div>
-             </div>
-            <br />
-
-            <div class="row">
-                <div class="col-md-6">
-                <div class="checkbox checkbox-primary">
-                    <input id="use_imap" type="checkbox">
-                    <label for="use_imap">Enable Email Account Monitoring</label>
-                </div>
-                </div>
-             </div>
-            <br />
-
-            
-            <div class="row">
-                <label for="imaphost" class="col-sm-2 control-label form-label">IMAP Host:</label>
-                <div class="col-md-6">
-                    <input type="text" id="imaphost" name="imaphost" placeholder="imap.example.com"
-                        class="form-control" />
-                </div>
-            </div>
-            <br />
-
-            <div class="row">
-                <label for="imapport" class="col-sm-2 control-label form-label">IMAP Port:</label>
-                <div class="col-md-6">
-                    <input type="text" id="imapport" name="imapport" placeholder="993"
-                        class="form-control" />
-                </div>
-            </div>
-            <br />
-
-            <div class="row">
-                <label for="imapusername" class="col-sm-2 control-label form-label">IMAP Username:</label>
-                <div class="col-md-6">
-                    <input type="text" id="imapusername" name="imapusername" placeholder="Username"
-                        class="form-control" />
-                </div>
-            </div>
-            <br />
-
-            <div class="row">
-                <label for="imappassword" class="col-sm-2 control-label form-label">IMAP Password:</label>
-                <div class="col-md-6">
-                    <input type="password" id="imappassword" name="imappassword" placeholder="Password" autocomplete="off"
-                        class="form-control" />
-                </div>
-            </div>
-            <br />
-
-
-            <div class="row">
-                <label for="use_tls" class="col-sm-2 control-label form-label">Use TLS:</label>
-                <div class="col-md-6">
-                    <div class="checkbox checkbox-primary">
-                        <input id="use_tls" type="checkbox">
-                        <label for="use_tls"></label>
-                    </div>
-                    
-                </div>
-            </div>
-
-             <!-- Advanced Settings-->
-            <div id="advancedarea" style="display: none;">
-                <hr>
-                <div class="row">
-                <label for="folder" class="col-sm-2 control-label form-label">Folder:</label>
-                    <div class="col-md-6">
-                        <input type="text" id="folder" name="folder" placeholder="Leave blank for default of INBOX."
-                            class="form-control" />
-                    </div>
-                </div>
-                <br />
-
-                <div class="row">
-                    <label for="folder" class="col-sm-2 control-label form-label" data-toggle="tooltip" title="How often to check for new emails. 30 seconds minimum.">Polling frequency:</label>
-                        <div class="col-md-6">
-                            <input type="number" id="imapfreq" name="imapfreq" placeholder="Leave blank for default of every 60 seconds."
-                                class="form-control" />
-                        </div>
-                    </div>
-                    <br />
-        
-                <div class="row">
-                    <label for="restrictdomain" class="col-sm-2 control-label form-label" data-toggle="tooltip" title="Only check emails reported from the supplied domain.">Restrict to domain:</label>
-                    <div class="col-md-6">
-                        <input type="text" id="restrictdomain" name="restrictdomain" placeholder="e.g. widgets.com. Leave blank for all domains."
-                            class="form-control" />
-                    </div>
-                </div>
-                <br />
-
-                <div class="row">
-                    <label for="ignorecerterrors" class="col-sm-2 control-label form-label" data-toggle="tooltip" title="Ignore common certificate errors such as self-signed certs (exposes you to MiTM attacks - use carefully!)">Ignore Certificate Errors:</label>
-                    <div class="col-md-6">
-                        <div class="checkbox checkbox-primary">
-                            <input id="ignorecerterrors" type="checkbox">
-                            <label for="ignorecerterrors"></label>
-                        </div>
-                    </div>
-                </div>
-                <br />
-
-                <div class="row">
-                    <label for="deletecampaign" class="col-sm-2 control-label form-label" data-toggle="tooltip" title="Delete campaign emails after they've been reported.">Delete campaigns emails:</label>
-                    <div class="col-md-6">
-                        <div class="checkbox checkbox-primary">
-                            <input id="deletecampaign" type="checkbox">
-                            <label for="deletecampaign"></label>
-                        </div>
-                        
-                    </div>
-                </div>
-                <br />
-        
-                <div class="row" id="lastlogindiv">
-                <label for="lastlogin" class="col-sm-2 control-label form-label">Last succesful login:</label>
-                <div class="col-md-6">
-                    <input type="text" id="lastlogin" name="lastlogin" placeholder="Checking..." disabled
-                        class="form-control border-0" />
-                    </div>
-                </div>
-                <br />
-                <input type="hidden" id="lastloginraw" name="lastloginraw" value="">
-
-            </div>
-
-            <div class="row">
-                <label for="advancedsettings" class="col-sm-2 control-label form-label"></label>
-                <div class="col-md-6 text-right">
-                    <button class="btn-xs btn-link" id="advanced" type="button">Advanced Settings</button>
-                </div>
-            </div>
-
-            <button class="btn btn-primary" id ="savesettings" type="button"><i class="fa fa-save"></i> Save</button>
-            <button class="btn btn-primary" id="validateimap" type="button"><i class="fa fa-wrench"></i> Test Settings</button>
-
-
-        </form>
-        </div>
-        <!-- Reporting Settings End -->
     </div>
 </div>
-{{end}} {{define "scripts"}}
+</div>
+{{end}}
+
+{{define "scripts"}}
 <script src="/js/dist/app/passwords.min.js"></script>
 <script src="/js/dist/app/settings.min.js"></script>
 {{end}}
