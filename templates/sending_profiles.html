@@ -1,144 +1,242 @@
 {{define "body"}}
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-    <h1 class="page-header">
-        Sending Profiles
-    </h1>
-    <div id="flashes" class="row"></div>
-    <div class="row">
-        <button type="button" class="btn btn-primary" onclick="edit(-1)" data-toggle="modal" data-backdrop="static"
-            data-target="#modal"><i class="fa fa-plus"></i> New Profile</button>
-    </div>
-    &nbsp;
-    <div id="loading">
-        <i class="fa fa-spinner fa-spin fa-4x"></i>
-    </div>
-    <div id="emptyMessage" class="row" style="display:none;">
-        <div class="alert alert-info">
-            No profiles created yet. Let's create one!
+<div class="main">
+<div class="modern-page sending-profiles-page">
+    <!-- Modern Page Header -->
+    <div class="page-header-modern">
+        <div>
+            <h1 class="page-title">Sending Profiles</h1>
+            <p class="page-subtitle">Configure SMTP settings for sending phishing emails</p>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="btn-modern btn-primary-modern" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+                <i class="fa fa-plus"></i> New Profile
+            </button>
         </div>
     </div>
-    <div class="row">
-        <table id="profileTable" class="table" style="display:none;">
-            <thead>
-                <tr>
-                    <th class="col-md-4">Name</th>
-                    <th>Interface Type</th>
-                    <th>Last Modified Date</th>
-                    <th class="col-md-2 no-sort"></th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        <div id="flashes"></div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading-state">
+        <i class="fa fa-spinner fa-spin"></i>
+        <p>Loading profiles...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyMessage" style="display:none;">
+        <div class="empty-state">
+            <i class="fa fa-envelope"></i>
+            <h3>No Sending Profiles</h3>
+            <p>Create your first sending profile to configure email delivery settings.</p>
+            <button type="button" class="btn-modern btn-primary-modern" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+                <i class="fa fa-plus"></i> Create Profile
+            </button>
+        </div>
+    </div>
+
+    <!-- Profiles Table -->
+    <div class="modern-card" id="profilesCard" style="display:none;">
+        <div class="modern-card-header">
+            <div class="section-header" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                <h2><i class="fa fa-envelope"></i> SMTP Profiles</h2>
+            </div>
+        </div>
+        <div class="modern-card-body">
+            <div class="modern-table-wrapper">
+                <table id="profileTable" class="modern-table" role="table" aria-label="Sending profiles">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Interface Type</th>
+                            <th scope="col">Last Modified Date</th>
+                            <th scope="col" class="no-sort text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
-<!-- Modal -->
-<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- New Template Modal -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="dismiss()"><span
-                        aria-hidden="true">&times;</span></button>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="profileModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-modal-header">
+                <button type="button" class="close modern-close" data-dismiss="modal" aria-label="Close" onclick="dismiss()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title" id="profileModalLabel">New Sending Profile</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body modern-modal-body">
                 <div class="row" id="modal.flashes"></div>
                 <form>
-                    <div class="form-group">
-                        <label class="control-label" for="name">Name:</label>
-                        <input type="text" class="form-control" placeholder="Profile name" id="name" autofocus />
-                        <label class="control-label" for="interface_type">Interface Type:</label>
-                        <input type="text" class="form-control" value="SMTP" id="interface_type" disabled />
-                        <label class="control-label" for="from">SMTP From: <i class="fa fa-question-circle"
-                                data-toggle="tooltip" data-placement="right" title="Set this to an email address from your sending domain to bypass SPF-checks. You can set the Envelope Sender in Email Templates. The Envelope Sender is shown to the user."></i></label>
-                        <input type="text" class="form-control" placeholder="test@example.com" id="from"
-                            required />
-                        <label class="control-label" for="host">Host:</label>
-                        <input type="text" class="form-control" placeholder="smtp.example.com:25" id="host" required />
-                        <label class="control-label" for="username">Username:</label>
-                        <input type="text" class="form-control" placeholder="Username" id="username" />
-                        <label class="control-label" for="password">Password:</label>
-                        <input type="password" class="form-control" placeholder="Password" id="password" />
-                        <div class="checkbox checkbox-primary">
-                            <input id="ignore_cert_errors" type="checkbox" checked>
-                            <label for="ignore_cert_errors">Ignore Certificate Errors <i class="fa fa-question-circle"
-                                    data-toggle="tooltip" data-placement="right" title="Ignore common certificate errors such as self-signed certs (exposes you to MiTM attacks - use carefully!)"></i></label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label" for="name">Profile Name:</label>
+                                <input type="text" class="form-control" placeholder="Enter profile name" id="name" autofocus />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label" for="interface_type">Interface Type:</label>
+                                <input type="text" class="form-control" value="SMTP" id="interface_type" disabled />
+                            </div>
                         </div>
                     </div>
-                    <fieldset class="form-group">
-                        <label class="control-label input-group">Email Headers:</label>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="headerKey" id="headerKey" placeholder="X-Custom-Header">
+
+                    <div class="form-group">
+                        <label class="control-label" for="from">SMTP From:
+                            <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="Set this to an email address from your sending domain to bypass SPF-checks. You can set the Envelope Sender in Email Templates. The Envelope Sender is shown to the user."></i>
+                        </label>
+                        <input type="text" class="form-control" placeholder="test@example.com" id="from" required />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label" for="host">Host:</label>
+                                <input type="text" class="form-control" placeholder="smtp.example.com:25" id="host" required />
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="headerValue" id="headerValue" placeholder='{{"{{"}}.URL{{"}}"}}-gophish'>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label" for="username">Username:</label>
+                                <input type="text" class="form-control" placeholder="Username" id="username" />
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <button id="addCustomHeader" class="btn btn-danger btn-headers" type="button"><i class="fa fa-plus"></i> Add
-                                Custom Header</button>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label" for="password">Password:</label>
+                                <input type="password" class="form-control" placeholder="Password" id="password" />
+                            </div>
                         </div>
-                    </fieldset>
-                    <table id="headersTable" class="table table-hover table-striped table-condensed">
-                        <thead>
-                            <tr>
-                                <th>Header</th>
-                                <th>Value</th>
-                                <th class="no-sort"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                    <button type="button" data-toggle="modal" data-backdrop="static" data-target="#sendTestEmailModal"
-                        class="btn btn-primary"><i class="fa fa-envelope"></i> Send Test Email</button>
+                        <div class="col-md-6">
+                            <div class="form-group checkbox-group">
+                                <label class="control-label">&nbsp;</label>
+                                <div class="modern-checkbox">
+                                    <input id="ignore_cert_errors" type="checkbox" checked>
+                                    <label for="ignore_cert_errors">
+                                        Ignore Certificate Errors
+                                        <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="Ignore common certificate errors such as self-signed certs (exposes you to MiTM attacks - use carefully!)"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group headers-section">
+                        <label class="control-label">Email Headers:</label>
+                        <div class="headers-input-row">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="headerKey" id="headerKey" placeholder="X-Custom-Header">
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control" name="headerValue" id="headerValue" placeholder='{{"{{"}}.URL{{"}}"}}-gophish'>
+                                </div>
+                                <div class="col-md-3">
+                                    <button id="addCustomHeader" class="btn-modern btn-info-modern btn-sm-modern" type="button" style="width: 100%;">
+                                        <i class="fa fa-plus"></i> Add Header
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="headers-table-container">
+                            <table id="headersTable" class="modern-table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Header</th>
+                                        <th scope="col">Value</th>
+                                        <th scope="col" class="no-sort text-center" style="width: 50px;"><span class="sr-only">Delete</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="test-email-action">
+                        <button type="button" data-toggle="modal" data-backdrop="static" data-target="#sendTestEmailModal" class="btn-modern btn-info-modern">
+                            <i class="fa fa-envelope"></i> Send Test Email
+                        </button>
+                    </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default" onclick="dismiss()">Cancel</button>
-                <button type="button" class="btn btn-primary" id="modalSubmit">Save Profile</button>
+            <div class="modal-footer modern-modal-footer">
+                <button type="button" data-dismiss="modal" class="btn-modern btn-secondary-modern" onclick="dismiss()">Cancel</button>
+                <button type="button" class="btn-modern btn-primary-modern" id="modalSubmit">
+                    <i class="fa fa-save"></i> Save Profile
+                </button>
             </div>
         </div>
     </div>
 </div>
+
 <!-- Send Test Email Modal -->
-<div class="modal" id="sendTestEmailModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
+<div class="modal" id="sendTestEmailModal" tabindex="-1" role="dialog" aria-labelledby="sendTestEmailModalTitle">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- New Email Modal -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-modal-header">
+                <button type="button" class="close modern-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title" id="sendTestEmailModalTitle">Send Test Email</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body modern-modal-body">
                 <div class="row" id="sendTestEmailModal.flashes"></div>
+                <p class="help-text" style="margin-bottom: 1.5rem; color: #718096;">Send a test email to verify your SMTP settings are configured correctly.</p>
                 <div class="row">
-                    <div class="col-sm-12">
-                        <label class="control-label" for="to">Send Test Email to:</label>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>First Name:</label>
+                            <input type="text" class="form-control" placeholder="First Name" name="to_first_name">
+                        </div>
                     </div>
-                    <br>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control" placeholder="First Name" name="to_first_name">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Last Name:</label>
+                            <input type="text" class="form-control" placeholder="Last Name" name="to_last_name">
+                        </div>
                     </div>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control" placeholder="Last Name" name="to_last_name">
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Email Address:</label>
+                            <input type="email" class="form-control" placeholder="Email" name="to_email" required>
+                        </div>
                     </div>
-                    <div class="col-sm-4">
-                        <input type="email" class="form-control" placeholder="Email" name="to_email" required>
-                    </div>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control" placeholder="Position" name="to_position">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Position:</label>
+                            <input type="text" class="form-control" placeholder="Position" name="to_position">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
-                <button type="button" class="btn btn-primary" id="sendTestModalSubmit" onclick="sendTestEmail()"><i
-                        class="fa fa-envelope"></i> Send</button>
+            <div class="modal-footer modern-modal-footer">
+                <button type="button" data-dismiss="modal" class="btn-modern btn-secondary-modern">Cancel</button>
+                <button type="button" class="btn-modern btn-primary-modern" id="sendTestModalSubmit" onclick="sendTestEmail()">
+                    <i class="fa fa-envelope"></i> Send Test Email
+                </button>
             </div>
         </div>
     </div>
 </div>
-{{end}} {{define "scripts"}}
+{{end}}
+
+{{define "scripts"}}
 <script src="/js/dist/app/sending_profiles.min.js"></script>
 {{end}}

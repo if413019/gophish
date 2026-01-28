@@ -1167,3 +1167,500 @@
     color: white;
     margin-right: 0.25rem;
 }
+
+/* ================================
+   Icon Buttons
+   ================================ */
+.btn-icon-modern {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--modern-radius-sm);
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-icon-modern:hover {
+    transform: translateY(-2px);
+}
+
+.btn-icon-modern.btn-primary-modern {
+    background: var(--modern-primary-gradient);
+    color: white;
+}
+
+.btn-icon-modern.btn-primary-modern:hover {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-icon-modern.btn-info-modern {
+    background: var(--modern-info-gradient);
+    color: white;
+}
+
+.btn-icon-modern.btn-info-modern:hover {
+    box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+}
+
+.btn-icon-modern.btn-danger-modern {
+    background: var(--modern-danger-gradient);
+    color: white;
+}
+
+.btn-icon-modern.btn-danger-modern:hover {
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.btn-icon-modern.btn-success-modern {
+    background: var(--modern-success-gradient);
+    color: white;
+}
+
+.btn-icon-modern.btn-success-modern:hover {
+    box-shadow: 0 6px 20px rgba(69, 183, 209, 0.4);
+}
+
+.btn-icon-modern.btn-warning-modern {
+    background: var(--modern-warning-gradient);
+    color: white;
+}
+
+.btn-icon-modern.btn-warning-modern:hover {
+    box-shadow: 0 6px 20px rgba(254, 202, 87, 0.4);
+}
+
+.btn-warning-modern {
+    background: var(--modern-warning-gradient);
+    color: white;
+}
+
+.btn-warning-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(254, 202, 87, 0.4);
+    color: white;
+}
+
+/* ================================
+   Groups & Profiles Page Specific
+   ================================ */
+
+/* Import Controls Section */
+.import-controls {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* File Upload Button */
+.btn-file {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.btn-file input[type="file"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    cursor: inherit;
+    display: block;
+}
+
+/* CSV Template Link */
+.csv-template-link {
+    color: var(--modern-primary);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--modern-radius-sm);
+}
+
+.csv-template-link:hover {
+    color: var(--modern-primary-dark);
+    background: rgba(102, 126, 234, 0.1);
+}
+
+/* Target Form Inline */
+.target-form-inline {
+    margin-top: 0.75rem;
+}
+
+.target-form-inline .row {
+    display: flex;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.target-form-inline .col-sm-1,
+.target-form-inline .col-sm-2,
+.target-form-inline .col-sm-3 {
+    padding: 0;
+}
+
+.target-form-inline .form-control {
+    border: 2px solid var(--modern-border);
+    border-radius: var(--modern-radius-sm);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+    color: var(--modern-text-primary);
+}
+
+.target-form-inline .form-control:focus {
+    outline: none;
+    border-color: var(--modern-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Targets Table Container */
+.targets-table-container {
+    margin-top: 1.5rem;
+    border: 1px solid var(--modern-border);
+    border-radius: var(--modern-radius);
+    overflow: hidden;
+    background: white;
+}
+
+.targets-table-container .modern-table {
+    margin-bottom: 0;
+}
+
+.targets-table-container .modern-table th {
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+.targets-table-container .modern-table td {
+    padding: 0.875rem 1rem;
+}
+
+/* Modern Checkbox */
+.modern-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+}
+
+.modern-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--modern-primary);
+    cursor: pointer;
+}
+
+.modern-checkbox label {
+    margin: 0;
+    font-weight: 500;
+    color: var(--modern-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.checkbox-group .control-label {
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+}
+
+/* Headers Section */
+.headers-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--modern-border);
+}
+
+.headers-input-row {
+    margin-top: 0.75rem;
+}
+
+.headers-input-row .row {
+    display: flex;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.headers-input-row .col-md-3,
+.headers-input-row .col-md-4,
+.headers-input-row .col-md-5 {
+    padding: 0;
+}
+
+.headers-table-container {
+    margin-top: 1rem;
+    border: 1px solid var(--modern-border);
+    border-radius: var(--modern-radius);
+    overflow: hidden;
+    background: white;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.headers-table-container .modern-table {
+    margin-bottom: 0;
+}
+
+.headers-table-container .modern-table th {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    position: sticky;
+    top: 0;
+    background: var(--modern-bg-hover);
+    z-index: 1;
+}
+
+.headers-table-container .modern-table td {
+    padding: 0.625rem 1rem;
+}
+
+/* Test Email Action */
+.test-email-action {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--modern-border);
+}
+
+/* Table Condensed for modals */
+.modern-table.table-condensed th {
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+}
+
+.modern-table.table-condensed td {
+    padding: 0.75rem 1rem;
+}
+
+/* Delete icon in tables */
+.modern-table span[style*="cursor:pointer"] {
+    color: var(--modern-danger);
+    transition: all 0.2s ease;
+}
+
+.modern-table span[style*="cursor:pointer"]:hover {
+    color: var(--modern-danger-dark);
+    transform: scale(1.1);
+}
+
+.modern-table .fa-trash-o {
+    font-size: 1.1rem;
+}
+
+/* Small modern button */
+.btn-sm-modern {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* Help text styling */
+.help-text {
+    color: var(--modern-text-muted);
+    font-size: 0.9rem;
+}
+
+/* ================================
+   Users Page Specific
+   ================================ */
+.checkbox-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--modern-bg-hover);
+    border-radius: var(--modern-radius-sm);
+    margin-bottom: 1.5rem;
+}
+
+.password-strength-progress {
+    height: 8px;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    background: var(--modern-border);
+}
+
+.password-strength-progress .progress-bar {
+    border-radius: 4px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-strength-text {
+    font-size: 0.875rem;
+    color: var(--modern-text-muted);
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* ================================
+   Role Label Styling
+   ================================ */
+.role-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.role-admin {
+    background: rgba(102, 126, 234, 0.15);
+    color: var(--modern-primary);
+}
+
+.role-user {
+    background: rgba(108, 117, 125, 0.15);
+    color: var(--modern-secondary);
+}
+
+/* ================================
+   Templates & Landing Pages Specific
+   ================================ */
+.modern-nav-tabs-inline {
+    border-bottom: 2px solid var(--modern-border);
+    margin-bottom: 0;
+}
+
+.modern-nav-tabs-inline > li {
+    margin-bottom: -2px;
+}
+
+.modern-nav-tabs-inline > li > a {
+    border: none;
+    border-radius: 0;
+    color: var(--modern-text-muted);
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.modern-nav-tabs-inline > li > a:hover {
+    background: transparent;
+    color: var(--modern-primary);
+    border: none;
+}
+
+.modern-nav-tabs-inline > li.active > a,
+.modern-nav-tabs-inline > li.active > a:hover,
+.modern-nav-tabs-inline > li.active > a:focus {
+    border: none;
+    border-bottom: 3px solid var(--modern-primary);
+    color: var(--modern-primary);
+    background: transparent;
+    font-weight: 600;
+}
+
+.template-tab-content {
+    border: 1px solid var(--modern-border);
+    border-top: none;
+    border-radius: 0 0 var(--modern-radius-sm) var(--modern-radius-sm);
+    padding: 1rem;
+    background: white;
+    min-height: 200px;
+}
+
+.template-tab-content textarea.form-control {
+    border: none;
+    box-shadow: none;
+    resize: vertical;
+    min-height: 180px;
+}
+
+.template-tab-content textarea.form-control:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.template-options {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--modern-bg-hover);
+    border-radius: var(--modern-radius-sm);
+}
+
+.page-options {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--modern-bg-hover);
+    border-radius: var(--modern-radius-sm);
+}
+
+.page-options .modern-checkbox {
+    margin-bottom: 0.75rem;
+}
+
+.page-options .modern-checkbox:last-child {
+    margin-bottom: 0;
+}
+
+.attachment-section {
+    display: flex;
+    align-items: center;
+}
+
+.attachments-container {
+    margin-top: 1rem;
+    border: 1px solid var(--modern-border);
+    border-radius: var(--modern-radius);
+    overflow: hidden;
+    background: white;
+}
+
+.attachments-container .modern-table {
+    margin-bottom: 0;
+}
+
+.attachments-container .modern-table th {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+}
+
+.attachments-container .modern-table td {
+    padding: 0.625rem 1rem;
+}
+
+/* CKEditor in modal styling */
+.modern-modal-body .cke {
+    border-radius: 0 0 var(--modern-radius-sm) var(--modern-radius-sm);
+}
+
+.modern-modal-body .cke_top {
+    background: var(--modern-bg-hover);
+    border-bottom: 1px solid var(--modern-border);
+}
+
+.modern-modal-body .cke_bottom {
+    background: var(--modern-bg-hover);
+    border-top: 1px solid var(--modern-border);
+}

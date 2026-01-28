@@ -218,6 +218,7 @@ function addTarget(firstNameInput, lastNameInput, emailInput, positionInput) {
 
 function load() {
     $("#groupTable").hide()
+    $("#groupsCard").hide()
     $("#emptyMessage").hide()
     $("#loading").show()
     api.groups.summary()
@@ -226,6 +227,7 @@ function load() {
             if (response.total > 0) {
                 groups = response.groups
                 $("#emptyMessage").hide()
+                $("#groupsCard").show()
                 $("#groupTable").show()
                 var groupTable = $("#groupTable").DataTable({
                     destroy: true,
@@ -241,15 +243,18 @@ function load() {
                         escapeHtml(group.name),
                         escapeHtml(group.num_targets),
                         moment(group.modified_date).format('MMMM Do YYYY, h:mm:ss a'),
-                        "<div class='pull-right'><button class='btn btn-primary' data-toggle='modal' data-backdrop='static' data-target='#modal' onclick='edit(" + group.id + ")'>\
-                    <i class='fa fa-pencil'></i>\
-                    </button>\
-                    <button class='btn btn-danger' onclick='deleteGroup(" + group.id + ")'>\
-                    <i class='fa fa-trash-o'></i>\
-                    </button></div>"
+                        "<div class='pull-right action-buttons'>\
+                            <button class='btn-modern btn-icon-modern btn-primary-modern' data-toggle='modal' data-backdrop='static' data-target='#modal' onclick='edit(" + group.id + ")' title='Edit Group' aria-label='Edit " + escapeHtml(group.name) + "'>\
+                                <i class='fa fa-pencil' aria-hidden='true'></i>\
+                            </button>\
+                            <button class='btn-modern btn-icon-modern btn-danger-modern' onclick='deleteGroup(" + group.id + ")' title='Delete Group' aria-label='Delete " + escapeHtml(group.name) + "'>\
+                                <i class='fa fa-trash-o' aria-hidden='true'></i>\
+                            </button>\
+                        </div>"
                     ])
                 })
                 groupTable.rows.add(groupRows).draw()
+                $('[data-toggle="tooltip"]').tooltip()
             } else {
                 $("#emptyMessage").show()
             }

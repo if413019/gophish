@@ -187,11 +187,13 @@ const impersonate = (id) => {
 
 const load = () => {
     $("#userTable").hide()
+    $("#usersCard").hide()
     $("#loading").show()
     api.users.get()
         .success((us) => {
             users = us
             $("#loading").hide()
+            $("#usersCard").show()
             $("#userTable").show()
             let userTable = $("#userTable").DataTable({
                 destroy: true,
@@ -211,19 +213,21 @@ const load = () => {
                     escapeHtml(user.username),
                     escapeHtml(user.role.name),
                     lastlogin,
-                    "<div class='pull-right'>\
-                    <button class='btn btn-warning impersonate_button' data-user-id='" + user.id + "'>\
-                    <i class='fa fa-retweet'></i>\
-                    </button>\
-                    <button class='btn btn-primary edit_button' data-toggle='modal' data-backdrop='static' data-target='#modal' data-user-id='" + user.id + "'>\
-                    <i class='fa fa-pencil'></i>\
-                    </button>\
-                    <button class='btn btn-danger delete_button' data-user-id='" + user.id + "'>\
-                    <i class='fa fa-trash-o'></i>\
-                    </button></div>"
+                    "<div class='pull-right action-buttons'>\
+                        <button class='btn-modern btn-icon-modern btn-warning-modern impersonate_button' data-user-id='" + user.id + "' title='Impersonate User' aria-label='Impersonate " + escapeHtml(user.username) + "'>\
+                            <i class='fa fa-retweet' aria-hidden='true'></i>\
+                        </button>\
+                        <button class='btn-modern btn-icon-modern btn-primary-modern edit_button' data-toggle='modal' data-backdrop='static' data-target='#modal' data-user-id='" + user.id + "' title='Edit User' aria-label='Edit " + escapeHtml(user.username) + "'>\
+                            <i class='fa fa-pencil' aria-hidden='true'></i>\
+                        </button>\
+                        <button class='btn-modern btn-icon-modern btn-danger-modern delete_button' data-user-id='" + user.id + "' title='Delete User' aria-label='Delete " + escapeHtml(user.username) + "'>\
+                            <i class='fa fa-trash-o' aria-hidden='true'></i>\
+                        </button>\
+                    </div>"
                 ])
             })
             userTable.rows.add(userRows).draw();
+            $('[data-toggle="tooltip"]').tooltip()
         })
         .error(() => {
             errorFlash("Error fetching users")

@@ -187,6 +187,7 @@ function copy(idx) {
 
 function load() {
     $("#profileTable").hide()
+    $("#profilesCard").hide()
     $("#emptyMessage").hide()
     $("#loading").show()
     api.SMTP.get()
@@ -194,6 +195,7 @@ function load() {
             profiles = ss
             $("#loading").hide()
             if (profiles.length > 0) {
+                $("#profilesCard").show()
                 $("#profileTable").show()
                 profileTable = $("#profileTable").DataTable({
                     destroy: true,
@@ -209,15 +211,21 @@ function load() {
                         escapeHtml(profile.name),
                         profile.interface_type,
                         moment(profile.modified_date).format('MMMM Do YYYY, h:mm:ss a'),
-                        "<div class='pull-right'><span data-toggle='modal' data-backdrop='static' data-target='#modal'><button class='btn btn-primary' data-toggle='tooltip' data-placement='left' title='Edit Profile' onclick='edit(" + i + ")'>\
-                    <i class='fa fa-pencil'></i>\
-                    </button></span>\
-		    <span data-toggle='modal' data-target='#modal'><button class='btn btn-primary' data-toggle='tooltip' data-placement='left' title='Copy Profile' onclick='copy(" + i + ")'>\
-                    <i class='fa fa-copy'></i>\
-                    </button></span>\
-                    <button class='btn btn-danger' data-toggle='tooltip' data-placement='left' title='Delete Profile' onclick='deleteProfile(" + i + ")'>\
-                    <i class='fa fa-trash-o'></i>\
-                    </button></div>"
+                        "<div class='pull-right action-buttons'>\
+                            <span data-toggle='modal' data-backdrop='static' data-target='#modal'>\
+                                <button class='btn-modern btn-icon-modern btn-primary-modern' title='Edit Profile' aria-label='Edit " + escapeHtml(profile.name) + "' onclick='edit(" + i + ")'>\
+                                    <i class='fa fa-pencil' aria-hidden='true'></i>\
+                                </button>\
+                            </span>\
+                            <span data-toggle='modal' data-target='#modal'>\
+                                <button class='btn-modern btn-icon-modern btn-info-modern' title='Copy Profile' aria-label='Copy " + escapeHtml(profile.name) + "' onclick='copy(" + i + ")'>\
+                                    <i class='fa fa-copy' aria-hidden='true'></i>\
+                                </button>\
+                            </span>\
+                            <button class='btn-modern btn-icon-modern btn-danger-modern' title='Delete Profile' aria-label='Delete " + escapeHtml(profile.name) + "' onclick='deleteProfile(" + i + ")'>\
+                                <i class='fa fa-trash-o' aria-hidden='true'></i>\
+                            </button>\
+                        </div>"
                     ])
                 })
                 profileTable.rows.add(profileRows).draw()

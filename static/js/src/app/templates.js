@@ -308,6 +308,7 @@ function importEmail() {
 
 function load() {
     $("#templateTable").hide()
+    $("#templatesCard").hide()
     $("#emptyMessage").hide()
     $("#loading").show()
     api.templates.get()
@@ -315,6 +316,7 @@ function load() {
             templates = ts
             $("#loading").hide()
             if (templates.length > 0) {
+                $("#templatesCard").show()
                 $("#templateTable").show()
                 templateTable = $("#templateTable").DataTable({
                     destroy: true,
@@ -329,15 +331,21 @@ function load() {
                     templateRows.push([
                         escapeHtml(template.name),
                         moment(template.modified_date).format('MMMM Do YYYY, h:mm:ss a'),
-                        "<div class='pull-right'><span data-toggle='modal' data-backdrop='static' data-target='#modal'><button class='btn btn-primary' data-toggle='tooltip' data-placement='left' title='Edit Template' onclick='edit(" + i + ")'>\
-                    <i class='fa fa-pencil'></i>\
-                    </button></span>\
-		    <span data-toggle='modal' data-target='#modal'><button class='btn btn-primary' data-toggle='tooltip' data-placement='left' title='Copy Template' onclick='copy(" + i + ")'>\
-                    <i class='fa fa-copy'></i>\
-                    </button></span>\
-                    <button class='btn btn-danger' data-toggle='tooltip' data-placement='left' title='Delete Template' onclick='deleteTemplate(" + i + ")'>\
-                    <i class='fa fa-trash-o'></i>\
-                    </button></div>"
+                        "<div class='pull-right action-buttons'>\
+                            <span data-toggle='modal' data-backdrop='static' data-target='#modal'>\
+                                <button class='btn-modern btn-icon-modern btn-primary-modern' title='Edit Template' aria-label='Edit " + escapeHtml(template.name) + "' onclick='edit(" + i + ")'>\
+                                    <i class='fa fa-pencil' aria-hidden='true'></i>\
+                                </button>\
+                            </span>\
+                            <span data-toggle='modal' data-target='#modal'>\
+                                <button class='btn-modern btn-icon-modern btn-info-modern' title='Copy Template' aria-label='Copy " + escapeHtml(template.name) + "' onclick='copy(" + i + ")'>\
+                                    <i class='fa fa-copy' aria-hidden='true'></i>\
+                                </button>\
+                            </span>\
+                            <button class='btn-modern btn-icon-modern btn-danger-modern' title='Delete Template' aria-label='Delete " + escapeHtml(template.name) + "' onclick='deleteTemplate(" + i + ")'>\
+                                <i class='fa fa-trash-o' aria-hidden='true'></i>\
+                            </button>\
+                        </div>"
                     ])
                 })
                 templateTable.rows.add(templateRows).draw()

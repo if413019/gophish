@@ -1,120 +1,173 @@
 {{define "body"}}
 <div class="main">
-    <h1 class="page-header">
-        Landing Pages
-    </h1>
-    <div id="flashes" class="row"></div>
-    <div class="row">
-        <button type="button" class="btn btn-primary" onclick="edit(-1)" data-toggle="modal" data-backdrop="static"
-            data-target="#modal"><i class="fa fa-plus"></i> New Page</button>
-    </div>
-    &nbsp;
-    <div id="loading">
-        <i class="fa fa-spinner fa-spin fa-4x"></i>
-    </div>
-    <div id="emptyMessage" class="row" style="display:none;">
-        <div class="alert alert-info">
-            No pages created yet. Let's create one!
+<div class="modern-page landing-pages-page">
+    <!-- Modern Page Header -->
+    <div class="page-header-modern">
+        <div>
+            <h1 class="page-title">Landing Pages</h1>
+            <p class="page-subtitle">Create phishing landing pages to capture credentials</p>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="btn-modern btn-primary-modern" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+                <i class="fa fa-plus"></i> New Page
+            </button>
         </div>
     </div>
-    <div class="row">
-        <table id="pagesTable" class="table" style="display:none;">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Last Modified Date</th>
-                    <th class="col-md-2 no-sort"></th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        <div id="flashes"></div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading-state">
+        <i class="fa fa-spinner fa-spin"></i>
+        <p>Loading pages...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyMessage" style="display:none;">
+        <div class="empty-state">
+            <i class="fa fa-file-code-o"></i>
+            <h3>No Landing Pages</h3>
+            <p>Create your first landing page to use in phishing campaigns.</p>
+            <button type="button" class="btn-modern btn-primary-modern" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+                <i class="fa fa-plus"></i> Create Page
+            </button>
+        </div>
+    </div>
+
+    <!-- Pages Table -->
+    <div class="modern-card" id="pagesCard" style="display:none;">
+        <div class="modern-card-header">
+            <div class="section-header" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                <h2><i class="fa fa-file-code-o"></i> Landing Pages</h2>
+            </div>
+        </div>
+        <div class="modern-card-body">
+            <div class="modern-table-wrapper">
+                <table id="pagesTable" class="modern-table" role="table" aria-label="Landing pages">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Last Modified Date</th>
+                            <th scope="col" class="no-sort text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
-<!-- Modal -->
-<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- New Template Modal -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="dismiss()"><span
-                        aria-hidden="true">&times;</span></button>
+</div>
+
+<!-- Page Modal -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="pageModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-modal-header">
+                <button type="button" class="close modern-close" data-dismiss="modal" aria-label="Close" onclick="dismiss()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title" id="modalLabel">New Landing Page</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body modern-modal-body">
                 <div class="row" id="modal.flashes"></div>
-                <label class="control-label" for="name">Name:</label>
+
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Page name" id="name" autofocus />
+                    <label class="control-label" for="name">Page Name:</label>
+                    <input type="text" class="form-control" placeholder="Enter page name" id="name" autofocus />
                 </div>
+
                 <div class="form-group">
-                    <button class="btn btn-danger" data-toggle="modal" data-backdrop="static" data-target="#importSiteModal"><i
-                            class="fa fa-globe"></i>
-                        Import Site</button>
+                    <button class="btn-modern btn-info-modern btn-sm-modern" data-toggle="modal" data-backdrop="static" data-target="#importSiteModal">
+                        <i class="fa fa-globe"></i> Import Site
+                    </button>
                 </div>
+
                 <!-- Nav tabs -->
-                <ul class="nav nav-tabs" role="tablist">
+                <ul class="nav nav-tabs modern-nav-tabs-inline" role="tablist">
                     <li class="active" role="html"><a href="#html" aria-controls="html" role="tab" data-toggle="tab">HTML</a></li>
                 </ul>
+
                 <!-- Tab panes -->
-                <div class="tab-content">
+                <div class="tab-content template-tab-content">
                     <div role="tabpanel" class="tab-pane active" id="html">
                         <textarea id="html_editor"></textarea>
                     </div>
                 </div>
-                <div class="checkbox checkbox-primary">
-                    <input id="capture_credentials_checkbox" type="checkbox">
-                    <label for="capture_credentials_checkbox">Capture Submitted Data <i class="fa fa-question-circle"
-                            data-toggle="tooltip" data-placement="right" title="If the landing page contains a form, submitted input (except passwords!) will be captured."></i></label>
-                </div>
-                <div class="checkbox checkbox-primary" id="capture_passwords">
-                    <input id="capture_passwords_checkbox" type="checkbox">
-                    <label for="capture_passwords_checkbox">Capture Passwords</label>
-                    <div class="alert alert-warning">
-                        <i class="fa fa-exclamation-circle"></i> <b>Warning:</b> Credentials are currently <b>not
-                            encrypted</b>. This means that captured passwords are stored in the database as cleartext.
-                        Be careful with this!
+
+                <div class="page-options">
+                    <div class="modern-checkbox">
+                        <input id="capture_credentials_checkbox" type="checkbox">
+                        <label for="capture_credentials_checkbox">
+                            Capture Submitted Data
+                            <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="If the landing page contains a form, submitted input (except passwords!) will be captured."></i>
+                        </label>
                     </div>
-                </div>
-                <div id="redirect_url">
-                    <label class="control-label" for="redirect_url_input">Redirect to: <i class="fa fa-question-circle"
-                            data-toggle="tooltip" data-placement="right" title="This option lets you redirect the user to a page after credentials are submitted."></i></label>
-                    <div class="form-group">
+
+                    <div id="capture_passwords" style="display: none;">
+                        <div class="modern-checkbox">
+                            <input id="capture_passwords_checkbox" type="checkbox">
+                            <label for="capture_passwords_checkbox">Capture Passwords</label>
+                        </div>
+                        <div class="alert-modern alert-warning-modern" style="margin-top: 0.75rem;">
+                            <i class="fa fa-exclamation-circle"></i>
+                            <strong>Warning:</strong> Credentials are currently <strong>not encrypted</strong>. This means that captured passwords are stored in the database as cleartext. Be careful with this!
+                        </div>
+                    </div>
+
+                    <div id="redirect_url" style="display: none; margin-top: 1rem;">
+                        <label class="control-label" for="redirect_url_input">
+                            Redirect to:
+                            <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="This option lets you redirect the user to a page after credentials are submitted."></i>
+                        </label>
                         <input id="redirect_url_input" class="form-control" placeholder="http://example.com" />
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default" onclick="dismiss()">Cancel</button>
-                <button type="button" class="btn btn-primary" id="modalSubmit">Save Page</button>
+            <div class="modal-footer modern-modal-footer">
+                <button type="button" data-dismiss="modal" class="btn-modern btn-secondary-modern" onclick="dismiss()">Cancel</button>
+                <button type="button" class="btn-modern btn-primary-modern" id="modalSubmit">
+                    <i class="fa fa-save"></i> Save Page
+                </button>
             </div>
         </div>
     </div>
 </div>
-<!-- Modal -->
+
+<!-- Import Site Modal -->
 <div class="modal fade" id="importSiteModal" tabindex="-1" role="dialog" aria-labelledby="importSiteModalLabel">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- New Template Modal -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-modal-header">
+                <button type="button" class="close modern-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title" id="importSiteModalLabel">Import Site</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body modern-modal-body">
                 <div class="row" id="modal.flashes"></div>
-                <label class="control-label" for="url">URL:</label>
+                <p class="help-text" style="margin-bottom: 1rem;">Enter a URL to clone and import the page content.</p>
+
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="http://google.com" id="url" autofocus />
+                    <label class="control-label" for="url">URL:</label>
+                    <input type="text" class="form-control" placeholder="https://example.com" id="url" autofocus />
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
-                <button type="button" class="btn btn-primary" id="modalSubmit" onclick="importSite()">Import</button>
+            <div class="modal-footer modern-modal-footer">
+                <button type="button" data-dismiss="modal" class="btn-modern btn-secondary-modern">Cancel</button>
+                <button type="button" class="btn-modern btn-primary-modern" onclick="importSite()">
+                    <i class="fa fa-download"></i> Import
+                </button>
             </div>
         </div>
     </div>
 </div>
 {{end}}
+
 {{define "scripts"}}
 <script src="/js/src/vendor/ckeditor/ckeditor.js"></script>
 <script src="/js/src/vendor/ckeditor/adapters/jquery.js"></script>

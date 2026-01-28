@@ -1,106 +1,152 @@
 {{define "body"}}
 <div class="main">
-    <div class="row">
-        <h1 class="page-header">
-            Users &amp; Groups
-        </h1>
-    </div>
-    <div id="flashes" class="row"></div>
-    <div class="row">
-        <button type="button" class="btn btn-primary" onclick="edit(-1)" data-toggle="modal" data-backdrop="static"
-            data-target="#modal">
-            <i class="fa fa-plus"></i> New Group</button>
-    </div>
-    &nbsp;
-    <div id="loading">
-        <i class="fa fa-spinner fa-spin fa-4x"></i>
-    </div>
-    <div id="emptyMessage" class="row" style="display:none;">
-        <div class="alert alert-info">
-            No groups created yet. Let's create one!
+<div class="modern-page groups-page">
+    <!-- Modern Page Header -->
+    <div class="page-header-modern">
+        <div>
+            <h1 class="page-title">Users &amp; Groups</h1>
+            <p class="page-subtitle">Manage target groups for your phishing campaigns</p>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="btn-modern btn-primary-modern" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+                <i class="fa fa-plus"></i> New Group
+            </button>
         </div>
     </div>
-    <div class="row">
-        <table id="groupTable" class="table" style="display:none;">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th># of Members</th>
-                    <th>Modified Date</th>
-                    <th class="col-md-2 no-sort"></th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        <div id="flashes"></div>
     </div>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title" id="groupModalLabel">New Group</h4>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading-state">
+        <i class="fa fa-spinner fa-spin"></i>
+        <p>Loading groups...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyMessage" style="display:none;">
+        <div class="empty-state">
+            <i class="fa fa-users"></i>
+            <h3>No Groups Created</h3>
+            <p>Create your first target group to start organizing recipients for your campaigns.</p>
+            <button type="button" class="btn-modern btn-primary-modern" onclick="edit(-1)" data-toggle="modal" data-backdrop="static" data-target="#modal">
+                <i class="fa fa-plus"></i> Create Group
+            </button>
+        </div>
+    </div>
+
+    <!-- Groups Table -->
+    <div class="modern-card" id="groupsCard" style="display:none;">
+        <div class="modern-card-header">
+            <div class="section-header" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                <h2><i class="fa fa-users"></i> Target Groups</h2>
             </div>
-            <div class="modal-body">
-                <div class="row" id="modal.flashes"></div>
-                <label class="control-label" for="name">Name:</label>
-                <div class="form-group">
-                    <input type="text" class="form-control" ng-model="group.name" placeholder="Group name" id="name"
-                        autofocus />
-                </div>
-                <div class="form-group">
-                    <span class="btn btn-danger btn-file" data-toggle="tooltip" data-placement="right"
-                        title="Supports CSV files" id="fileUpload">
-                        <i class="fa fa-plus"></i> Bulk Import Users
-                        <input type="file" id="csvupload" multiple>
-                    </span>
-                    <span id="csv-template" class="text-muted small">
-                        <i class="fa fa-file-excel-o"></i> Download CSV Template</span>
-                </div>
-                <div class="row">
-                    <form id="targetForm">
-                        <div class="col-sm-2">
-                            <input type="text" class="form-control" placeholder="First Name" id="firstName">
-                        </div>
-                        <div class="col-sm-2">
-                            <input type="text" class="form-control" placeholder="Last Name" id="lastName">
-                        </div>
-                        <div class="col-sm-3">
-                            <input type="email" class="form-control" placeholder="Email" id="email" required>
-                        </div>
-                        <div class="col-sm-3">
-                            <input type="text" class="form-control" placeholder="Position" id="position">
-                        </div>
-                        <div class="col-sm-1">
-                            <button type="submit" class="btn btn-danger btn-lg">
-                                <i class="fa fa-plus"></i> Add</button>
-                        </div>
-                    </form>
-                </div>
-                <br />
-                <table id="targetsTable" class="table table-hover table-striped table-condensed">
+        </div>
+        <div class="modern-card-body">
+            <div class="modern-table-wrapper">
+                <table id="groupTable" class="modern-table" role="table" aria-label="Target groups">
                     <thead>
                         <tr>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Email</th>
-                            <th>Position</th>
-                            <th class="no-sort"></th>
+                            <th scope="col">Name</th>
+                            <th scope="col"># of Members</th>
+                            <th scope="col">Modified Date</th>
+                            <th scope="col" class="no-sort text-center">Actions</th>
+                        </tr>
+                    </thead>
                     <tbody>
                     </tbody>
                 </table>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="modalSubmit">Save changes</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Group Modal -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="groupModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-modal-header">
+                <button type="button" class="close modern-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="groupModalLabel">New Group</h4>
+            </div>
+            <div class="modal-body modern-modal-body">
+                <div class="row" id="modal.flashes"></div>
+
+                <div class="form-group">
+                    <label class="control-label" for="name">Group Name:</label>
+                    <input type="text" class="form-control" ng-model="group.name" placeholder="Enter group name" id="name" autofocus />
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Import Users:</label>
+                    <div class="import-controls">
+                        <span class="btn-modern btn-info-modern btn-file" data-toggle="tooltip" data-placement="right" title="Supports CSV files" id="fileUpload">
+                            <i class="fa fa-upload"></i> Bulk Import CSV
+                            <input type="file" id="csvupload" multiple>
+                        </span>
+                        <span id="csv-template" class="csv-template-link">
+                            <i class="fa fa-file-excel-o"></i> Download CSV Template
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Add Individual User:</label>
+                    <form id="targetForm" class="target-form-inline">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" placeholder="First Name" id="firstName">
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" placeholder="Last Name" id="lastName">
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="email" class="form-control" placeholder="Email" id="email" required>
+                            </div>
+                            <div class="col-sm-2">
+                                <input type="text" class="form-control" placeholder="Position" id="position">
+                            </div>
+                            <div class="col-sm-1">
+                                <button type="submit" class="btn-modern btn-success-modern btn-sm-modern" style="width: 100%;">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="targets-table-container">
+                    <table id="targetsTable" class="modern-table table-condensed">
+                        <thead>
+                            <tr>
+                                <th scope="col">First Name</th>
+                                <th scope="col">Last Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Position</th>
+                                <th scope="col" class="no-sort text-center" style="width: 50px;"><span class="sr-only">Delete</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer modern-modal-footer">
+                <button type="button" class="btn-modern btn-secondary-modern" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-modern btn-primary-modern" id="modalSubmit">
+                    <i class="fa fa-save"></i> Save Group
+                </button>
             </div>
         </div>
     </div>
 </div>
-{{end}} {{define "scripts"}}
+{{end}}
+
+{{define "scripts"}}
 <script src="/js/dist/app/groups.min.js"></script>
 {{end}}

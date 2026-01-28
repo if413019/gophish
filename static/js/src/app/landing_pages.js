@@ -144,6 +144,7 @@ function load() {
         load() - Loads the current pages using the API
     */
     $("#pagesTable").hide()
+    $("#pagesCard").hide()
     $("#emptyMessage").hide()
     $("#loading").show()
     api.pages.get()
@@ -151,6 +152,7 @@ function load() {
             pages = ps
             $("#loading").hide()
             if (pages.length > 0) {
+                $("#pagesCard").show()
                 $("#pagesTable").show()
                 pagesTable = $("#pagesTable").DataTable({
                     destroy: true,
@@ -165,15 +167,21 @@ function load() {
                     pageRows.push([
                         escapeHtml(page.name),
                         moment(page.modified_date).format('MMMM Do YYYY, h:mm:ss a'),
-                        "<div class='pull-right'><span data-toggle='modal' data-backdrop='static' data-target='#modal'><button class='btn btn-primary' data-toggle='tooltip' data-placement='left' title='Edit Page' onclick='edit(" + i + ")'>\
-                    <i class='fa fa-pencil'></i>\
-                    </button></span>\
-		    <span data-toggle='modal' data-target='#modal'><button class='btn btn-primary' data-toggle='tooltip' data-placement='left' title='Copy Page' onclick='copy(" + i + ")'>\
-                    <i class='fa fa-copy'></i>\
-                    </button></span>\
-                    <button class='btn btn-danger' data-toggle='tooltip' data-placement='left' title='Delete Page' onclick='deletePage(" + i + ")'>\
-                    <i class='fa fa-trash-o'></i>\
-                    </button></div>"
+                        "<div class='pull-right action-buttons'>\
+                            <span data-toggle='modal' data-backdrop='static' data-target='#modal'>\
+                                <button class='btn-modern btn-icon-modern btn-primary-modern' title='Edit Page' aria-label='Edit " + escapeHtml(page.name) + "' onclick='edit(" + i + ")'>\
+                                    <i class='fa fa-pencil' aria-hidden='true'></i>\
+                                </button>\
+                            </span>\
+                            <span data-toggle='modal' data-target='#modal'>\
+                                <button class='btn-modern btn-icon-modern btn-info-modern' title='Copy Page' aria-label='Copy " + escapeHtml(page.name) + "' onclick='copy(" + i + ")'>\
+                                    <i class='fa fa-copy' aria-hidden='true'></i>\
+                                </button>\
+                            </span>\
+                            <button class='btn-modern btn-icon-modern btn-danger-modern' title='Delete Page' aria-label='Delete " + escapeHtml(page.name) + "' onclick='deletePage(" + i + ")'>\
+                                <i class='fa fa-trash-o' aria-hidden='true'></i>\
+                            </button>\
+                        </div>"
                     ])
                 })
                 pagesTable.rows.add(pageRows).draw()
