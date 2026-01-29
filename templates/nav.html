@@ -9,7 +9,7 @@
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
                         <i class="fa fa-shield"></i>
-                        <span class="sidebar-title">Security Portal</span>
+                        <span class="sidebar-title">NanoSecure+</span>
                     </div>
                 </div>
 
@@ -57,7 +57,7 @@
                 <div class="sidebar-header">
                     <div class="sidebar-logo">
                         <i class="fa fa-shield"></i>
-                        <span class="sidebar-title">Gophish</span>
+                        <span class="sidebar-title">NanoSecure+</span>
                     </div>
                 </div>
 
@@ -179,7 +179,7 @@
     width: 256px;
     height: 100vh;
     background: hsl(0 0% 100%);
-    border-right: 1px solid hsl(210 40% 95%);
+    border-right: 1px solid hsl(210 40% 94%);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     overflow-y: auto;
 }
@@ -193,9 +193,12 @@
 
 /* Sidebar Header */
 .sidebar-header {
-    padding: 1.5rem 1rem;
-    border-bottom: 1px solid hsl(210 40% 95%);
+    height: 64px;
+    padding: 0 1rem;
+    border-bottom: 1px solid hsl(210 40% 94%);
     background: hsl(0 0% 100%);
+    display: flex;
+    align-items: center;
 }
 
 .sidebar-logo {
@@ -346,77 +349,12 @@
         transform: translateX(-100%);
         transition: transform 0.3s ease-in-out;
     }
-    
+
     .sidebar-container.mobile-open {
         transform: translateX(0);
     }
 }
 
-/* Dark theme support */
-@media (prefers-color-scheme: dark) {
-    .sidebar-container {
-        background: hsl(224 71% 4%);
-        border-right-color: hsl(215 27% 17%);
-    }
-    
-    .sidebar-header {
-        border-bottom-color: hsl(215 27% 17%);
-        background: hsl(224 71% 4%);
-    }
-    
-    .sidebar-logo {
-        color: hsl(0 0% 100%);
-    }
-    
-    .sidebar-logo i {
-        background: hsl(0 0% 100%);
-        color: hsl(224 71% 4%);
-    }
-    
-    .sidebar-title {
-        color: hsl(0 0% 100%);
-    }
-    
-    .nav-group-title {
-        color: hsl(215 20% 65%);
-    }
-    
-    .nav-separator {
-        background: hsl(215 27% 17%);
-    }
-    
-    .nav-item {
-        color: hsl(215 20% 65%);
-    }
-    
-    .nav-item:hover {
-        background: hsl(215 27% 17%);
-        color: hsl(0 0% 100%);
-    }
-    
-    .nav-item.nav-item-active {
-        background: hsl(215 27% 17%);
-        color: hsl(0 0% 100%);
-    }
-    
-    .nav-item.active {
-        background: hsl(210 84% 56%);
-        color: hsl(0 0% 100%);
-    }
-}
-
-/* Adjust main content margin for fixed sidebar */
-.main {
-    margin-left: 256px;
-    background: #f8f9fa;
-    min-height: 100vh;
-}
-
-@media (max-width: 768px) {
-    .main {
-        margin-left: 0;
-    }
-}
 </style>
 
 <script>
@@ -424,20 +362,20 @@
 document.addEventListener('DOMContentLoaded', function() {
     const currentPath = window.location.pathname;
     const navItems = document.querySelectorAll('.nav-item');
-    
+
     navItems.forEach(item => {
         const href = item.getAttribute('href');
         if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href)))) {
             item.classList.add('active');
         }
     });
-    
-    // Mobile sidebar toggle (if needed in future)
-    const sidebarToggle = document.getElementById('sidebar-toggle');
+
+    // Mobile sidebar toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const sidebarContainer = document.querySelector('.sidebar-container');
-    
-    if (sidebarToggle && sidebarContainer) {
-        sidebarToggle.addEventListener('click', function() {
+
+    if (mobileMenuToggle && sidebarContainer) {
+        mobileMenuToggle.addEventListener('click', function() {
             sidebarContainer.classList.toggle('mobile-open');
         });
     }

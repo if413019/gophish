@@ -346,6 +346,9 @@
 
 .empty-state {
     grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
     padding: 4rem 2rem;
     background: rgba(255, 255, 255, 0.95);
@@ -354,7 +357,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.empty-state i {
+.empty-state > i {
     font-size: 4rem;
     color: #a0aec0;
     margin-bottom: 1rem;

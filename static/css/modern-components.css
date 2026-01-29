@@ -715,7 +715,7 @@
     color: var(--modern-text-muted);
 }
 
-.loading-state i {
+.loading-state > i {
     font-size: 3rem;
     margin-bottom: 1rem;
     color: var(--modern-primary);
@@ -730,12 +730,16 @@
    Empty State
    ================================ */
 .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     padding: 4rem 2rem;
     color: var(--modern-text-muted);
 }
 
-.empty-state i {
+.empty-state > i {
     font-size: 5rem;
     color: var(--modern-text-light);
     margin-bottom: 1.5rem;
@@ -752,6 +756,12 @@
 .empty-state p {
     margin: 0 0 2rem 0;
     font-size: 1.1rem;
+    max-width: 400px;
+}
+
+.empty-state .btn-modern {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9375rem;
 }
 
 /* ================================
@@ -1123,18 +1133,52 @@
 
 .modern-modal-body .input-group {
     display: flex;
+    width: 100%;
 }
 
-.modern-modal-body .input-group .form-control {
+.modern-modal-body .input-group .form-control,
+.modern-modal-body .input-group .select2-container {
+    flex: 1;
+    min-width: 0;
     border-radius: var(--modern-radius-sm) 0 0 var(--modern-radius-sm);
+}
+
+.modern-modal-body .input-group-addon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0.625rem 0.875rem;
+    background: var(--modern-bg-hover);
+    border: 1px solid var(--modern-border);
+    border-right: none;
+    border-radius: var(--modern-radius-sm) 0 0 var(--modern-radius-sm);
+}
+
+.modern-modal-body .input-group-addon + .form-control {
+    border-radius: 0;
+}
+
+.modern-modal-body .input-group-addon input[type="radio"],
+.modern-modal-body .input-group-addon input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: var(--modern-primary);
+    cursor: pointer;
 }
 
 .modern-modal-body .input-group-btn {
     display: flex;
+    flex-shrink: 0;
 }
 
-.modern-modal-body .input-group-btn .btn-modern {
+.modern-modal-body .input-group-btn .btn-modern,
+.modern-modal-body .input-group-btn .btn {
     border-radius: 0 var(--modern-radius-sm) var(--modern-radius-sm) 0;
+    white-space: nowrap;
+    height: 100%;
 }
 
 .modern-modal-footer {

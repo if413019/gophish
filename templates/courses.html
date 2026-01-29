@@ -269,12 +269,15 @@
 }
 
 .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
     padding: 4rem 2rem;
     color: #718096;
 }
 
-.empty-state i {
+.empty-state > i {
     font-size: 5rem;
     color: #cbd5e0;
     margin-bottom: 1rem;
@@ -839,10 +842,26 @@
     transition: width 0.3s ease;
 }
 
+/* Quiz options container */
+.modal-content .options-container {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.modal-content .options-container .option-group {
+    margin-bottom: 0.75rem;
+}
+
+.modal-content .options-container .option-group:last-child {
+    margin-bottom: 0;
+}
+
 /* Input group styling */
 .modal-content .input-group {
-    display: flex;
+    display: flex !important;
     align-items: stretch;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .modal-content .input-group-addon {
@@ -850,26 +869,60 @@
     border: 2px solid #e2e8f0;
     border-right: none;
     border-radius: 8px 0 0 8px;
-    padding: 1.25rem;
-    display: flex;
+    padding: 0 1rem;
+    display: flex !important;
     align-items: center;
+    justify-content: center;
     font-size: 1.125rem;
     color: #4a5568;
+    flex: 0 0 50px !important;
+    width: 50px !important;
+}
+
+.modal-content .input-group-addon input[type="radio"],
+.modal-content .input-group-addon input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
 }
 
 .modal-content .input-group .form-control {
-    border-radius: 0 8px 8px 0 !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 0 !important;
     border-left: none !important;
+    box-sizing: border-box;
+}
+
+/* When input-group has only addon + form-control */
+.modal-content .input-group .form-control:last-child {
+    border-radius: 0 8px 8px 0 !important;
+}
+
+/* When input-group has addon + form-control + btn */
+.modal-content .input-group .input-group-btn:last-child .btn {
+    border-radius: 0 8px 8px 0;
+}
+
+.modal-content .input-group .form-control:not(:last-child) {
+    border-radius: 0 !important;
 }
 
 .modal-content .input-group-btn {
-    display: flex;
+    display: flex !important;
     align-items: stretch;
+    flex: 0 0 48px !important;
+    width: 48px !important;
 }
 
 .modal-content .input-group-btn .btn {
     border-radius: 0 8px 8px 0;
-    border-left: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.625rem;
 }
 
 /* Responsive design */
@@ -1281,8 +1334,8 @@
                         <input type="text" class="form-control quiz-name" placeholder="Quiz Name" style="font-size: 1.125rem !important;" />
                     </div>
                     <div>
+                        <div class="help-block" style="font-size: 1rem; margin-top: 0.25rem;">Passing Grade %</div>
                         <input type="number" class="form-control quiz-passing-score" placeholder="70" value="70" min="0" max="100" style="font-size: 1.125rem !important;" />
-                        <div class="help-block" style="font-size: 1rem; margin-top: 0.25rem;">Passing %</div>
                     </div>
                     <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                         <button type="button" class="btn btn-sm btn-info add-question" style="font-size: 1rem !important;">
