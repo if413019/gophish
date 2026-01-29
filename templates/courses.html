@@ -1091,10 +1091,7 @@
                             <a href="#course-info" aria-controls="course-info" role="tab" data-toggle="tab" style="color: #4a5568; font-weight: 600; border: none; padding: 1rem 2rem; border-radius: 0; position: relative;">Course Info</a>
                         </li>
                         <li role="presentation">
-                            <a href="#course-modules" aria-controls="course-modules" role="tab" data-toggle="tab" style="color: #4a5568; font-weight: 600; border: none; padding: 1rem 2rem; border-radius: 0;">Modules</a>
-                        </li>
-                        <li role="presentation">
-                            <a href="#course-quizzes" aria-controls="course-quizzes" role="tab" data-toggle="tab" style="color: #4a5568; font-weight: 600; border: none; padding: 1rem 2rem; border-radius: 0;">Quizzes</a>
+                            <a href="#course-content" aria-controls="course-content" role="tab" data-toggle="tab" style="color: #4a5568; font-weight: 600; border: none; padding: 1rem 2rem; border-radius: 0;">Course Content</a>
                         </li>
                     </ul>
 
@@ -1114,37 +1111,28 @@
                             </div>
                         </div>
 
-                        <!-- Modules Tab -->
-                        <div role="tabpanel" class="tab-pane" id="course-modules">
+                        <!-- Course Content Tab (Modules & Quizzes) -->
+                        <div role="tabpanel" class="tab-pane" id="course-content">
                             <div class="form-group">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                                    <label style="color: #2d3748; font-weight: 600; font-size: 1.25rem; margin-bottom: 0;">Course Modules:</label>
-                                    <button type="button" class="btn-modern btn-primary-modern" onclick="addModule()">
-                                        <i class="fa fa-plus"></i> Add Module
-                                    </button>
+                                    <label style="color: #2d3748; font-weight: 600; font-size: 1.25rem; margin-bottom: 0;">Course Content:</label>
+                                    <div style="display: flex; gap: 0.75rem;">
+                                        <button type="button" class="btn-modern btn-primary-modern" onclick="addModule()">
+                                            <i class="fa fa-file-text-o"></i> Add Module
+                                        </button>
+                                        <button type="button" class="btn-modern btn-success-modern" onclick="addQuiz()">
+                                            <i class="fa fa-question-circle"></i> Add Quiz
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="help-block" style="color: #718096; font-size: 1.125rem;">Create interactive learning modules with content, videos, presentations, and quizzes.</div>
+                                <div class="help-block" style="color: #718096; font-size: 1.125rem;">
+                                    Build your course by adding modules (content, videos, presentations) and quizzes.
+                                    Use the arrow buttons to reorder items.
+                                </div>
                             </div>
-                            
-                            <div id="modules-container">
-                                <!-- Modules will be added dynamically -->
-                            </div>
-                        </div>
 
-                        <!-- Quizzes Tab -->
-                        <div role="tabpanel" class="tab-pane" id="course-quizzes">
-                            <div class="form-group">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                                    <label style="color: #2d3748; font-weight: 600; font-size: 1.25rem; margin-bottom: 0;">Course Quizzes:</label>
-                                    <button type="button" class="btn-modern btn-primary-modern" onclick="addQuiz()">
-                                        <i class="fa fa-plus"></i> Add Quiz
-                                    </button>
-                                </div>
-                                <div class="help-block" style="color: #718096; font-size: 1.125rem;">Create interactive quizzes to test student knowledge and comprehension.</div>
-                            </div>
-                            
-                            <div id="quizzes-container">
-                                <!-- Quizzes will be added dynamically -->
+                            <div id="content-container">
+                                <!-- Modules and Quizzes will be added dynamically -->
                             </div>
                         </div>
                     </div>
@@ -1162,22 +1150,32 @@
 
 <!-- Module Template -->
 <div id="module-template" style="display: none;">
-    <div class="panel panel-default module-panel">
+    <div class="panel panel-default module-panel content-item" data-item-type="module">
         <div class="panel-heading">
             <div class="form-group" style="margin-bottom: 0;">
-                <div style="display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 1rem; align-items: center;">
-                    <div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="reorder-buttons" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <button type="button" class="btn btn-xs btn-default move-up" title="Move Up" style="padding: 0.25rem 0.5rem;">
+                            <i class="fa fa-chevron-up"></i>
+                        </button>
+                        <button type="button" class="btn btn-xs btn-default move-down" title="Move Down" style="padding: 0.25rem 0.5rem;">
+                            <i class="fa fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <span class="item-type-badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; white-space: nowrap;">
+                        <i class="fa fa-file-text-o"></i> MODULE
+                    </span>
+                    <div style="flex: 2;">
                         <input type="text" class="form-control module-name" placeholder="Module Name" style="font-size: 1.125rem !important;" />
                     </div>
-                    <div>
+                    <div style="flex: 1.5;">
                         <select class="form-control module-type" style="font-size: 1.125rem !important;">
                             <option value="html">HTML Content</option>
                             <option value="video">Video</option>
                             <option value="presentation">Presentation</option>
-                            <option value="quiz">Quiz</option>
                         </select>
                     </div>
-                    <div style="text-align: right;">
+                    <div>
                         <button type="button" class="btn btn-sm btn-danger remove-module" style="font-size: 1rem !important;">
                             <i class="fa fa-trash"></i> Remove
                         </button>
@@ -1295,15 +1293,6 @@
                 </div>
             </div>
             
-            <!-- Quiz-specific fields -->
-            <div class="form-group module-quiz-fields" style="display: none;">
-                <label>Select Quiz:</label>
-                <select class="form-control module-quiz-id">
-                    <option value="">Select an existing quiz...</option>
-                </select>
-                <small class="help-block">Create quizzes first in the Quizzes tab, then link them here</small>
-            </div>
-            
             <!-- Completion settings -->
             <div class="row">
                 <div class="col-md-6">
@@ -1326,23 +1315,30 @@
 
 <!-- Quiz Template -->
 <div id="quiz-template" style="display: none;">
-    <div class="panel panel-default quiz-panel">
-        <div class="panel-heading">
+    <div class="panel panel-default quiz-panel content-item" data-item-type="quiz">
+        <div class="panel-heading" style="background: linear-gradient(135deg, #45b7d115 0%, #96c93d15 100%);">
             <div class="form-group" style="margin-bottom: 0;">
-                <div style="display: grid; grid-template-columns: 2fr 1fr 2fr; gap: 1rem; align-items: end;">
-                    <div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div class="reorder-buttons" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <button type="button" class="btn btn-xs btn-default move-up" title="Move Up" style="padding: 0.25rem 0.5rem;">
+                            <i class="fa fa-chevron-up"></i>
+                        </button>
+                        <button type="button" class="btn btn-xs btn-default move-down" title="Move Down" style="padding: 0.25rem 0.5rem;">
+                            <i class="fa fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <span class="item-type-badge" style="background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%); color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; white-space: nowrap;">
+                        <i class="fa fa-question-circle"></i> QUIZ
+                    </span>
+                    <div style="flex: 2;">
                         <input type="text" class="form-control quiz-name" placeholder="Quiz Name" style="font-size: 1.125rem !important;" />
                     </div>
-                    <div>
-                        <div class="help-block" style="font-size: 1rem; margin-top: 0.25rem;">Passing Grade %</div>
-                        <input type="number" class="form-control quiz-passing-score" placeholder="70" value="70" min="0" max="100" style="font-size: 1.125rem !important;" />
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <div style="display: flex; gap: 0.5rem;">
                         <button type="button" class="btn btn-sm btn-info add-question" style="font-size: 1rem !important;">
-                            <i class="fa fa-plus"></i> Add Question
+                            <i class="fa fa-plus"></i> Question
                         </button>
                         <button type="button" class="btn btn-sm btn-danger remove-quiz" style="font-size: 1rem !important;">
-                            <i class="fa fa-trash"></i> Remove Quiz
+                            <i class="fa fa-trash"></i> Remove
                         </button>
                     </div>
                 </div>
@@ -1353,6 +1349,30 @@
                 <label>Quiz Description:</label>
                 <textarea class="form-control quiz-description" rows="2" placeholder="Quiz description"></textarea>
             </div>
+
+            <!-- Quiz Settings -->
+            <div class="row" style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                <div class="col-md-4">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 1rem;">Passing Score %</label>
+                        <input type="number" class="form-control quiz-passing-score" placeholder="70" value="70" min="0" max="100" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 1rem;">Time Limit (minutes)</label>
+                        <input type="number" class="form-control quiz-time-limit" placeholder="0" value="0" min="0" />
+                        <small class="help-block">0 = No time limit</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 1rem;">Max Attempts</label>
+                        <input type="number" class="form-control quiz-max-attempts" placeholder="3" value="3" min="1" />
+                    </div>
+                </div>
+            </div>
+
             <div class="questions-container">
                 <!-- Questions will be added here -->
             </div>

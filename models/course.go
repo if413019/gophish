@@ -25,6 +25,54 @@ type Course struct {
 	ModifiedDate time.Time      `json:"modified_date"`
 	Modules      []CourseModule `json:"modules,omitempty"`
 	Quizzes      []CourseQuiz   `json:"quizzes,omitempty"`
+	ContentItems []ContentItem  `json:"content_items,omitempty" sql:"-"` // Unified view of modules and quizzes
+}
+
+// ContentItem represents a unified view of modules and quizzes for display
+type ContentItem struct {
+	Type       string        `json:"type"`        // "module" or "quiz"
+	OrderIndex int           `json:"order_index"`
+	Module     *CourseModule `json:"module,omitempty"`
+	Quiz       *CourseQuiz   `json:"quiz,omitempty"`
+}
+
+// ContentItemSlice is a slice of ContentItem that implements sort.Interface
+type ContentItemSlice []ContentItem
+
+func (c ContentItemSlice) Len() int           { return len(c) }
+func (c ContentItemSlice) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c ContentItemSlice) Less(i, j int) bool { return c[i].OrderIndex < c[j].OrderIndex }
+
+// GetContentItems returns a unified, sorted list of modules and quizzes
+func (c *Course) GetContentItems() []ContentItem {
+	items := make([]ContentItem, 0, len(c.Modules)+len(c.Quizzes))
+
+	for i := range c.Modules {
+		items = append(items, ContentItem{
+			Type:       "module",
+			OrderIndex: c.Modules[i].OrderIndex,
+			Module:     &c.Modules[i],
+		})
+	}
+
+	for i := range c.Quizzes {
+		items = append(items, ContentItem{
+			Type:       "quiz",
+			OrderIndex: c.Quizzes[i].OrderIndex,
+			Quiz:       &c.Quizzes[i],
+		})
+	}
+
+	// Sort by OrderIndex
+	for i := 0; i < len(items)-1; i++ {
+		for j := i + 1; j < len(items); j++ {
+			if items[j].OrderIndex < items[i].OrderIndex {
+				items[i], items[j] = items[j], items[i]
+			}
+		}
+	}
+
+	return items
 }
 
 // CourseModule represents a section/module within a course with different types
@@ -258,7 +306,10 @@ func GetCourse(id int64, uid int64) (Course, error) {
 			}
 		}
 	}
-	
+
+	// Populate unified content items view
+	c.ContentItems = c.GetContentItems()
+
 	return c, nil
 }
 
@@ -275,12 +326,123 @@ func PostCourse(c *Course, uid int64) error {
 	if err != nil {
 		return err
 	}
-	
+
 	c.UserId = uid
 	c.CreatedDate = time.Now().UTC()
 	c.ModifiedDate = c.CreatedDate
-	
-	return db.Save(c).Error
+
+	// Store modules separately before creating course (GORM may reset nested slices)
+	modules := make([]CourseModule, len(c.Modules))
+	copy(modules, c.Modules)
+
+	// Store quizzes separately before creating course (GORM may reset nested slices)
+	quizzes := make([]CourseQuiz, len(c.Quizzes))
+	for i, quiz := range c.Quizzes {
+		quizzes[i] = quiz
+		// Deep copy questions
+		quizzes[i].Questions = make([]CourseQuestion, len(quiz.Questions))
+		for j, q := range quiz.Questions {
+			quizzes[i].Questions[j] = q
+			// Deep copy options
+			quizzes[i].Questions[j].Options = make([]QuestionOption, len(q.Options))
+			copy(quizzes[i].Questions[j].Options, q.Options)
+		}
+	}
+
+	log.Info("PostCourse: Received ", len(modules), " modules and ", len(quizzes), " quizzes")
+	for i, quiz := range quizzes {
+		log.Info("Quiz ", i, ": ", quiz.Name, " has ", len(quiz.Questions), " questions")
+		for j, q := range quiz.Questions {
+			log.Info("  Question ", j, ": ", q.Question, " has ", len(q.Options), " options")
+		}
+	}
+
+	tx := db.Begin()
+
+	// Clear nested slices before creating course to avoid GORM issues
+	c.Quizzes = nil
+	c.Modules = nil
+
+	// Save the course first to get its ID
+	err = tx.Create(c).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	log.Info("PostCourse: Course created with ID ", c.Id)
+
+	// Save modules
+	for i := range modules {
+		modules[i].CourseId = c.Id
+		modules[i].CreatedDate = time.Now().UTC()
+		modules[i].ModifiedDate = modules[i].CreatedDate
+		err = tx.Create(&modules[i]).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	// Restore modules to course
+	c.Modules = modules
+
+	// Save quizzes with questions and options from our copy
+	for i := range quizzes {
+		quizzes[i].CourseId = c.Id
+		quizzes[i].CreatedDate = time.Now().UTC()
+
+		// Store questions before creating quiz
+		questions := quizzes[i].Questions
+		quizzes[i].Questions = nil
+
+		err = tx.Create(&quizzes[i]).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		log.Info("PostCourse: Quiz created with ID ", quizzes[i].Id, ", now saving ", len(questions), " questions")
+
+		// Save questions
+		for j := range questions {
+			questions[j].QuizId = quizzes[i].Id
+
+			// Store options before creating question
+			options := questions[j].Options
+			questions[j].Options = nil
+
+			err = tx.Create(&questions[j]).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			log.Info("PostCourse: Question created with ID ", questions[j].Id, ", now saving ", len(options), " options")
+
+			// Save options
+			for k := range options {
+				options[k].QuestionId = questions[j].Id
+				err = tx.Create(&options[k]).Error
+				if err != nil {
+					tx.Rollback()
+					return err
+				}
+			}
+
+			// Restore options to question
+			questions[j].Options = options
+		}
+
+		// Restore questions to quiz
+		quizzes[i].Questions = questions
+	}
+
+	// Restore quizzes to course
+	c.Quizzes = quizzes
+
+	tx.Commit()
+	return nil
 }
 
 // PutCourse updates an existing course
@@ -376,7 +538,158 @@ func PutCourse(c *Course, uid int64) error {
 			return err
 		}
 	}
-	
+
+	// Update or create quizzes
+	for i := range c.Quizzes {
+		c.Quizzes[i].CourseId = c.Id
+
+		log.Info("Processing quiz: ", c.Quizzes[i].Name, " (ID: ", c.Quizzes[i].Id, ")")
+
+		if c.Quizzes[i].Id == 0 {
+			// New quiz - create it
+			c.Quizzes[i].CreatedDate = time.Now().UTC()
+			err = tx.Create(&c.Quizzes[i]).Error
+			log.Info("Created new quiz with ID: ", c.Quizzes[i].Id)
+		} else {
+			// Existing quiz - update it
+			err = tx.Save(&c.Quizzes[i]).Error
+			log.Info("Updated existing quiz ID: ", c.Quizzes[i].Id)
+		}
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		// Handle questions for this quiz
+		for j := range c.Quizzes[i].Questions {
+			c.Quizzes[i].Questions[j].QuizId = c.Quizzes[i].Id
+
+			if c.Quizzes[i].Questions[j].Id == 0 {
+				err = tx.Create(&c.Quizzes[i].Questions[j]).Error
+			} else {
+				err = tx.Save(&c.Quizzes[i].Questions[j]).Error
+			}
+
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			// Handle options for this question
+			for k := range c.Quizzes[i].Questions[j].Options {
+				c.Quizzes[i].Questions[j].Options[k].QuestionId = c.Quizzes[i].Questions[j].Id
+
+				if c.Quizzes[i].Questions[j].Options[k].Id == 0 {
+					err = tx.Create(&c.Quizzes[i].Questions[j].Options[k]).Error
+				} else {
+					err = tx.Save(&c.Quizzes[i].Questions[j].Options[k]).Error
+				}
+
+				if err != nil {
+					tx.Rollback()
+					return err
+				}
+			}
+
+			// Delete removed options
+			var existingOptionIds []int64
+			err = tx.Model(&QuestionOption{}).Where("question_id = ?", c.Quizzes[i].Questions[j].Id).Pluck("id", &existingOptionIds).Error
+			if err == nil && len(existingOptionIds) > 0 {
+				var submittedOptionIds []int64
+				for _, opt := range c.Quizzes[i].Questions[j].Options {
+					if opt.Id != 0 {
+						submittedOptionIds = append(submittedOptionIds, opt.Id)
+					}
+				}
+				for _, existingId := range existingOptionIds {
+					found := false
+					for _, submittedId := range submittedOptionIds {
+						if existingId == submittedId {
+							found = true
+							break
+						}
+					}
+					if !found {
+						tx.Where("id = ?", existingId).Delete(&QuestionOption{})
+					}
+				}
+			}
+		}
+
+		// Delete removed questions
+		var existingQuestionIds []int64
+		err = tx.Model(&CourseQuestion{}).Where("quiz_id = ?", c.Quizzes[i].Id).Pluck("id", &existingQuestionIds).Error
+		if err == nil && len(existingQuestionIds) > 0 {
+			var submittedQuestionIds []int64
+			for _, q := range c.Quizzes[i].Questions {
+				if q.Id != 0 {
+					submittedQuestionIds = append(submittedQuestionIds, q.Id)
+				}
+			}
+			for _, existingId := range existingQuestionIds {
+				found := false
+				for _, submittedId := range submittedQuestionIds {
+					if existingId == submittedId {
+						found = true
+						break
+					}
+				}
+				if !found {
+					// Delete options first, then question
+					tx.Where("question_id = ?", existingId).Delete(&QuestionOption{})
+					tx.Where("id = ?", existingId).Delete(&CourseQuestion{})
+				}
+			}
+		}
+	}
+
+	// Handle quiz deletion - delete any quizzes that exist in DB but not in current submission
+	var existingQuizIds []int64
+	err = tx.Model(&CourseQuiz{}).Where("course_id = ?", c.Id).Pluck("id", &existingQuizIds).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Build list of quiz IDs from current submission
+	var submittedQuizIds []int64
+	for _, quiz := range c.Quizzes {
+		if quiz.Id != 0 {
+			submittedQuizIds = append(submittedQuizIds, quiz.Id)
+		}
+	}
+
+	// Find quizzes to delete (exist in DB but not in submission)
+	var quizzesToDelete []int64
+	for _, existingId := range existingQuizIds {
+		found := false
+		for _, submittedId := range submittedQuizIds {
+			if existingId == submittedId {
+				found = true
+				break
+			}
+		}
+		if !found {
+			quizzesToDelete = append(quizzesToDelete, existingId)
+		}
+	}
+
+	// Delete the quizzes that were removed (with their questions and options)
+	if len(quizzesToDelete) > 0 {
+		log.Info("Deleting removed quizzes: ", quizzesToDelete)
+		// Delete options first
+		tx.Exec("DELETE FROM question_options WHERE question_id IN (SELECT id FROM course_questions WHERE quiz_id IN (?))", quizzesToDelete)
+		// Delete questions
+		tx.Exec("DELETE FROM course_questions WHERE quiz_id IN (?)", quizzesToDelete)
+		// Delete quizzes
+		err = tx.Where("id IN (?)", quizzesToDelete).Delete(&CourseQuiz{}).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
 	tx.Commit()
 	return nil
 }

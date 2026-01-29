@@ -10,17 +10,15 @@ function dismiss(){
     $("#modal").modal('hide')
     $("#name").val("")
     $("#description").val("")
-    $("#modules-container").empty()
-    $("#quizzes-container").empty()
+    $("#content-container").empty()
 }
 
 function newCourse(){
     course = {}
     $("#modalLabel").text("New Course")
     $("#name").val("")
-    $("#description").val("")  
-    $("#modules-container").empty()
-    $("#quizzes-container").empty()
+    $("#description").val("")
+    $("#content-container").empty()
     $("#modal").modal('show')
 }
 
@@ -39,44 +37,50 @@ function deleteCourse(idx){
 
 function addModule() {
     var moduleHtml = $("#module-template").html()
-    var moduleCount = $("#modules-container .module-panel").length
+    var moduleCount = $("#content-container .module-panel").length
     var moduleElement = $(moduleHtml)
     var uniqueId = Date.now() + "_" + moduleCount
-    
+
     // Fix radio button names to be unique per module
     moduleElement.find('input[name="video-source"]').attr('name', 'video-source-' + uniqueId)
     moduleElement.find('input[name="presentation-source"]').attr('name', 'presentation-source-' + uniqueId)
-    
+
     // Handle remove module
     moduleElement.find('.remove-module').click(function() {
         $(this).closest('.module-panel').remove()
+        updateOrderIndices()
     })
-    
+
     // Handle module type change
     moduleElement.find('.module-type').change(function() {
         toggleModuleFields($(this))
     })
-    
-    // Load available quizzes for quiz selection
-    loadQuizzesForModule(moduleElement)
-    
-    $("#modules-container").append(moduleElement)
-    
+
+    // Handle move up/down
+    moduleElement.find('.move-up').click(function() {
+        moveItemUp($(this).closest('.content-item'))
+    })
+    moduleElement.find('.move-down').click(function() {
+        moveItemDown($(this).closest('.content-item'))
+    })
+
+    $("#content-container").append(moduleElement)
+
     // Trigger initial field visibility based on default selection
     toggleModuleFields(moduleElement.find('.module-type'))
+    updateOrderIndices()
 }
 
 function toggleModuleFields(moduleTypeSelect) {
     var modulePanel = moduleTypeSelect.closest('.module-panel')
     var moduleType = moduleTypeSelect.val()
-    
+
     console.log('Toggling module fields for type:', moduleType)
-    
+
     // Hide all type-specific fields first
     modulePanel.find('.module-video-fields').hide()
-    modulePanel.find('.module-presentation-fields').hide() 
-    modulePanel.find('.module-quiz-fields').hide()
-    
+    modulePanel.find('.module-presentation-fields').hide()
+
     // Show appropriate fields based on type
     switch(moduleType) {
         case 'video':
@@ -88,10 +92,6 @@ function toggleModuleFields(moduleTypeSelect) {
             console.log('Showing presentation fields')
             modulePanel.find('.module-presentation-fields').show()
             setupPresentationSourceToggle(modulePanel)
-            break
-        case 'quiz':
-            console.log('Showing quiz fields')
-            modulePanel.find('.module-quiz-fields').show()
             break
         case 'html':
         default:
@@ -263,47 +263,54 @@ function removeUploadedFile(button, fileType, modulePanel) {
     })
 }
 
-function loadQuizzesForModule(moduleElement) {
-    // Load available quizzes from current form
-    var quizSelect = moduleElement.find('.module-quiz-id')
-    quizSelect.empty().append('<option value="">Select an existing quiz...</option>')
-    
-    // Get quizzes from current form (from quizzes tab)
-    $("#quizzes-container .quiz-panel").each(function(index) {
-        var quizName = $(this).find('.quiz-name').val() || ('Quiz ' + (index + 1))
-        quizSelect.append('<option value="' + index + '">' + quizName + '</option>')
+// Move item up in the content container
+function moveItemUp(item) {
+    var prev = item.prev('.content-item')
+    if (prev.length) {
+        item.insertBefore(prev)
+        updateOrderIndices()
+    }
+}
+
+// Move item down in the content container
+function moveItemDown(item) {
+    var next = item.next('.content-item')
+    if (next.length) {
+        item.insertAfter(next)
+        updateOrderIndices()
+    }
+}
+
+// Update visual order indices for all items
+function updateOrderIndices() {
+    $("#content-container .content-item").each(function(index) {
+        $(this).data('order-index', index)
     })
 }
 
 function addQuiz() {
     var quizHtml = $("#quiz-template").html()
     var quizElement = $(quizHtml)
-    
+
     quizElement.find('.remove-quiz').click(function() {
         $(this).closest('.quiz-panel').remove()
-        // Refresh all module quiz dropdowns after removing a quiz
-        refreshAllModuleQuizDropdowns()
+        updateOrderIndices()
     })
-    
+
     quizElement.find('.add-question').click(function() {
         addQuestion($(this).closest('.quiz-panel'))
     })
-    
-    // Listen for quiz name changes to update module dropdowns
-    quizElement.find('.quiz-name').on('input', function() {
-        refreshAllModuleQuizDropdowns()
-    })
-    
-    $("#quizzes-container").append(quizElement)
-    
-    // Refresh all module quiz dropdowns after adding a new quiz
-    refreshAllModuleQuizDropdowns()
-}
 
-function refreshAllModuleQuizDropdowns() {
-    $("#modules-container .module-panel").each(function() {
-        loadQuizzesForModule($(this))
+    // Handle move up/down
+    quizElement.find('.move-up').click(function() {
+        moveItemUp($(this).closest('.content-item'))
     })
+    quizElement.find('.move-down').click(function() {
+        moveItemDown($(this).closest('.content-item'))
+    })
+
+    $("#content-container").append(quizElement)
+    updateOrderIndices()
 }
 
 function addQuestion(quizPanel) {
@@ -343,104 +350,125 @@ function serializeCourse() {
         modules: [],
         quizzes: []
     }
-    
-    // Serialize modules
-    $("#modules-container .module-panel").each(function(index) {
-        var modulePanel = $(this)
-        var moduleType = modulePanel.find('.module-type').val()
-        
-        var module = {
-            name: modulePanel.find('.module-name').val(),
-            description: modulePanel.find('.module-description').val(),
-            content: modulePanel.find('.module-content').val(),
-            module_type: moduleType,
-            must_complete: modulePanel.find('.module-must-complete').is(':checked'),
-            min_time_spent: parseInt(modulePanel.find('.module-min-time').val()) || 0,
-            order_index: index
-        }
-        
-        // Include module ID and timestamps if this is an existing module
-        var moduleId = modulePanel.data('module-id')
-        if (moduleId) {
-            module.id = moduleId
-            module.created_date = modulePanel.data('created-date')
-            // Don't include modified_date - let the backend set it
-        }
-        
-        // Add type-specific fields
-        if (moduleType === 'video') {
-            var videoSource = modulePanel.find('input[type="radio"]:checked').filter(function() {
-                return $(this).attr('name') && $(this).attr('name').startsWith('video-source-')
-            }).val()
-            if (videoSource === 'upload') {
+
+    // Serialize all content items in order from the unified container
+    $("#content-container .content-item").each(function(index) {
+        var itemType = $(this).data('item-type')
+
+        if (itemType === 'module') {
+            var modulePanel = $(this)
+            var moduleType = modulePanel.find('.module-type').val()
+
+            var module = {
+                name: modulePanel.find('.module-name').val(),
+                description: modulePanel.find('.module-description').val(),
+                content: modulePanel.find('.module-content').val(),
+                module_type: moduleType,
+                must_complete: modulePanel.find('.module-must-complete').is(':checked'),
+                min_time_spent: parseInt(modulePanel.find('.module-min-time').val()) || 0,
+                order_index: index
+            }
+
+            // Include module ID and timestamps if this is an existing module
+            var moduleId = modulePanel.data('module-id')
+            if (moduleId) {
+                module.id = moduleId
+                module.created_date = modulePanel.data('created-date')
+                // Don't include modified_date - let the backend set it
+            }
+
+            // Add type-specific fields
+            if (moduleType === 'video') {
+                var videoSource = modulePanel.find('input[type="radio"]:checked').filter(function() {
+                    return $(this).attr('name') && $(this).attr('name').startsWith('video-source-')
+                }).val()
+                if (videoSource === 'upload') {
+                    var uploadedFile = modulePanel.data('uploaded-file')
+                    if (uploadedFile) {
+                        module.video_file_path = uploadedFile.file_path
+                        module.original_filename = uploadedFile.original_filename
+                        module.file_size = uploadedFile.file_size
+                        module.mime_type = uploadedFile.mime_type
+                    }
+                } else {
+                    module.video_url = modulePanel.find('.module-video-url').val()
+                }
+            } else if (moduleType === 'presentation') {
+                var presentationSource = modulePanel.find('input[type="radio"]:checked').filter(function() {
+                    return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-')
+                }).val()
                 var uploadedFile = modulePanel.data('uploaded-file')
-                if (uploadedFile) {
-                    module.video_file_path = uploadedFile.file_path
-                    module.original_filename = uploadedFile.original_filename
-                    module.file_size = uploadedFile.file_size
-                    module.mime_type = uploadedFile.mime_type
+                if (presentationSource === 'upload') {
+                    if (uploadedFile) {
+                        module.presentation_file_path = uploadedFile.file_path
+                        module.original_filename = uploadedFile.original_filename
+                        module.file_size = uploadedFile.file_size
+                        module.mime_type = uploadedFile.mime_type
+                    }
+                } else {
+                    module.presentation_url = modulePanel.find('.module-presentation-url').val()
                 }
-            } else {
-                module.video_url = modulePanel.find('.module-video-url').val()
             }
-        } else if (moduleType === 'presentation') {
-            var presentationSource = modulePanel.find('input[type="radio"]:checked').filter(function() {
-                return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-')
-            }).val()
-            var uploadedFile = modulePanel.data('uploaded-file')
-            if (presentationSource === 'upload') {
-                if (uploadedFile) {
-                    module.presentation_file_path = uploadedFile.file_path
-                    module.original_filename = uploadedFile.original_filename
-                    module.file_size = uploadedFile.file_size
-                    module.mime_type = uploadedFile.mime_type
+
+            courseData.modules.push(module)
+
+        } else if (itemType === 'quiz') {
+            var quizPanel = $(this)
+            var quiz = {
+                name: quizPanel.find('.quiz-name').val(),
+                description: quizPanel.find('.quiz-description').val(),
+                passing_score: parseInt(quizPanel.find('.quiz-passing-score').val()) || 70,
+                time_limit: parseInt(quizPanel.find('.quiz-time-limit').val()) || 0,
+                max_attempts: parseInt(quizPanel.find('.quiz-max-attempts').val()) || 3,
+                order_index: index,
+                questions: []
+            }
+
+            // Include quiz ID if this is an existing quiz
+            var quizId = quizPanel.data('quiz-id')
+            if (quizId) {
+                quiz.id = quizId
+            }
+
+            quizPanel.find('.question-panel').each(function(questionIndex) {
+                var questionPanel = $(this)
+                var question = {
+                    question: questionPanel.find('.question-text').val(),
+                    order_index: questionIndex,
+                    options: []
                 }
-            } else {
-                module.presentation_url = modulePanel.find('.module-presentation-url').val()
-            }
-        } else if (moduleType === 'quiz') {
-            var selectedQuizIndex = modulePanel.find('.module-quiz-id').val()
-            if (selectedQuizIndex !== '') {
-                module.quiz_id = parseInt(selectedQuizIndex)
-            }
-        }
-        
-        courseData.modules.push(module)
-    })
-    
-    // Serialize quizzes
-    $("#quizzes-container .quiz-panel").each(function(quizIndex) {
-        var quiz = {
-            name: $(this).find('.quiz-name').val(),
-            description: $(this).find('.quiz-description').val(),
-            passing_score: parseInt($(this).find('.quiz-passing-score').val()) || 70,
-            order_index: quizIndex,
-            questions: []
-        }
-        
-        $(this).find('.question-panel').each(function(questionIndex) {
-            var question = {
-                question: $(this).find('.question-text').val(),
-                order_index: questionIndex,
-                options: []
-            }
-            
-            $(this).find('.option-group').each(function(optionIndex) {
-                var isCorrect = $(this).find('.correct-option').is(':checked')
-                var option = {
-                    option: $(this).find('.option-text').val(),
-                    is_correct: isCorrect,
-                    order_index: optionIndex
+
+                // Include question ID if this is an existing question
+                var questionId = questionPanel.data('question-id')
+                if (questionId) {
+                    question.id = questionId
                 }
-                question.options.push(option)
+
+                questionPanel.find('.option-group').each(function(optionIndex) {
+                    var optionGroup = $(this)
+                    var isCorrect = optionGroup.find('.correct-option').is(':checked')
+                    var option = {
+                        option: optionGroup.find('.option-text').val(),
+                        is_correct: isCorrect,
+                        order_index: optionIndex
+                    }
+
+                    // Include option ID if this is an existing option
+                    var optionId = optionGroup.data('option-id')
+                    if (optionId) {
+                        option.id = optionId
+                    }
+
+                    question.options.push(option)
+                })
+
+                quiz.questions.push(question)
             })
-            
-            quiz.questions.push(question)
-        })
-        
-        courseData.quizzes.push(quiz)
+
+            courseData.quizzes.push(quiz)
+        }
     })
-    
+
     return courseData
 }
 
@@ -580,112 +608,162 @@ function edit(course) {
     $("#modalLabel").text("Edit Course")
     $("#name").val(course.name)
     $("#description").val(course.description)
-    
+
     // Clear containers
-    $("#modules-container").empty()
-    $("#quizzes-container").empty()
-    
-    // Load modules
+    $("#content-container").empty()
+
+    // Combine modules and quizzes into a single sorted list
+    var contentItems = []
+
     if (course.modules) {
         $.each(course.modules, function(i, module) {
-            addModule()
-            var modulePanel = $("#modules-container .module-panel").last()
-            
-            // Store the module ID and timestamps for existing modules
-            if (module.id) {
-                modulePanel.data('module-id', module.id)
-                modulePanel.data('created-date', module.created_date)
-                modulePanel.data('modified-date', module.modified_date)
-            }
-            
-            modulePanel.find('.module-name').val(module.name)
-            modulePanel.find('.module-description').val(module.description)
-            modulePanel.find('.module-content').val(module.content)
-            modulePanel.find('.module-type').val(module.module_type).trigger('change')
-            modulePanel.find('.module-must-complete').prop('checked', module.must_complete)
-            modulePanel.find('.module-min-time').val(module.min_time_spent)
-            
-            // Load type-specific data
-            if (module.module_type === 'video') {
-                if (module.video_file_path) {
-                    // Uploaded file
-                    modulePanel.find('input[type="radio"]').filter(function() {
-                        return $(this).attr('name') && $(this).attr('name').startsWith('video-source-') && $(this).val() === 'upload'
-                    }).prop('checked', true).trigger('change')
-                    if (module.original_filename) {
-                        modulePanel.find('.uploaded-file-info').show()
-                        modulePanel.find('.filename').text(module.original_filename)
-                        modulePanel.data('uploaded-file', {
-                            filename: module.video_file_path.split('/').pop(),
-                            original_filename: module.original_filename,
-                            file_path: module.video_file_path,
-                            file_size: module.file_size,
-                            mime_type: module.mime_type
-                        })
-                    }
-                } else if (module.video_url) {
-                    // External URL
-                    modulePanel.find('input[type="radio"]').filter(function() {
-                        return $(this).attr('name') && $(this).attr('name').startsWith('video-source-') && $(this).val() === 'url'
-                    }).prop('checked', true).trigger('change')
-                    modulePanel.find('.module-video-url').val(module.video_url)
-                }
-            } else if (module.module_type === 'presentation') {
-                if (module.presentation_file_path) {
-                    // Uploaded file
-                    modulePanel.find('input[type="radio"]').filter(function() {
-                        return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-') && $(this).val() === 'upload'
-                    }).prop('checked', true).trigger('change')
-                    if (module.original_filename) {
-                        modulePanel.find('.uploaded-file-info').show()
-                        modulePanel.find('.filename').text(module.original_filename)
-                        modulePanel.data('uploaded-file', {
-                            filename: module.presentation_file_path.split('/').pop(),
-                            original_filename: module.original_filename,
-                            file_path: module.presentation_file_path,
-                            file_size: module.file_size,
-                            mime_type: module.mime_type
-                        })
-                    }
-                } else if (module.presentation_url) {
-                    // External URL
-                    modulePanel.find('input[type="radio"]').filter(function() {
-                        return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-') && $(this).val() === 'url'
-                    }).prop('checked', true).trigger('change')
-                    modulePanel.find('.module-presentation-url').val(module.presentation_url)
-                }
-            } else if (module.module_type === 'quiz') {
-                modulePanel.find('.module-quiz-id').val(module.quiz_id)
-            }
+            contentItems.push({
+                type: 'module',
+                data: module,
+                order_index: module.order_index || i
+            })
         })
     }
-    
-    // Load quizzes
+
     if (course.quizzes) {
         $.each(course.quizzes, function(i, quiz) {
-            addQuiz()
-            var quizPanel = $("#quizzes-container .quiz-panel").last()
-            quizPanel.find('.quiz-name').val(quiz.name)
-            quizPanel.find('.quiz-description').val(quiz.description)
-            quizPanel.find('.quiz-passing-score').val(quiz.passing_score)
-            
-            // Load questions
-            if (quiz.questions) {
-                $.each(quiz.questions, function(j, question) {
-                    addQuestion(quizPanel)
-                    var questionPanel = quizPanel.find('.question-panel').last()
-                    questionPanel.find('.question-text').val(question.question)
-                    
-                    // Load options
-                    if (question.options) {
-                        $.each(question.options, function(k, option) {
-                            addOption(questionPanel)
-                            var optionGroup = questionPanel.find('.option-group').last()
-                            optionGroup.find('.option-text').val(option.option)
-                            if (option.is_correct) {
-                                optionGroup.find('.correct-option').prop('checked', true)
-                            }
-                        })
+            contentItems.push({
+                type: 'quiz',
+                data: quiz,
+                order_index: quiz.order_index || i
+            })
+        })
+    }
+
+    // Sort by order_index
+    contentItems.sort(function(a, b) {
+        return a.order_index - b.order_index
+    })
+
+    // Add items in sorted order
+    $.each(contentItems, function(i, item) {
+        if (item.type === 'module') {
+            loadModuleItem(item.data)
+        } else if (item.type === 'quiz') {
+            loadQuizItem(item.data)
+        }
+    })
+
+    updateOrderIndices()
+}
+
+function loadModuleItem(module) {
+    addModule()
+    var modulePanel = $("#content-container .module-panel").last()
+
+    // Store the module ID and timestamps for existing modules
+    if (module.id) {
+        modulePanel.data('module-id', module.id)
+        modulePanel.data('created-date', module.created_date)
+        modulePanel.data('modified-date', module.modified_date)
+    }
+
+    modulePanel.find('.module-name').val(module.name)
+    modulePanel.find('.module-description').val(module.description)
+    modulePanel.find('.module-content').val(module.content)
+    modulePanel.find('.module-type').val(module.module_type).trigger('change')
+    modulePanel.find('.module-must-complete').prop('checked', module.must_complete)
+    modulePanel.find('.module-min-time').val(module.min_time_spent)
+
+    // Load type-specific data
+    if (module.module_type === 'video') {
+        if (module.video_file_path) {
+            // Uploaded file
+            modulePanel.find('input[type="radio"]').filter(function() {
+                return $(this).attr('name') && $(this).attr('name').startsWith('video-source-') && $(this).val() === 'upload'
+            }).prop('checked', true).trigger('change')
+            if (module.original_filename) {
+                modulePanel.find('.uploaded-file-info').show()
+                modulePanel.find('.filename').text(module.original_filename)
+                modulePanel.data('uploaded-file', {
+                    filename: module.video_file_path.split('/').pop(),
+                    original_filename: module.original_filename,
+                    file_path: module.video_file_path,
+                    file_size: module.file_size,
+                    mime_type: module.mime_type
+                })
+            }
+        } else if (module.video_url) {
+            // External URL
+            modulePanel.find('input[type="radio"]').filter(function() {
+                return $(this).attr('name') && $(this).attr('name').startsWith('video-source-') && $(this).val() === 'url'
+            }).prop('checked', true).trigger('change')
+            modulePanel.find('.module-video-url').val(module.video_url)
+        }
+    } else if (module.module_type === 'presentation') {
+        if (module.presentation_file_path) {
+            // Uploaded file
+            modulePanel.find('input[type="radio"]').filter(function() {
+                return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-') && $(this).val() === 'upload'
+            }).prop('checked', true).trigger('change')
+            if (module.original_filename) {
+                modulePanel.find('.uploaded-file-info').show()
+                modulePanel.find('.filename').text(module.original_filename)
+                modulePanel.data('uploaded-file', {
+                    filename: module.presentation_file_path.split('/').pop(),
+                    original_filename: module.original_filename,
+                    file_path: module.presentation_file_path,
+                    file_size: module.file_size,
+                    mime_type: module.mime_type
+                })
+            }
+        } else if (module.presentation_url) {
+            // External URL
+            modulePanel.find('input[type="radio"]').filter(function() {
+                return $(this).attr('name') && $(this).attr('name').startsWith('presentation-source-') && $(this).val() === 'url'
+            }).prop('checked', true).trigger('change')
+            modulePanel.find('.module-presentation-url').val(module.presentation_url)
+        }
+    }
+}
+
+function loadQuizItem(quiz) {
+    addQuiz()
+    var quizPanel = $("#content-container .quiz-panel").last()
+
+    // Store the quiz ID for existing quizzes
+    if (quiz.id) {
+        quizPanel.data('quiz-id', quiz.id)
+    }
+
+    quizPanel.find('.quiz-name').val(quiz.name)
+    quizPanel.find('.quiz-description').val(quiz.description)
+    quizPanel.find('.quiz-passing-score').val(quiz.passing_score)
+    quizPanel.find('.quiz-time-limit').val(quiz.time_limit || 0)
+    quizPanel.find('.quiz-max-attempts').val(quiz.max_attempts || 3)
+
+    // Load questions
+    if (quiz.questions) {
+        $.each(quiz.questions, function(j, question) {
+            addQuestion(quizPanel)
+            var questionPanel = quizPanel.find('.question-panel').last()
+
+            // Store the question ID for existing questions
+            if (question.id) {
+                questionPanel.data('question-id', question.id)
+            }
+
+            questionPanel.find('.question-text').val(question.question)
+
+            // Load options
+            if (question.options) {
+                $.each(question.options, function(k, option) {
+                    addOption(questionPanel)
+                    var optionGroup = questionPanel.find('.option-group').last()
+
+                    // Store the option ID for existing options
+                    if (option.id) {
+                        optionGroup.data('option-id', option.id)
+                    }
+
+                    optionGroup.find('.option-text').val(option.option)
+                    if (option.is_correct) {
+                        optionGroup.find('.correct-option').prop('checked', true)
                     }
                 })
             }
@@ -694,7 +772,14 @@ function edit(course) {
 }
 
 function save(idx) {
-    course = courses[idx]
-    edit(course)
-    $("#modal").modal('show')
+    // Fetch full course data including questions and options
+    api.courseId.get(courses[idx].id)
+    .success(function(fullCourse) {
+        course = fullCourse
+        edit(course)
+        $("#modal").modal('show')
+    })
+    .error(function(data) {
+        errorFlash("Error loading course details")
+    })
 }
