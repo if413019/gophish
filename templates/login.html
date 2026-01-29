@@ -6,53 +6,379 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gophish - Open-Source Phishing Toolkit">
-    <meta name="author" content="Jordan Wright (http://github.com/jordan-wright)">
+    <meta name="description" content="NanoSecure+ - Security Awareness Training Platform">
+    <meta name="author" content="">
     <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
     <link rel="shortcut icon" href="/images/favicon.ico">
 
-    <title>Gophish - {{ .Title }}</title>
+    <title>NanoSecure+ - {{ .Title }}</title>
 
     <link href="/css/dist/gophish.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,600,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap' rel='stylesheet'>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background shapes */
+        .bg-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bg-shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .bg-shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-shape:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            right: -50px;
+            animation-delay: -5s;
+        }
+
+        .bg-shape:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            right: 10%;
+            animation-delay: -10s;
+        }
+
+        .bg-shape:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 10%;
+            animation-delay: -7s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-30px) rotate(10deg);
+            }
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        .login-header {
+            padding: 2.5rem 2.5rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .login-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-logo i {
+            font-size: 4rem;
+            color: white;
+        }
+
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .login-subtitle {
+            color: #718096;
+            font-size: 0.95rem;
+        }
+
+        .login-body {
+            padding: 2rem 2.5rem 2.5rem;
+        }
+
+        .flash-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .flash {
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .flash-danger {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .flash-success {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #059669;
+            border: 1px solid #6ee7b7;
+        }
+
+        .flash-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #d97706;
+            border: 1px solid #fcd34d;
+        }
+
+        .flash-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #2563eb;
+            border: 1px solid #93c5fd;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            color: #a0aec0;
+            font-size: 1rem;
+            z-index: 1;
+            transition: color 0.2s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 2.75rem;
+            font-size: 1rem;
+            font-family: inherit;
+            color: #2d3748;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            background: white;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-input:focus + .input-icon,
+        .form-input:focus ~ .input-icon {
+            color: #667eea;
+        }
+
+        .form-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .login-footer {
+            text-align: center;
+            padding: 1.5rem 2.5rem;
+            background: #f8f9fa;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .login-footer-text {
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        .login-footer-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .login-footer-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 15px;
+            }
+
+            .login-header, .login-body {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            .login-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Override Bootstrap styles */
+        .navbar { display: none; }
+        .container { padding: 0; max-width: none; }
+    </style>
 </head>
 
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <img class="navbar-logo" src="/images/logo_inv_small.png" />
-                <a class="navbar-brand" href="/">&nbsp;gophish</a>
+    <!-- Animated Background Shapes -->
+    <div class="bg-shapes">
+        <div class="bg-shape"></div>
+        <div class="bg-shape"></div>
+        <div class="bg-shape"></div>
+        <div class="bg-shape"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fa fa-shield"></i>
+                </div>
+                <h1 class="login-title">NanoSecure+</h1>
+                <p class="login-subtitle">Security Awareness Training Platform</p>
             </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a id="login-button" href="/login">
-                            <button type="button" class="btn btn-primary">Login</button>
-                        </a>
-                    </li>
-                </ul>
+
+            <form class="login-body" action="" method="POST">
+                {{if .Flashes}}
+                <div class="flash-container">
+                    {{range .Flashes}}
+                    <div class="flash flash-{{.Type}}">
+                        <i class="fa {{if eq .Type "danger"}}fa-exclamation-circle{{else if eq .Type "success"}}fa-check-circle{{else if eq .Type "warning"}}fa-exclamation-triangle{{else}}fa-info-circle{{end}}"></i>
+                        <span>{{.Message}}</span>
+                    </div>
+                    {{end}}
+                </div>
+                {{end}}
+
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <div class="input-group">
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" required autofocus>
+                        <i class="fa fa-user input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-group">
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" autocomplete="off" required>
+                        <i class="fa fa-lock input-icon"></i>
+                    </div>
+                </div>
+
+                <input type="hidden" name="csrf_token" value="{{.Token}}" />
+
+                <button class="btn-login" type="submit">
+                    <i class="fa fa-sign-in"></i>
+                    Sign In
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p class="login-footer-text">
+                    Powered by <a href="#" class="login-footer-link">GoPhish</a>
+                </p>
             </div>
         </div>
     </div>
-    <div class="container">
-        <form class="form-signin" action="" method="POST">
-            <img id="logo" src="/images/logo_purple.png" />
-            <h2 class="form-signin-heading">Please sign in</h2>
-            {{template "flashes" .Flashes}}
-            <input type="text" name="username" class="form-control top-input" placeholder="Username" required autofocus>
-            <input type="password" name="password" class="form-control bottom-input" placeholder="Password" autocomplete="off" required>
-            <input type="hidden" name="csrf_token" value="{{.Token}}" />
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-        </form>
-    </div>
-    <!-- Placed at the end of the document so the pages load faster -->
+
     <script src="/js/dist/vendor.min.js"></script>
 </body>
 
