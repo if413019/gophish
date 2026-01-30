@@ -45,6 +45,11 @@ function addModule() {
     moduleElement.find('input[name="video-source"]').attr('name', 'video-source-' + uniqueId)
     moduleElement.find('input[name="presentation-source"]').attr('name', 'presentation-source-' + uniqueId)
 
+    // Fix checkbox id and label for attribute to be unique
+    var checkboxId = 'module-must-complete-' + uniqueId
+    moduleElement.find('.module-must-complete').attr('id', checkboxId)
+    moduleElement.find('label[for="module-must-complete-placeholder"]').attr('for', checkboxId)
+
     // Handle remove module
     moduleElement.find('.remove-module').click(function() {
         $(this).closest('.module-panel').remove()
