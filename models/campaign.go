@@ -37,11 +37,19 @@ type Campaign struct {
 
 // CampaignResults is a struct representing the results from a campaign
 type CampaignResults struct {
-	Id      int64    `json:"id"`
-	Name    string   `json:"name"`
-	Status  string   `json:"status"`
-	Results []Result `json:"results,omitempty"`
-	Events  []Event  `json:"timeline,omitempty"`
+	Id            int64                   `json:"id"`
+	Name          string                  `json:"name"`
+	Status        string                  `json:"status"`
+	Results       []Result                `json:"results,omitempty"`
+	Events        []Event                 `json:"timeline,omitempty"`
+	LearningStats *LearningStats          `json:"learning_stats,omitempty"`
+	LearningProgress map[string]LearningProgress `json:"learning_progress,omitempty"` // keyed by result email
+}
+
+// LearningProgress represents an individual's learning progress
+type LearningProgress struct {
+	Status   string `json:"status"`   // "not-needed", "not-started", "in-progress", "completed"
+	Progress int    `json:"progress"` // 0-100 percentage
 }
 
 // CampaignSummaries is a struct representing the overview of campaigns
@@ -71,6 +79,17 @@ type CampaignStats struct {
 	SubmittedData int64 `json:"submitted_data"`
 	EmailReported int64 `json:"email_reported"`
 	Error         int64 `json:"error"`
+}
+
+// LearningStats represents learning progress statistics for a campaign
+type LearningStats struct {
+	PhishedCount      int64 `json:"phished_count"`      // People who clicked or submitted (need training)
+	EnrolledCount     int64 `json:"enrolled_count"`     // People enrolled in course
+	CompletedCount    int64 `json:"completed_count"`    // People who completed course
+	InProgressCount   int64 `json:"in_progress_count"`  // People currently taking course
+	NotStartedCount   int64 `json:"not_started_count"`  // Enrolled but not started
+	CourseId          int64 `json:"course_id"`          // Associated course ID
+	CourseName        string `json:"course_name"`       // Course name
 }
 
 // Event contains the fields for an event
@@ -128,6 +147,9 @@ var ErrSMTPNotFound = errors.New("Sending profile not found")
 // launch date
 var ErrInvalidSendByDate = errors.New("The launch date must be before the \"send emails by\" date")
 
+// ErrELearningNotConfigured indicates e-learning settings are not configured when a course is selected
+var ErrELearningNotConfigured = errors.New("E-learning sending profile must be configured in Settings when auto-enroll course is selected")
+
 // RecipientParameter is the URL parameter that points to the result ID for a recipient.
 const RecipientParameter = "rid"
 
@@ -146,6 +168,14 @@ func (c *Campaign) Validate() error {
 		return ErrSMTPNotSpecified
 	case !c.SendByDate.IsZero() && !c.LaunchDate.IsZero() && c.SendByDate.Before(c.LaunchDate):
 		return ErrInvalidSendByDate
+	}
+	// Validate e-learning settings when auto-enroll course is selected
+	// Check both Id and Name since API/UI passes course by name, not ID
+	if c.Course.Id > 0 || c.Course.Name != "" {
+		settings, err := GetELearningSettings()
+		if err != nil || settings.SMTPId <= 0 {
+			return ErrELearningNotConfigured
+		}
 	}
 	return nil
 }
@@ -314,6 +344,119 @@ func getCampaignStats(cid int64) (CampaignStats, error) {
 	return s, err
 }
 
+// getCampaignLearningStats returns learning statistics for a campaign.
+// It calculates how many people got phished and their course completion status.
+func getCampaignLearningStats(cid int64) (*LearningStats, map[string]LearningProgress, error) {
+	stats := &LearningStats{}
+	progress := make(map[string]LearningProgress)
+
+	// Get campaign to check if it has a course
+	var campaign Campaign
+	err := db.Where("id = ?", cid).First(&campaign).Error
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// If no course is associated, return nil (no learning tracking needed)
+	if campaign.CourseId == 0 {
+		return nil, nil, nil
+	}
+
+	// Get course details
+	var course Course
+	err = db.Where("id = ?", campaign.CourseId).First(&course).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			stats.CourseName = "[Deleted]"
+		} else {
+			return nil, nil, err
+		}
+	} else {
+		stats.CourseId = course.Id
+		stats.CourseName = course.Name
+	}
+
+	// Get all results for this campaign
+	var results []Result
+	err = db.Where("campaign_id = ?", cid).Find(&results).Error
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Get all enrollments for this campaign
+	var enrollments []CourseEnrollment
+	err = db.Where("campaign_id = ? AND course_id = ?", cid, campaign.CourseId).Find(&enrollments).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, nil, err
+	}
+
+	// Build a map of email -> enrollment for quick lookup
+	enrollmentMap := make(map[string]*CourseEnrollment)
+	for i := range enrollments {
+		// Get the user's email for this enrollment
+		var user User
+		if err := db.Where("id = ?", enrollments[i].UserId).First(&user).Error; err == nil {
+			enrollmentMap[user.Username] = &enrollments[i]
+		}
+	}
+
+	// Process each result
+	for _, result := range results {
+		// Check if this person got phished (clicked link or submitted data)
+		gotPhished := result.Status == EventClicked || result.Status == EventDataSubmit
+
+		if !gotPhished {
+			// Person didn't get phished - learning not needed
+			progress[result.Email] = LearningProgress{
+				Status:   "not-needed",
+				Progress: 0,
+			}
+			continue
+		}
+
+		// Person got phished - count them
+		stats.PhishedCount++
+
+		// Check if they have an enrollment
+		enrollment, hasEnrollment := enrollmentMap[result.Email]
+		if !hasEnrollment {
+			// Phished but not enrolled (shouldn't happen normally, but possible if enrollment failed)
+			progress[result.Email] = LearningProgress{
+				Status:   "not-started",
+				Progress: 0,
+			}
+			stats.NotStartedCount++
+			continue
+		}
+
+		// Has enrollment - check status
+		stats.EnrolledCount++
+		switch enrollment.Status {
+		case EnrollmentStatusCompleted:
+			progress[result.Email] = LearningProgress{
+				Status:   "completed",
+				Progress: 100,
+			}
+			stats.CompletedCount++
+		case EnrollmentStatusInProgress:
+			progress[result.Email] = LearningProgress{
+				Status:   "in-progress",
+				Progress: enrollment.Progress,
+			}
+			stats.InProgressCount++
+		default:
+			// enrolled but not started
+			progress[result.Email] = LearningProgress{
+				Status:   "not-started",
+				Progress: 0,
+			}
+			stats.NotStartedCount++
+		}
+	}
+
+	return stats, progress, nil
+}
+
 // GetCampaigns returns the campaigns owned by the given user.
 func GetCampaigns(uid int64) ([]Campaign, error) {
 	cs := []Campaign{}
@@ -439,6 +582,14 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
 	if err != nil {
 		log.Errorf("%s: events not found for campaign", err)
 		return cr, err
+	}
+	// Get learning stats if campaign has a course
+	learningStats, learningProgress, lerr := getCampaignLearningStats(cr.Id)
+	if lerr != nil {
+		log.Warnf("error getting learning stats for campaign %d: %v", cr.Id, lerr)
+	} else if learningStats != nil {
+		cr.LearningStats = learningStats
+		cr.LearningProgress = learningProgress
 	}
 	return cr, err
 }

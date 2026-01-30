@@ -310,6 +310,7 @@
 .stat-card-icon.clicked { background: linear-gradient(135deg, #F39C12 0%, #e67e22 100%); }
 .stat-card-icon.submitted { background: linear-gradient(135deg, #f05b4f 0%, #e74c3c 100%); }
 .stat-card-icon.reported { background: linear-gradient(135deg, #45d6ef 0%, #3498db 100%); }
+.stat-card-icon.course-completion { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); }
 
 .stat-card-content {
     flex: 1;

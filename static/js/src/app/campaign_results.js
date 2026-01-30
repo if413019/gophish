@@ -117,6 +117,30 @@ var statusMapping = {
     "Email Reported": "reported",
 }
 
+// Learning status styles
+var learningStatuses = {
+    "not-needed": {
+        label: "label-modern label-secondary-modern",
+        text: "Not Needed",
+        icon: "fa-minus"
+    },
+    "not-started": {
+        label: "label-modern label-info-modern",
+        text: "Not Started",
+        icon: "fa-clock-o"
+    },
+    "in-progress": {
+        label: "label-modern label-warning-modern",
+        text: "In Progress",
+        icon: "fa-spinner"
+    },
+    "completed": {
+        label: "label-modern label-success-modern",
+        text: "Completed",
+        icon: "fa-check"
+    }
+}
+
 // This is an underwhelming attempt at an enum
 // until I have time to refactor this appropriately.
 var progressListing = [
@@ -656,6 +680,75 @@ function createStatusLabel(status, send_date) {
     return statusColumn
 }
 
+/**
+ * Creates a learning status label for use in the results datatable
+ * @param {string} status - Learning status (not-needed, not-started, in-progress, completed)
+ * @param {number} progress - Progress percentage (0-100)
+ */
+function createLearningLabel(status, progress) {
+    var statusInfo = learningStatuses[status] || learningStatuses["not-needed"];
+    var label = statusInfo.label;
+    var text = statusInfo.text;
+
+    // For in-progress, show progress percentage
+    if (status === "in-progress" && progress > 0) {
+        text = progress + "% Done";
+    }
+
+    return "<span class=\"label " + label + "\"><i class=\"fa " + statusInfo.icon + "\"></i> " + text + "</span>";
+}
+
+/**
+ * Renders the course completion pie chart
+ */
+function renderCourseCompletionChart(learningStats) {
+    if (!learningStats) {
+        return;
+    }
+
+    // Show the card and learning column (show even if no one is phished yet)
+    $("#course-completion-card").show();
+    $(".learning-column").show();
+
+    // Update the count display
+    $("#course-completion-count").text(learningStats.completed_count + "/" + learningStats.phished_count);
+
+    // Calculate percentage (handle division by zero)
+    var completedPercent = 0;
+    if (learningStats.phished_count > 0) {
+        completedPercent = Math.floor((learningStats.completed_count / learningStats.phished_count) * 100);
+    }
+    var chartData = [
+        { name: "Completed", y: completedPercent, count: learningStats.completed_count },
+        { name: "", y: 100 - completedPercent }
+    ];
+
+    return Highcharts.chart('course_completion_chart', {
+        chart: {
+            type: 'pie',
+            backgroundColor: 'transparent',
+            height: 80,
+            width: 80,
+            margin: [0, 0, 0, 0],
+            spacing: [0, 0, 0, 0]
+        },
+        title: { text: null },
+        credits: { enabled: false },
+        tooltip: { enabled: false },
+        plotOptions: {
+            pie: {
+                innerSize: '70%',
+                dataLabels: { enabled: false },
+                states: { hover: { enabled: false } }
+            }
+        },
+        series: [{
+            data: chartData,
+            colors: ['#27ae60', '#dddddd']
+        }]
+    });
+}
+
 /* poll - Queries the API and updates the UI with the results
  *
  * Updates:
@@ -723,17 +816,39 @@ function poll() {
                 })
             })
 
+            /* Update the course completion chart if learning stats exist */
+            if (campaign.learning_stats) {
+                var completionChart = $("#course_completion_chart").highcharts();
+                if (completionChart) {
+                    var completedPercent = 0;
+                    if (campaign.learning_stats.phished_count > 0) {
+                        completedPercent = Math.floor((campaign.learning_stats.completed_count / campaign.learning_stats.phished_count) * 100);
+                    }
+                    var chartData = [
+                        { name: "Completed", y: completedPercent, count: campaign.learning_stats.completed_count },
+                        { name: "", y: 100 - completedPercent }
+                    ];
+                    completionChart.series[0].update({ data: chartData });
+                    $("#course-completion-count").text(campaign.learning_stats.completed_count + "/" + campaign.learning_stats.phished_count);
+                }
+            }
+
             /* Update the datatable */
             resultsTable = $("#resultsTable").DataTable()
             resultsTable.rows().every(function (i, tableLoop, rowLoop) {
                 var row = this.row(i)
                 var rowData = row.data()
                 var rid = rowData[0]
+                var email = rowData[4] // email is at index 4
                 $.each(campaign.results, function (j, result) {
                     if (result.id == rid) {
                         rowData[8] = moment(result.send_date).format('MMMM Do YYYY, h:mm:ss a')
                         rowData[7] = result.reported
                         rowData[6] = result.status
+                        // Update learning progress
+                        if (campaign.learning_progress && campaign.learning_progress[result.email]) {
+                            rowData[9] = campaign.learning_progress[result.email];
+                        }
                         resultsTable.row(i).data(rowData)
                         if (row.child.isShown()) {
                             $(row.node()).find("#caret").removeClass("fa-caret-right")
@@ -784,42 +899,67 @@ function load() {
                         payloadResults.show()
                     }
                 })
+                // Check if campaign has learning stats (course associated)
+                var hasLearningStats = campaign.learning_stats !== null && campaign.learning_stats !== undefined;
+
                 // Setup the results table
+                var columnDefsList = [{
+                        orderable: false,
+                        targets: "no-sort"
+                    }, {
+                        className: "details-control",
+                        "targets": [1]
+                    }, {
+                        "visible": false,
+                        "targets": [0, 8]
+                    },
+                    {
+                        "render": function (data, type, row) {
+                            return createStatusLabel(data, row[8])
+                        },
+                        "targets": [6]
+                    },
+                    {
+                        className: "text-center",
+                        "render": function (reported, type, row) {
+                            if (type == "display") {
+                                if (reported) {
+                                    return "<i class='fa fa-check-circle text-center text-success'></i>"
+                                }
+                                return "<i role='button' class='fa fa-times-circle text-center text-muted' onclick='report_mail(\"" + row[0] + "\", \"" + campaign.id + "\");'></i>"
+                            }
+                            return reported
+                        },
+                        "targets": [7]
+                    }
+                ];
+
+                // Add learning column renderer if learning stats exist
+                if (hasLearningStats) {
+                    columnDefsList.push({
+                        className: "text-center",
+                        "render": function (data, type, row) {
+                            if (type == "display" && data) {
+                                return createLearningLabel(data.status, data.progress);
+                            }
+                            return data ? data.status : "";
+                        },
+                        "targets": [9]
+                    });
+                } else {
+                    // Hide learning column if no learning stats
+                    columnDefsList.push({
+                        "visible": false,
+                        "targets": [9]
+                    });
+                }
+
                 resultsTable = $("#resultsTable").DataTable({
                     destroy: true,
                     "order": [
                         [2, "asc"]
                     ],
-                    columnDefs: [{
-                            orderable: false,
-                            targets: "no-sort"
-                        }, {
-                            className: "details-control",
-                            "targets": [1]
-                        }, {
-                            "visible": false,
-                            "targets": [0, 8]
-                        },
-                        {
-                            "render": function (data, type, row) {
-                                return createStatusLabel(data, row[8])
-                            },
-                            "targets": [6]
-                        },
-                        {
-                            className: "text-center",
-                            "render": function (reported, type, row) {
-                                if (type == "display") {
-                                    if (reported) {
-                                        return "<i class='fa fa-check-circle text-center text-success'></i>"
-                                    }
-                                    return "<i role='button' class='fa fa-times-circle text-center text-muted' onclick='report_mail(\"" + row[0] + "\", \"" + campaign.id + "\");'></i>"
-                                }
-                                return reported
-                            },
-                            "targets": [7]
-                        }
-                    ]
+                    columnDefs: columnDefsList
                 });
                 resultsTable.clear();
                 var email_series_data = {}
@@ -828,6 +968,12 @@ function load() {
                     email_series_data[k] = 0
                 });
                 $.each(campaign.results, function (i, result) {
+                    // Get learning progress for this result
+                    var learningProgress = null;
+                    if (campaign.learning_progress && campaign.learning_progress[result.email]) {
+                        learningProgress = campaign.learning_progress[result.email];
+                    }
+
                     resultsTable.row.add([
                         result.id,
                         "<i id=\"caret\" class=\"fa fa-caret-right\"></i>",
@@ -837,7 +983,8 @@ function load() {
                         escapeHtml(result.position) || "",
                         result.status,
                         result.reported,
-                        moment(result.send_date).format('MMMM Do YYYY, h:mm:ss a')
+                        moment(result.send_date).format('MMMM Do YYYY, h:mm:ss a'),
+                        learningProgress
                     ])
                     email_series_data[result.status]++;
                     if (result.reported) {
@@ -911,6 +1058,11 @@ function load() {
                         colors: [statuses[status].color, '#dddddd']
                     })
                 })
+
+                // Render course completion chart if learning stats exist
+                if (hasLearningStats) {
+                    renderCourseCompletionChart(campaign.learning_stats);
+                }
 
                 if (use_map) {
                     $("#resultsMapContainer").show()
