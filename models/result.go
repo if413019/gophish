@@ -292,14 +292,14 @@ func (r *Result) sendEnrollmentNotification(user User, campaign Campaign) error 
 		log.Infof("User %s already has password, skipping temporary password setup", r.Email)
 	}
 
-	// Send the notification email
-	log.Infof("Calling SendEnrollmentNotification for %s", r.Email)
-	err = SendEnrollmentNotification(r.Email, course, isNewUser, tempPassword)
+	// Send the notification email (uses DB template if available, falls back to .env config)
+	log.Infof("Calling SendEnrollmentNotificationWithTemplate for %s", r.Email)
+	err = SendEnrollmentNotificationWithTemplate(r.Email, course, isNewUser, tempPassword)
 	if err != nil {
-		log.Errorf("SendEnrollmentNotification failed for %s: %v", r.Email, err)
+		log.Errorf("SendEnrollmentNotificationWithTemplate failed for %s: %v", r.Email, err)
 		return err
 	}
-	log.Infof("SendEnrollmentNotification completed successfully for %s", r.Email)
+	log.Infof("SendEnrollmentNotificationWithTemplate completed successfully for %s", r.Email)
 	return nil
 }
 

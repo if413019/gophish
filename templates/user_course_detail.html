@@ -1147,10 +1147,15 @@
             {{ range $index, $module := .Course.Modules }}
             <div class="course-module" data-module-id="{{ $module.Id }}" data-module-index="{{ $index }}">
                         {{ if eq $module.ModuleType "html" }}
-                            <!-- HTML Content Module -->
-                            <div class="html-content">
+                            <!-- HTML Content Module - Rendered in iframe for CSS isolation -->
+                            <div class="html-content-wrapper">
                                 {{ if $module.Content }}
-                                    {{ $module.Content | safehtml }}
+                                    <iframe class="html-content-frame" id="html-frame-{{ $module.Id }}"
+                                            style="width: 100%; height: 700px; min-height: 400px; max-height: 2000px; border: none; background: #fff;"
+                                            data-template-id="html-template-{{ $module.Id }}"
+                                            tabindex="0"
+                                            allowfullscreen></iframe>
+                                    <script type="text/template" id="html-template-{{ $module.Id }}">{{ $module.Content | safehtml }}</script>
                                 {{ else }}
                                     <div style="padding: 20px; text-align: center; color: #666;">
                                         <i class="fa fa-file-text-o fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
@@ -1417,11 +1422,173 @@ var currentModuleId = null;
 $(document).ready(function() {
     var courseId = {{ .Course.Id }};
     var totalModules = {{ len .Course.Modules }};
-    
+
     initializeModuleNavigation();
     initializeVideoTimers();
+    initializeHtmlFrames();
     loadModuleProgress(); // This will call showFirstAvailableModule() when done
 });
+
+// Initialize HTML content frames with isolated CSS
+function initializeHtmlFrames() {
+    // Listen for messages from iframes (for height reporting)
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'iframeHeight') {
+            var iframe = document.getElementById(event.data.iframeId);
+            if (iframe) {
+                var height = Math.min(Math.max(event.data.height, 400), 2000);
+                iframe.style.height = height + 'px';
+            }
+        }
+    });
+
+    $('.html-content-frame').each(function() {
+        var iframe = this;
+        var iframeId = iframe.id;
+        var templateId = $(iframe).data('template-id');
+        var templateEl = document.getElementById(templateId);
+
+        if (templateEl) {
+            // Get raw HTML content from script template
+            var content = templateEl.innerHTML;
+
+            // Write content to iframe as-is
+            var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(content);
+            iframeDoc.close();
+
+            // After iframe loads, inject our helper code
+            function setupIframeHelpers() {
+                try {
+                    var iframeWin = iframe.contentWindow;
+                    var iframeDocument = iframe.contentDocument || iframeWin.document;
+
+                    // Inject all helper code into the iframe (only once)
+                    if (!iframeDocument._helpersInjected) {
+                        iframeDocument._helpersInjected = true;
+                        try {
+                            var script = iframeDocument.createElement('script');
+                            // Build script as string - runs inside iframe context
+                            script.textContent = '(function(iframeId) {' +
+                                'if (window._iframeHelpersReady) return;' +
+                                'window._iframeHelpersReady = true;' +
+                                // Height reporting
+                                'function reportHeight() {' +
+                                '  var height = Math.max(' +
+                                '    document.body ? document.body.scrollHeight : 0,' +
+                                '    document.body ? document.body.offsetHeight : 0,' +
+                                '    document.documentElement ? document.documentElement.scrollHeight : 0,' +
+                                '    document.documentElement ? document.documentElement.offsetHeight : 0' +
+                                '  );' +
+                                '  if (height > 0) parent.postMessage({type: "iframeHeight", iframeId: iframeId, height: height}, "*");' +
+                                '}' +
+                                'reportHeight();' +
+                                'setTimeout(reportHeight, 100);' +
+                                'setTimeout(reportHeight, 500);' +
+                                'setTimeout(reportHeight, 1000);' +
+                                'setTimeout(reportHeight, 2000);' +
+                                'if (typeof MutationObserver !== "undefined" && document.body) {' +
+                                '  var observer = new MutationObserver(function() { setTimeout(reportHeight, 50); });' +
+                                '  observer.observe(document.body, {childList: true, subtree: true, attributes: true});' +
+                                '}' +
+                                // Make body focusable
+                                'if (document.body) {' +
+                                '  document.body.setAttribute("tabindex", "0");' +
+                                '  document.body.style.outline = "none";' +
+                                '}' +
+                                'document.addEventListener("click", function() { if (document.body) document.body.focus(); });' +
+                                // Slide navigation
+                                'var currentSlideIndex = 0;' +
+                                'function getSlides() { return document.querySelectorAll(".slide"); }' +
+                                'function goToSlide(index) {' +
+                                '  var slides = getSlides();' +
+                                '  if (slides.length === 0) return;' +
+                                '  if (index < 0) index = 0;' +
+                                '  if (index >= slides.length) index = slides.length - 1;' +
+                                '  slides.forEach(function(s, i) {' +
+                                '    s.classList.remove("active");' +
+                                '    if (i === index) s.classList.add("active");' +
+                                '  });' +
+                                '  currentSlideIndex = index;' +
+                                '  var counter = document.getElementById("current-slide");' +
+                                '  if (counter) counter.textContent = index + 1;' +
+                                '}' +
+                                'function nextSlide() { goToSlide(currentSlideIndex + 1); }' +
+                                'function prevSlide() { goToSlide(currentSlideIndex - 1); }' +
+                                // Find current active slide
+                                'var slides = getSlides();' +
+                                'slides.forEach(function(s, i) { if (s.classList.contains("active")) currentSlideIndex = i; });' +
+                                // Keyboard navigation
+                                'document.addEventListener("keydown", function(e) {' +
+                                '  var slides = getSlides();' +
+                                '  if (slides.length === 0) return;' +
+                                '  switch(e.key) {' +
+                                '    case "ArrowRight": case "ArrowDown": case " ": case "PageDown":' +
+                                '      e.preventDefault(); nextSlide(); break;' +
+                                '    case "ArrowLeft": case "ArrowUp": case "PageUp":' +
+                                '      e.preventDefault(); prevSlide(); break;' +
+                                '    case "Home": e.preventDefault(); goToSlide(0); break;' +
+                                '    case "End": e.preventDefault(); goToSlide(slides.length - 1); break;' +
+                                '  }' +
+                                '}, true);' +
+                                '})("' + iframeId + '");';
+                            iframeDocument.head.appendChild(script);
+                        } catch(scriptErr) {
+                            // Script injection failed (may be cross-origin)
+                        }
+                    }
+
+                    // Focus the iframe window
+                    iframeWin.focus();
+                } catch(e) {
+                    // Error setting up iframe helpers
+                }
+            }
+
+            // Setup helpers after a short delay to let content initialize
+            setTimeout(setupIframeHelpers, 100);
+            setTimeout(setupIframeHelpers, 500);
+            setTimeout(setupIframeHelpers, 1000);
+
+            // Store focus state on the iframe element itself so we can check it globally
+            iframe._hasFocus = false;
+
+            // Handle focus for keyboard interaction
+            function focusIframeContent() {
+                try {
+                    iframe.contentWindow.focus();
+                } catch(e) {
+                    console.error('Focus error:', e);
+                }
+            }
+
+            // Focus iframe on click
+            $(iframe).on('click mousedown', function() {
+                focusIframeContent();
+            });
+
+            // Focus when mouse enters iframe
+            $(iframe).on('mouseenter', function() {
+                iframe._hasFocus = true;
+                focusIframeContent();
+            });
+
+            // Blur when mouse leaves iframe
+            $(iframe).on('mouseleave', function() {
+                iframe._hasFocus = false;
+            });
+
+            // Also focus when the module becomes active
+            $(iframe).closest('.course-module').on('moduleActivated', function() {
+                setTimeout(focusIframeContent, 100);
+            });
+
+            // Initial focus attempt
+            setTimeout(focusIframeContent, 500);
+        }
+    });
+}
 
 function loadModuleProgress() {
     $.get('/api/user/courses/{{ .Course.Id }}/modules/progress')
@@ -1531,8 +1698,18 @@ function showModule(moduleId, moduleIndex) {
     $('.module-nav-item').removeClass('active');
     
     // Show selected module
-    $('.course-module[data-module-id="' + moduleId + '"]').addClass('active');
+    var activeModule = $('.course-module[data-module-id="' + moduleId + '"]');
+    activeModule.addClass('active');
     $('.module-nav-item[data-module-id="' + moduleId + '"]').addClass('active');
+
+    // Trigger event for iframe focus and focus any iframe in this module
+    activeModule.trigger('moduleActivated');
+    var iframe = activeModule.find('.html-content-frame');
+    if (iframe.length > 0) {
+        setTimeout(function() {
+            iframe[0].contentWindow.focus();
+        }, 100);
+    }
     
     // Update header title
     var moduleName = $('.module-nav-item[data-module-id="' + moduleId + '"] .module-title').text();

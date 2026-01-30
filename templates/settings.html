@@ -35,6 +35,13 @@
                         <i class="fa fa-envelope-open"></i> Reporting Settings
                     </a>
                 </li>
+                {{if .ModifySystem }}
+                <li role="elearningSettings">
+                    <a href="#elearningSettings" aria-controls="elearningSettings" role="tab" id="elearningtab" data-toggle="tab">
+                        <i class="fa fa-graduation-cap"></i> E-Learning Settings
+                    </a>
+                </li>
+                {{end}}
             </ul>
         </div>
 
@@ -328,6 +335,134 @@
                     </div>
                 </form>
             </div>
+
+            {{if .ModifySystem }}
+            <!-- E-Learning Settings Tab -->
+            <div role="tabpanel" class="tab-pane" id="elearningSettings">
+                <form id="elearningForm">
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa fa-graduation-cap"></i> E-Learning Notification Settings
+                        </h3>
+                        <p class="settings-description">Configure automatic enrollment notification emails sent to users who fall for phishing simulations.</p>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="elearning_smtp">Sending Profile</label>
+                                <p class="settings-help">Select which SMTP profile to use for sending enrollment notifications</p>
+                            </div>
+                            <div class="settings-value">
+                                <select id="elearning_smtp" name="smtp_id" class="form-control">
+                                    <option value="">-- Select Sending Profile --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="elearning_base_url">Base URL</label>
+                                <p class="settings-help">The URL where users can access the e-learning portal (e.g., https://training.example.com)</p>
+                            </div>
+                            <div class="settings-value">
+                                <input type="url" id="elearning_base_url" name="base_url" placeholder="https://localhost:3333" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="elearning_company_name">Company Name</label>
+                                <p class="settings-help">Your organization's name (appears in email template)</p>
+                            </div>
+                            <div class="settings-value">
+                                <input type="text" id="elearning_company_name" name="company_name" placeholder="Your Organization" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="elearning_email_subject">Email Subject</label>
+                                <p class="settings-help">Subject line for enrollment notification emails</p>
+                            </div>
+                            <div class="settings-value">
+                                <input type="text" id="elearning_email_subject" name="email_subject" placeholder="Security Awareness Training Required" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa fa-file-text-o"></i> Email Template
+                        </h3>
+                        <p class="settings-description">
+                            Customize the HTML email template sent to users. Available placeholders:
+                            <code>{{"{{"}}.UserEmail{{"}}"}}</code>, <code>{{"{{"}}.TempPassword{{"}}"}}</code>, <code>{{"{{"}}.CourseName{{"}}"}}</code>,
+                            <code>{{"{{"}}.CourseDescription{{"}}"}}</code>, <code>{{"{{"}}.LoginURL{{"}}"}}</code>, <code>{{"{{"}}.CompanyName{{"}}"}}</code>,
+                            <code>{{"{{"}}.IsNewUser{{"}}"}}</code>
+                        </p>
+
+                        <!-- Template Editor/Preview -->
+                        <div class="template-editor-wrapper">
+                            <div class="template-tabs-header" style="margin-bottom: 10px;">
+                                <button type="button" class="btn btn-sm btn-default active" id="btn-template-editor">
+                                    <i class="fa fa-code"></i> HTML Editor
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" id="btn-template-preview">
+                                    <i class="fa fa-eye"></i> Preview
+                                </button>
+                            </div>
+
+                            <div id="template-editor-pane">
+                                <textarea id="elearning_email_html" name="email_html" class="form-control" rows="20" style="font-family: monospace; font-size: 12px;"></textarea>
+                            </div>
+                            <div id="template-preview-pane" style="display: none;">
+                                <iframe id="template-preview-frame" style="width: 100%; height: 500px; border: 1px solid #ddd; background: #fff;"></iframe>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <button type="button" class="btn-modern btn-outline-modern btn-sm-modern" id="reset-template">
+                                <i class="fa fa-undo"></i> Reset to Default Template
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa fa-paper-plane"></i> Test Email
+                        </h3>
+                        <p class="settings-description">Send a test enrollment notification email to verify your settings.</p>
+
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <label for="test_email_address">Test Email Address</label>
+                            </div>
+                            <div class="settings-value">
+                                <div class="input-group">
+                                    <input type="email" id="test_email_address" placeholder="test@example.com" class="form-control" />
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn-modern btn-info-modern" id="send-test-email">
+                                            <i class="fa fa-send"></i> Send Test
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-actions-row">
+                        <div class="settings-actions">
+                            <button class="btn-modern btn-primary-modern" id="save-elearning-settings" type="button">
+                                <i class="fa fa-save"></i> Save E-Learning Settings
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {{end}}
         </div>
     </div>
 </div>

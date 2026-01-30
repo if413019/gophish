@@ -235,4 +235,216 @@ $(document).ready(function () {
     })
 
     loadIMAPSettings()
+
+    // E-Learning Settings Tab
+    var elearningSettingsLoaded = false;
+
+    $("#elearningtab").click(function() {
+        if (!elearningSettingsLoaded) {
+            loadELearningSettings()
+            elearningSettingsLoaded = true
+        }
+    })
+
+    // Load E-Learning Settings
+    function loadELearningSettings() {
+        api.elearningSettings.get()
+            .success(function(data) {
+                var settings = data.settings
+                var smtpProfiles = data.smtp_profiles
+
+                // Populate SMTP dropdown
+                var $smtpSelect = $("#elearning_smtp")
+                $smtpSelect.empty()
+                $smtpSelect.append('<option value="">-- Select Sending Profile --</option>')
+
+                if (smtpProfiles && smtpProfiles.length > 0) {
+                    smtpProfiles.forEach(function(profile) {
+                        var selected = settings.smtp_id === profile.id ? ' selected' : ''
+                        $smtpSelect.append('<option value="' + profile.id + '"' + selected + '>' + escapeHtml(profile.name) + '</option>')
+                    })
+                }
+
+                // Populate form fields
+                $("#elearning_base_url").val(settings.base_url || 'https://localhost:3333')
+                $("#elearning_company_name").val(settings.company_name || 'Your Organization')
+                $("#elearning_email_subject").val(settings.email_subject || 'Security Awareness Training Required')
+
+                // Load email template
+                if (settings.email_html) {
+                    $("#elearning_email_html").val(settings.email_html)
+                } else {
+                    // Load default template if none exists
+                    loadDefaultTemplate()
+                }
+            })
+            .error(function(data) {
+                errorFlash("Error loading E-Learning settings")
+            })
+    }
+
+    // Load default template
+    function loadDefaultTemplate() {
+        api.elearningSettings.getDefaultTemplate()
+            .success(function(data) {
+                $("#elearning_email_html").val(data.template)
+            })
+            .error(function() {
+                errorFlash("Error loading default template")
+            })
+    }
+
+    // Reset to default template button
+    $("#reset-template").click(function() {
+        Swal.fire({
+            title: "Reset Template?",
+            text: "This will replace your current template with the default template.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Reset",
+            confirmButtonColor: "#dc3545"
+        }).then(function(result) {
+            if (result.value) {
+                loadDefaultTemplate()
+                successFlashFade("Template reset to default", 2)
+            }
+        })
+    })
+
+    // Template editor/preview toggle buttons
+    $("#btn-template-editor").click(function() {
+        $(this).addClass('active')
+        $("#btn-template-preview").removeClass('active')
+        $("#template-editor-pane").show()
+        $("#template-preview-pane").hide()
+    })
+
+    $("#btn-template-preview").click(function() {
+        $(this).addClass('active')
+        $("#btn-template-editor").removeClass('active')
+        $("#template-editor-pane").hide()
+        $("#template-preview-pane").show()
+
+        // Generate preview
+        var template = $("#elearning_email_html").val()
+        var iframe = document.getElementById('template-preview-frame')
+        var iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+
+        if (!template) {
+            iframeDoc.open()
+            iframeDoc.write('<html><body style="font-family: sans-serif; padding: 20px; color: #666;"><p>No template to preview. Please enter an HTML template.</p></body></html>')
+            iframeDoc.close()
+            return
+        }
+
+        api.elearningSettings.previewTemplate(template)
+            .success(function(data) {
+                iframeDoc.open()
+                iframeDoc.write(data.preview)
+                iframeDoc.close()
+            })
+            .error(function(data) {
+                var message = data.responseJSON ? data.responseJSON.message : "Error generating preview"
+                iframeDoc.open()
+                iframeDoc.write('<html><body style="font-family: sans-serif; padding: 20px;"><div style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 4px;">' + escapeHtml(message) + '</div></body></html>')
+                iframeDoc.close()
+            })
+    })
+
+    // Save E-Learning Settings
+    $("#save-elearning-settings").click(function() {
+        var settings = {
+            smtp_id: parseInt($("#elearning_smtp").val()) || 0,
+            base_url: $("#elearning_base_url").val().trim(),
+            company_name: $("#elearning_company_name").val().trim(),
+            email_subject: $("#elearning_email_subject").val().trim(),
+            email_html: $("#elearning_email_html").val()
+        }
+
+        // Validation
+        if (!settings.smtp_id) {
+            errorFlash("Please select a Sending Profile")
+            return
+        }
+        if (!settings.base_url) {
+            errorFlash("Please enter a Base URL")
+            return
+        }
+        if (!settings.company_name) {
+            errorFlash("Please enter a Company Name")
+            return
+        }
+
+        var $btn = $(this)
+        var oldHTML = $btn.html()
+        $btn.attr("disabled", true)
+        $btn.html('<i class="fa fa-circle-o-notch fa-spin"></i> Saving...')
+
+        api.elearningSettings.post(settings)
+            .success(function(data) {
+                if (data.success) {
+                    successFlashFade("E-Learning settings saved successfully", 3)
+                } else {
+                    errorFlash(data.message || "Error saving settings")
+                }
+            })
+            .error(function(data) {
+                var message = data.responseJSON ? data.responseJSON.message : "Error saving settings"
+                errorFlash(message)
+            })
+            .always(function() {
+                $btn.attr("disabled", false)
+                $btn.html(oldHTML)
+            })
+    })
+
+    // Send Test Email
+    $("#send-test-email").click(function() {
+        var email = $("#test_email_address").val().trim()
+        if (!email) {
+            errorFlash("Please enter a test email address")
+            return
+        }
+
+        // Basic email validation
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+            errorFlash("Please enter a valid email address")
+            return
+        }
+
+        var $btn = $(this)
+        var oldHTML = $btn.html()
+        $btn.attr("disabled", true)
+        $btn.html('<i class="fa fa-circle-o-notch fa-spin"></i> Sending...')
+
+        api.elearningSettings.testEmail(email)
+            .success(function(data) {
+                if (data.success) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: data.message,
+                        type: "success"
+                    })
+                } else {
+                    Swal.fire({
+                        title: "Failed",
+                        text: data.message || "Failed to send test email",
+                        type: "error"
+                    })
+                }
+            })
+            .error(function(data) {
+                var message = data.responseJSON ? data.responseJSON.message : "Error sending test email"
+                Swal.fire({
+                    title: "Error",
+                    text: message,
+                    type: "error"
+                })
+            })
+            .always(function() {
+                $btn.attr("disabled", false)
+                $btn.html(oldHTML)
+            })
+    })
 })

@@ -86,7 +86,13 @@ func (as *Server) registerRoutes() {
 	router.HandleFunc("/webhooks/", mid.Use(as.Webhooks, mid.RequirePermission(models.PermissionModifySystem)))
 	router.HandleFunc("/webhooks/{id:[0-9]+}/validate", mid.Use(as.ValidateWebhook, mid.RequirePermission(models.PermissionModifySystem)))
 	router.HandleFunc("/webhooks/{id:[0-9]+}", mid.Use(as.Webhook, mid.RequirePermission(models.PermissionModifySystem)))
-	
+
+	// E-learning settings routes (admin only)
+	router.HandleFunc("/elearning_settings/", mid.Use(as.ELearningSettings, mid.RequirePermission(models.PermissionModifySystem)))
+	router.HandleFunc("/elearning_settings/test", mid.Use(as.ELearningSettingsTestEmail, mid.RequirePermission(models.PermissionModifySystem)))
+	router.HandleFunc("/elearning_settings/default_template", mid.Use(as.ELearningSettingsDefaultTemplate, mid.RequirePermission(models.PermissionModifySystem)))
+	router.HandleFunc("/elearning_settings/preview", mid.Use(as.ELearningSettingsPreviewTemplate, mid.RequirePermission(models.PermissionModifySystem)))
+
 	// E-learning course routes
 	router.HandleFunc("/courses/", as.Courses)
 	router.HandleFunc("/courses/{id:[0-9]+}", as.Course)

@@ -328,6 +328,29 @@ var api = {
         post: function (enrollment) {
             return query("/enrollments/", "POST", enrollment, false)
         }
+    },
+    // elearningSettings contains the endpoints for /elearning_settings
+    elearningSettings: {
+        // get() - Queries the API for GET /elearning_settings/
+        get: function () {
+            return query("/elearning_settings/", "GET", {}, false)
+        },
+        // post() - Posts settings to POST /elearning_settings/
+        post: function (settings) {
+            return query("/elearning_settings/", "POST", settings, false)
+        },
+        // testEmail() - Sends a test email via POST /elearning_settings/test
+        testEmail: function (email) {
+            return query("/elearning_settings/test", "POST", { email: email }, true)
+        },
+        // getDefaultTemplate() - Gets the default template via GET /elearning_settings/default_template
+        getDefaultTemplate: function () {
+            return query("/elearning_settings/default_template", "GET", {}, false)
+        },
+        // previewTemplate() - Previews a template via POST /elearning_settings/preview
+        previewTemplate: function (template) {
+            return query("/elearning_settings/preview", "POST", { template: template }, false)
+        }
     }
 }
 window.api = api

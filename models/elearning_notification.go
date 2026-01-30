@@ -2,9 +2,11 @@ package models
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/rand"
 	"crypto/tls"
 	"fmt"
+	"html/template"
 	"math/big"
 	"net/smtp"
 	"os"
@@ -30,6 +32,215 @@ type ELearningConfig struct {
 }
 
 var elearningConfig *ELearningConfig
+
+// EmailTemplateData contains the data for rendering email templates
+type EmailTemplateData struct {
+	UserEmail         string
+	TempPassword      string
+	CourseName        string
+	CourseDescription string
+	LoginURL          string
+	CompanyName       string
+	IsNewUser         bool
+}
+
+// GetELearningConfigFromDB loads configuration from database, falling back to .env if not configured
+func GetELearningConfigFromDB() (*ELearningConfig, *ELearningSettings, error) {
+	// Try to load from database first
+	settings, err := GetELearningSettings()
+	if err != nil {
+		log.Warnf("Could not load e-learning settings from DB: %v, falling back to .env", err)
+		config, envErr := LoadELearningConfig()
+		return config, nil, envErr
+	}
+
+	// Check if DB settings are properly configured (has SMTP profile)
+	if settings.SMTPId <= 0 || settings.SMTP.Id == 0 {
+		log.Info("E-learning settings not fully configured in DB, falling back to .env")
+		config, envErr := LoadELearningConfig()
+		return config, nil, envErr
+	}
+
+	// Build config from DB settings
+	smtp := settings.SMTP
+	host := smtp.Host
+	port := 25
+
+	// Parse host:port
+	if strings.Contains(smtp.Host, ":") {
+		parts := strings.Split(smtp.Host, ":")
+		host = parts[0]
+		if p, err := strconv.Atoi(parts[1]); err == nil {
+			port = p
+		}
+	}
+
+	config := &ELearningConfig{
+		SMTPHost:     host,
+		SMTPPort:     port,
+		SMTPUsername: smtp.Username,
+		SMTPPassword: smtp.Password,
+		SMTPFrom:     smtp.FromAddress,
+		SMTPUseTLS:   !smtp.IgnoreCertErrors, // Use TLS unless cert errors are ignored
+		BaseURL:      settings.BaseURL,
+		EmailSubject: settings.EmailSubject,
+		CompanyName:  settings.CompanyName,
+	}
+
+	return config, &settings, nil
+}
+
+// SendEnrollmentNotificationWithTemplate sends an email using the DB template if available
+func SendEnrollmentNotificationWithTemplate(userEmail string, course Course, isNewUser bool, tempPassword string) error {
+	log.Infof("SendEnrollmentNotificationWithTemplate called for %s, course: %s, isNewUser: %t", userEmail, course.Name, isNewUser)
+
+	config, settings, err := GetELearningConfigFromDB()
+	if err != nil {
+		log.Errorf("Failed to load e-learning config: %v", err)
+		return fmt.Errorf("failed to load e-learning config: %v", err)
+	}
+
+	// Skip if SMTP is not configured
+	if config.SMTPUsername == "" || config.SMTPPassword == "" {
+		log.Warn("E-learning SMTP not configured. Skipping enrollment notification.")
+		return nil
+	}
+
+	subject := config.EmailSubject
+
+	var body string
+	// Use HTML template from DB if available
+	if settings != nil && settings.EmailHTML != "" {
+		log.Info("Using HTML template from database")
+		body, err = renderEmailTemplate(settings.EmailHTML, userEmail, course, isNewUser, tempPassword, config)
+		if err != nil {
+			log.Errorf("Failed to render HTML template: %v, falling back to plain text", err)
+			body = createEnrollmentEmailBody(userEmail, course, isNewUser, tempPassword, config)
+		}
+	} else {
+		log.Info("Using default plain text email body")
+		body = createEnrollmentEmailBody(userEmail, course, isNewUser, tempPassword, config)
+	}
+
+	log.Infof("Email content created for %s, subject: %s", userEmail, subject)
+
+	// Determine if we're sending HTML or plain text
+	isHTML := settings != nil && settings.EmailHTML != ""
+	err = sendEmailWithFormat(config, userEmail, subject, body, isHTML)
+	if err != nil {
+		log.Errorf("Failed to send email to %s: %v", userEmail, err)
+		return err
+	}
+	log.Infof("Email sent successfully to %s", userEmail)
+	return nil
+}
+
+// renderEmailTemplate renders the HTML email template with the provided data
+func renderEmailTemplate(templateHTML string, userEmail string, course Course, isNewUser bool, tempPassword string, config *ELearningConfig) (string, error) {
+	data := EmailTemplateData{
+		UserEmail:         userEmail,
+		TempPassword:      tempPassword,
+		CourseName:        course.Name,
+		CourseDescription: course.Description,
+		LoginURL:          fmt.Sprintf("%s/login", config.BaseURL),
+		CompanyName:       config.CompanyName,
+		IsNewUser:         isNewUser,
+	}
+
+	tmpl, err := template.New("email").Parse(templateHTML)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse email template: %v", err)
+	}
+
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, data)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute email template: %v", err)
+	}
+
+	return buf.String(), nil
+}
+
+// sendEmailWithFormat sends an email with optional HTML format
+func sendEmailWithFormat(config *ELearningConfig, to, subject, body string, isHTML bool) error {
+	fromAddr := config.SMTPUsername
+
+	fromDisplay := config.SMTPFrom
+	if fromDisplay == "" {
+		fromDisplay = config.SMTPUsername
+	}
+
+	var msg string
+	if isHTML {
+		msg = fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", fromDisplay, to, subject, body)
+	} else {
+		msg = fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s", fromDisplay, to, subject, body)
+	}
+
+	serverAddr := fmt.Sprintf("%s:%d", config.SMTPHost, config.SMTPPort)
+	log.Infof("Connecting to SMTP server: %s (TLS: %t)", serverAddr, config.SMTPUseTLS)
+
+	var c *smtp.Client
+	var err error
+
+	if config.SMTPUseTLS {
+		c, err = smtp.Dial(serverAddr)
+		if err != nil {
+			return fmt.Errorf("failed to connect to SMTP server: %v", err)
+		}
+
+		if ok, _ := c.Extension("STARTTLS"); ok {
+			tlsConfig := &tls.Config{
+				ServerName: config.SMTPHost,
+			}
+			if err = c.StartTLS(tlsConfig); err != nil {
+				c.Close()
+				return fmt.Errorf("failed to start TLS: %v", err)
+			}
+		}
+	} else {
+		c, err = smtp.Dial(serverAddr)
+		if err != nil {
+			return fmt.Errorf("failed to connect to SMTP server: %v", err)
+		}
+	}
+	defer c.Close()
+
+	if config.SMTPUsername != "" && config.SMTPPassword != "" {
+		log.Infof("Authenticating with SMTP server for user: %s", config.SMTPUsername)
+		auth := smtp.PlainAuth("", config.SMTPUsername, config.SMTPPassword, config.SMTPHost)
+		if err = c.Auth(auth); err != nil {
+			return fmt.Errorf("SMTP authentication failed: %v", err)
+		}
+		log.Infof("SMTP authentication successful")
+	}
+
+	log.Infof("Sending email from %s to %s", fromAddr, to)
+	if err = c.Mail(fromAddr); err != nil {
+		return fmt.Errorf("failed to set sender: %v", err)
+	}
+	if err = c.Rcpt(to); err != nil {
+		return fmt.Errorf("failed to set recipient: %v", err)
+	}
+
+	w, err := c.Data()
+	if err != nil {
+		return fmt.Errorf("failed to create data writer: %v", err)
+	}
+
+	_, err = w.Write([]byte(msg))
+	if err != nil {
+		return fmt.Errorf("failed to write message: %v", err)
+	}
+
+	err = w.Close()
+	if err != nil {
+		return fmt.Errorf("failed to close data writer: %v", err)
+	}
+
+	log.Infof("Email sent successfully to %s", to)
+	return nil
+}
 
 // LoadELearningConfig loads configuration from .env file
 func LoadELearningConfig() (*ELearningConfig, error) {
