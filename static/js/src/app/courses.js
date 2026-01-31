@@ -575,7 +575,7 @@ function load(){
                 "<div class='course-date'>" + moment(course.created_date).format('MMM DD, YYYY') + "</div>",
                 "<div class='course-date'>" + moment(course.modified_date).format('MMM DD, YYYY') + "</div>",
                 "<div class='action-buttons'>" +
-                    "<button class='btn-sm-modern btn-secondary-modern' data-toggle='tooltip' data-placement='left' title='Preview Course' onclick='window.open(\"/courses/" + course.id + "/preview\", \"_blank\")'>" +
+                    "<button class='btn-sm-modern btn-secondary-modern' data-toggle='tooltip' data-placement='left' title='Preview Course' onclick='window.location.href=\"/courses/" + course.id + "/preview\"'>" +
                         "<i class='fa fa-eye'></i>" +
                     "</button>" +
                     "<button class='btn-sm-modern btn-primary-modern' data-toggle='tooltip' data-placement='left' title='Edit Course' onclick='save(" + i + ")'>" +

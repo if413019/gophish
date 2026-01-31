@@ -475,4 +475,11 @@ $(document).ready(function () {
             return 0;
         });
     })
+    // Check for #new hash to open new campaign modal
+    if (window.location.hash === '#new') {
+        edit('new')
+        $('#modal').modal('show')
+        // Clear the hash from URL without triggering a scroll
+        history.replaceState(null, null, ' ')
+    }
 })

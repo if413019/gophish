@@ -629,6 +629,88 @@ var renderPieChart = function (chartopts) {
     })
 }
 
+/* Renders the big combined stats chart */
+var renderCombinedStatsChart = function (statsData, total, hasLearning, learningStats) {
+    var categories = ['Sent', 'Opened', 'Clicked', 'Submitted', 'Reported'];
+    var colors = ['#1abc9c', '#f9bf3b', '#F39C12', '#f05b4f', '#45d6ef'];
+    var data = [
+        { name: 'Sent', y: statsData['Email Sent'] || 0, color: '#1abc9c' },
+        { name: 'Opened', y: statsData['Email Opened'] || 0, color: '#f9bf3b' },
+        { name: 'Clicked', y: statsData['Clicked Link'] || 0, color: '#F39C12' },
+        { name: 'Submitted', y: statsData['Submitted Data'] || 0, color: '#f05b4f' },
+        { name: 'Reported', y: statsData['Email Reported'] || 0, color: '#45d6ef' }
+    ];
+
+    // Add learning stats if available
+    if (hasLearning && learningStats) {
+        data.push({
+            name: 'Completed',
+            y: learningStats.completed_count || 0,
+            color: '#27ae60'
+        });
+    }
+
+    return Highcharts.chart('combined_stats_chart', {
+        chart: {
+            type: 'bar',
+            backgroundColor: 'transparent',
+            height: 220,
+            style: {
+                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+            }
+        },
+        title: { text: null },
+        xAxis: {
+            categories: data.map(function(d) { return d.name; }),
+            labels: {
+                style: { color: '#718096', fontSize: '11px' }
+            },
+            lineColor: '#e2e8f0'
+        },
+        yAxis: {
+            min: 0,
+            max: total > 0 ? total : 1,
+            title: { text: null },
+            labels: {
+                style: { color: '#718096' }
+            },
+            gridLineColor: '#e2e8f0'
+        },
+        tooltip: {
+            backgroundColor: 'rgba(45, 55, 72, 0.95)',
+            borderColor: '#667eea',
+            borderRadius: 8,
+            style: { color: '#ffffff' },
+            formatter: function () {
+                var pct = total > 0 ? Math.round((this.y / total) * 100) : 0;
+                return '<b>' + this.point.name + '</b><br/>' +
+                       this.y + ' of ' + total + ' (' + pct + '%)';
+            }
+        },
+        legend: { enabled: false },
+        credits: { enabled: false },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                dataLabels: {
+                    enabled: true,
+                    format: '{y}',
+                    style: {
+                        color: '#718096',
+                        fontWeight: '600',
+                        textOutline: 'none'
+                    }
+                }
+            }
+        },
+        series: [{
+            name: 'Count',
+            data: data,
+            colorByPoint: true
+        }]
+    });
+}
+
 /* Updates the bubbles on the map
 
 @param {campaign.result[]} results - The campaign results to process
@@ -831,6 +913,24 @@ function poll() {
                     completionChart.series[0].update({ data: chartData });
                     $("#course-completion-count").text(campaign.learning_stats.completed_count + "/" + campaign.learning_stats.phished_count);
                 }
+            }
+
+            /* Update the combined stats chart */
+            var combinedChart = $("#combined_stats_chart").highcharts();
+            if (combinedChart) {
+                var hasLearning = campaign.learning_stats !== null && campaign.learning_stats !== undefined;
+                var newData = [
+                    { name: 'Sent', y: email_series_data['Email Sent'] || 0, color: '#1abc9c' },
+                    { name: 'Opened', y: email_series_data['Email Opened'] || 0, color: '#f9bf3b' },
+                    { name: 'Clicked', y: email_series_data['Clicked Link'] || 0, color: '#F39C12' },
+                    { name: 'Submitted', y: email_series_data['Submitted Data'] || 0, color: '#f05b4f' },
+                    { name: 'Reported', y: email_series_data['Email Reported'] || 0, color: '#45d6ef' }
+                ];
+                if (hasLearning && campaign.learning_stats) {
+                    newData.push({ name: 'Completed', y: campaign.learning_stats.completed_count || 0, color: '#27ae60' });
+                }
+                combinedChart.series[0].setData(newData, true);
+                combinedChart.yAxis[0].setExtremes(0, campaign.results.length > 0 ? campaign.results.length : 1);
             }
 
             /* Update the datatable */
@@ -1063,6 +1163,9 @@ function load() {
                 if (hasLearningStats) {
                     renderCourseCompletionChart(campaign.learning_stats);
                 }
+
+                // Render the combined stats chart
+                renderCombinedStatsChart(email_series_data, campaign.results.length, hasLearningStats, campaign.learning_stats);
 
                 if (use_map) {
                     $("#resultsMapContainer").show()

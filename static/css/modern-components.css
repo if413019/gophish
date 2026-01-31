@@ -266,21 +266,67 @@
 }
 
 /* ================================
-   Stats Cards
+   Stats Section - Big Chart + Cards Grid
    ================================ */
-.stats-grid {
+.stats-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: 1fr 2fr;
     gap: 1.5rem;
     margin-bottom: 2rem;
+}
+
+@media (max-width: 992px) {
+    .stats-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Big Combined Chart */
+.stats-main-chart {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: var(--modern-radius-lg);
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--modern-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.stats-main-chart h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--modern-text-primary);
+    margin: 0 0 1rem 0;
+}
+
+#combined_stats_chart {
+    width: 100%;
+    height: 220px;
+}
+
+/* Stats Cards Grid - 3x2 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .stat-card {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-radius: var(--modern-radius-lg);
-    padding: 1.5rem;
+    padding: 1rem 1.25rem;
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 1rem;
     transition: all 0.3s ease;
@@ -289,18 +335,18 @@
 }
 
 .stat-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--modern-shadow-hover);
 }
 
 .stat-card-icon {
-    width: 56px;
-    height: 56px;
+    width: 72px;
+    height: 72px;
     border-radius: var(--modern-radius);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 2rem;
     color: white;
     flex-shrink: 0;
 }
@@ -313,12 +359,15 @@
 .stat-card-icon.course-completion { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); }
 
 .stat-card-content {
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     min-width: 0;
+    flex: 1;
 }
 
 .stat-card-content h3 {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--modern-text-primary);
     margin: 0;
@@ -327,15 +376,15 @@
 
 .stat-card-content p {
     color: var(--modern-text-muted);
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     margin: 0.25rem 0 0 0;
+    white-space: nowrap;
 }
 
-.stat-card-chart {
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0;
+/* Hide mini charts in compact mode */
+.stat-card .stat-card-chart {
+    display: none;
 }
 
 /* ================================
@@ -823,7 +872,7 @@
     }
 
     .stat-card-content h3 {
-        font-size: 1.5rem;
+        font-size: 2rem;
     }
 }
 

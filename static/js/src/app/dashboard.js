@@ -210,6 +210,85 @@ function generateStatsPieCharts(campaigns) {
             colors: [statColors[status], "#e2e8f0"]
         })
     });
+
+    // Render combined stats chart (will be called separately with learning stats)
+    return { stats: stats_series_data, total: total };
+}
+
+/* Renders the big combined stats chart */
+function renderCombinedStatsChart(statsData, total, learningStats) {
+    // Always show all 6 bars, even with zero values
+    var data = [
+        { name: 'Sent', y: statsData['sent'] || 0, color: '#1abc9c' },
+        { name: 'Opened', y: statsData['opened'] || 0, color: '#f9bf3b' },
+        { name: 'Clicked', y: statsData['clicked'] || 0, color: '#F39C12' },
+        { name: 'Submitted', y: statsData['submitted_data'] || 0, color: '#f05b4f' },
+        { name: 'Reported', y: statsData['email_reported'] || 0, color: '#45d6ef' },
+        { name: 'Completed', y: (learningStats && learningStats.completed_count) || 0, color: '#27ae60' }
+    ];
+
+    // Ensure yAxis max is at least 1 to show the grid
+    var yMax = total > 0 ? total : 10;
+
+    return Highcharts.chart('combined_stats_chart', {
+        chart: {
+            type: 'bar',
+            backgroundColor: 'transparent',
+            height: 220,
+            style: {
+                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+            }
+        },
+        title: { text: null },
+        xAxis: {
+            categories: data.map(function(d) { return d.name; }),
+            labels: {
+                style: { color: '#718096', fontSize: '11px' }
+            },
+            lineColor: '#e2e8f0'
+        },
+        yAxis: {
+            min: 0,
+            max: yMax,
+            title: { text: null },
+            labels: {
+                style: { color: '#718096' }
+            },
+            gridLineColor: '#e2e8f0'
+        },
+        tooltip: {
+            backgroundColor: 'rgba(45, 55, 72, 0.95)',
+            borderColor: '#667eea',
+            borderRadius: 8,
+            style: { color: '#ffffff' },
+            formatter: function () {
+                var pct = total > 0 ? Math.round((this.y / total) * 100) : 0;
+                return '<b>' + this.point.name + '</b><br/>' +
+                       this.y + ' of ' + total + ' (' + pct + '%)';
+            }
+        },
+        legend: { enabled: false },
+        credits: { enabled: false },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                dataLabels: {
+                    enabled: true,
+                    format: '{y}',
+                    style: {
+                        color: '#718096',
+                        fontWeight: '600',
+                        textOutline: 'none'
+                    }
+                }
+            }
+        },
+        series: [{
+            name: 'Count',
+            data: data,
+            colorByPoint: true
+        }]
+    });
 }
 
 function generateTimelineChart(campaigns) {
@@ -449,8 +528,19 @@ $(document).ready(function () {
                 $('[data-toggle="tooltip"]').tooltip()
 
                 // Build the charts
-                generateStatsPieCharts(campaigns)
+                var statsResult = generateStatsPieCharts(campaigns)
                 generateTimelineChart(campaigns)
+
+                // Update course completion card with learning stats
+                var learningStats = data.learning_stats
+                if (learningStats && learningStats.phished_count > 0) {
+                    $('#course-completion-count').text(learningStats.completed_count + '/' + learningStats.phished_count)
+                } else {
+                    $('#course-completion-count').text('0/0')
+                }
+
+                // Render combined stats chart with learning data
+                renderCombinedStatsChart(statsResult.stats, statsResult.total, learningStats)
             } else {
                 $("#emptyMessage").show()
             }

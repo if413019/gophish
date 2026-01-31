@@ -31,7 +31,7 @@
             <i class="fa fa-rocket"></i>
             <h3>No Campaigns Yet</h3>
             <p>Create your first phishing campaign to start tracking security awareness metrics.</p>
-            <a href="/campaigns/new" class="btn-modern btn-primary-modern">
+            <a href="/campaigns#new" class="btn-modern btn-primary-modern">
                 <i class="fa fa-plus"></i> Create Campaign
             </a>
         </div>
@@ -39,61 +39,81 @@
 
     <!-- Dashboard Content -->
     <div id="dashboard" style="display:none;">
-        <!-- Stats Cards with Mini Charts -->
-        <div class="stats-grid" id="statsGrid" role="region" aria-label="Campaign Statistics">
-            <div class="stat-card" id="stat-sent" aria-label="Emails sent statistics">
-                <div class="stat-card-icon sent" aria-hidden="true">
-                    <i class="fa fa-envelope"></i>
-                </div>
-                <div class="stat-card-content">
-                    <h3 id="sent-count" aria-live="polite">0</h3>
-                    <p>Emails Sent</p>
-                </div>
-                <div class="stat-card-chart" id="sent_chart" aria-hidden="true"></div>
+        <!-- Stats Section: Big Chart + Cards Grid -->
+        <div class="stats-section" role="region" aria-label="Campaign Statistics">
+            <!-- Big Combined Chart -->
+            <div class="stats-main-chart">
+                <h4>Overall Statistics</h4>
+                <div id="combined_stats_chart"></div>
             </div>
 
-            <div class="stat-card" id="stat-opened" aria-label="Emails opened statistics">
-                <div class="stat-card-icon opened" aria-hidden="true">
-                    <i class="fa fa-envelope-open"></i>
+            <!-- Stats Cards Grid (3x2) -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card" id="stat-sent" aria-label="Emails sent statistics">
+                    <div class="stat-card-icon sent" aria-hidden="true">
+                        <i class="fa fa-envelope"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 id="sent-count" aria-live="polite">0</h3>
+                        <p>Emails Sent</p>
+                    </div>
+                    <div class="stat-card-chart" id="sent_chart" aria-hidden="true"></div>
                 </div>
-                <div class="stat-card-content">
-                    <h3 id="opened-count" aria-live="polite">0</h3>
-                    <p>Emails Opened</p>
-                </div>
-                <div class="stat-card-chart" id="opened_chart" aria-hidden="true"></div>
-            </div>
 
-            <div class="stat-card" id="stat-clicked" aria-label="Links clicked statistics">
-                <div class="stat-card-icon clicked" aria-hidden="true">
-                    <i class="fa fa-mouse-pointer"></i>
+                <div class="stat-card" id="stat-opened" aria-label="Emails opened statistics">
+                    <div class="stat-card-icon opened" aria-hidden="true">
+                        <i class="fa fa-envelope-open"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 id="opened-count" aria-live="polite">0</h3>
+                        <p>Emails Opened</p>
+                    </div>
+                    <div class="stat-card-chart" id="opened_chart" aria-hidden="true"></div>
                 </div>
-                <div class="stat-card-content">
-                    <h3 id="clicked-count" aria-live="polite">0</h3>
-                    <p>Clicked Link</p>
-                </div>
-                <div class="stat-card-chart" id="clicked_chart" aria-hidden="true"></div>
-            </div>
 
-            <div class="stat-card" id="stat-submitted" aria-label="Data submitted statistics">
-                <div class="stat-card-icon submitted" aria-hidden="true">
-                    <i class="fa fa-exclamation-circle"></i>
+                <div class="stat-card" id="stat-clicked" aria-label="Links clicked statistics">
+                    <div class="stat-card-icon clicked" aria-hidden="true">
+                        <i class="fa fa-mouse-pointer"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 id="clicked-count" aria-live="polite">0</h3>
+                        <p>Clicked Link</p>
+                    </div>
+                    <div class="stat-card-chart" id="clicked_chart" aria-hidden="true"></div>
                 </div>
-                <div class="stat-card-content">
-                    <h3 id="submitted_data-count" aria-live="polite">0</h3>
-                    <p>Submitted Data</p>
-                </div>
-                <div class="stat-card-chart" id="submitted_data_chart" aria-hidden="true"></div>
-            </div>
 
-            <div class="stat-card" id="stat-reported" aria-label="Phishing reported statistics">
-                <div class="stat-card-icon reported" aria-hidden="true">
-                    <i class="fa fa-flag"></i>
+                <div class="stat-card" id="stat-submitted" aria-label="Data submitted statistics">
+                    <div class="stat-card-icon submitted" aria-hidden="true">
+                        <i class="fa fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 id="submitted_data-count" aria-live="polite">0</h3>
+                        <p>Submitted Data</p>
+                    </div>
+                    <div class="stat-card-chart" id="submitted_data_chart" aria-hidden="true"></div>
                 </div>
-                <div class="stat-card-content">
-                    <h3 id="email_reported-count" aria-live="polite">0</h3>
-                    <p>Reported Phishing</p>
+
+                <div class="stat-card" id="stat-reported" aria-label="Phishing reported statistics">
+                    <div class="stat-card-icon reported" aria-hidden="true">
+                        <i class="fa fa-flag"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 id="email_reported-count" aria-live="polite">0</h3>
+                        <p>Reported</p>
+                    </div>
+                    <div class="stat-card-chart" id="email_reported_chart" aria-hidden="true"></div>
                 </div>
-                <div class="stat-card-chart" id="email_reported_chart" aria-hidden="true"></div>
+
+                <div class="stat-card" id="stat-course" aria-label="Course completion statistics">
+                    <div class="stat-card-icon course-completion" aria-hidden="true">
+                        <i class="fa fa-graduation-cap"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 id="course-completion-count" aria-live="polite">0/0</h3>
+                        <p>Course Completed</p>
+                    </div>
+                    <div class="stat-card-chart" id="course_completion_chart" aria-hidden="true"></div>
+                </div>
             </div>
         </div>
 

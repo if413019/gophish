@@ -54,8 +54,9 @@ type LearningProgress struct {
 
 // CampaignSummaries is a struct representing the overview of campaigns
 type CampaignSummaries struct {
-	Total     int64             `json:"total"`
-	Campaigns []CampaignSummary `json:"campaigns"`
+	Total         int64             `json:"total"`
+	Campaigns     []CampaignSummary `json:"campaigns"`
+	LearningStats *LearningStats    `json:"learning_stats,omitempty"`
 }
 
 // CampaignSummary is a struct representing the overview of a single camaign
@@ -496,7 +497,62 @@ func GetCampaignSummaries(uid int64) (CampaignSummaries, error) {
 	}
 	overview.Total = int64(len(cs))
 	overview.Campaigns = cs
+
+	// Get overall learning stats across all campaigns
+	learningStats, err := getOverallLearningStats(uid)
+	if err != nil {
+		log.Warnf("error getting overall learning stats: %v", err)
+	} else if learningStats != nil {
+		overview.LearningStats = learningStats
+	}
+
 	return overview, nil
+}
+
+// getOverallLearningStats calculates learning statistics across all campaigns for a user
+func getOverallLearningStats(uid int64) (*LearningStats, error) {
+	stats := &LearningStats{}
+
+	// Get all campaigns with courses for this user
+	var campaigns []Campaign
+	err := db.Where("user_id = ? AND course_id > 0", uid).Find(&campaigns).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// If no campaigns have courses, return nil
+	if len(campaigns) == 0 {
+		return nil, nil
+	}
+
+	// For each campaign, get the learning stats and aggregate
+	for _, campaign := range campaigns {
+		// Count phished users (clicked or submitted)
+		var phishedCount int64
+		db.Table("results").Where("campaign_id = ? AND (status = ? OR status = ?)",
+			campaign.Id, EventClicked, EventDataSubmit).Count(&phishedCount)
+		stats.PhishedCount += phishedCount
+
+		// Count enrollments by status for this campaign
+		var enrolledCount, completedCount, inProgressCount int64
+		db.Table("course_enrollments").Where("campaign_id = ? AND course_id = ?",
+			campaign.Id, campaign.CourseId).Count(&enrolledCount)
+		db.Table("course_enrollments").Where("campaign_id = ? AND course_id = ? AND status = ?",
+			campaign.Id, campaign.CourseId, EnrollmentStatusCompleted).Count(&completedCount)
+		db.Table("course_enrollments").Where("campaign_id = ? AND course_id = ? AND status = ?",
+			campaign.Id, campaign.CourseId, EnrollmentStatusInProgress).Count(&inProgressCount)
+
+		stats.EnrolledCount += enrolledCount
+		stats.CompletedCount += completedCount
+		stats.InProgressCount += inProgressCount
+	}
+
+	stats.NotStartedCount = stats.EnrolledCount - stats.CompletedCount - stats.InProgressCount
+	if stats.NotStartedCount < 0 {
+		stats.NotStartedCount = 0
+	}
+
+	return stats, nil
 }
 
 // GetCampaignSummary gets the summary object for a campaign specified by the campaign ID
