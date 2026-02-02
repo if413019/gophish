@@ -25,6 +25,7 @@
                         <i class="fa fa-user"></i> Account Settings
                     </a>
                 </li>
+                {{if .ModifySystem }}
                 <li role="uiSettings">
                     <a href="#uiSettings" aria-controls="uiSettings" role="tab" data-toggle="tab">
                         <i class="fa fa-desktop"></i> UI Settings
@@ -35,6 +36,7 @@
                         <i class="fa fa-envelope-open"></i> Reporting Settings
                     </a>
                 </li>
+                {{end}}
                 {{if .ModifySystem }}
                 <li role="elearningSettings">
                     <a href="#elearningSettings" aria-controls="elearningSettings" role="tab" id="elearningtab" data-toggle="tab">
@@ -141,6 +143,7 @@
                 </div>
             </div>
 
+            {{if .ModifySystem }}
             <!-- UI Settings Tab -->
             <div role="tabpanel" class="tab-pane" id="uiSettings">
                 <div class="settings-section">
@@ -335,6 +338,7 @@
                     </div>
                 </form>
             </div>
+            {{end}}
 
             {{if .ModifySystem }}
             <!-- E-Learning Settings Tab -->
