@@ -19,16 +19,17 @@ import (
 
 // ELearningConfig holds the configuration for e-learning notifications
 type ELearningConfig struct {
-	SMTPHost        string
-	SMTPPort        int
-	SMTPUsername    string
-	SMTPPassword    string
-	SMTPFrom        string
-	SMTPUseTLS      bool
-	BaseURL         string
-	DefaultPassword string
-	EmailSubject    string
-	CompanyName     string
+	SMTPHost         string
+	SMTPPort         int
+	SMTPUsername     string
+	SMTPPassword     string
+	SMTPFrom         string
+	SMTPUseTLS       bool
+	IgnoreCertErrors bool
+	BaseURL          string
+	DefaultPassword  string
+	EmailSubject     string
+	CompanyName      string
 }
 
 var elearningConfig *ELearningConfig
@@ -76,15 +77,16 @@ func GetELearningConfigFromDB() (*ELearningConfig, *ELearningSettings, error) {
 	}
 
 	config := &ELearningConfig{
-		SMTPHost:     host,
-		SMTPPort:     port,
-		SMTPUsername: smtp.Username,
-		SMTPPassword: smtp.Password,
-		SMTPFrom:     smtp.FromAddress,
-		SMTPUseTLS:   !smtp.IgnoreCertErrors, // Use TLS unless cert errors are ignored
-		BaseURL:      settings.BaseURL,
-		EmailSubject: settings.EmailSubject,
-		CompanyName:  settings.CompanyName,
+		SMTPHost:         host,
+		SMTPPort:         port,
+		SMTPUsername:     smtp.Username,
+		SMTPPassword:     smtp.Password,
+		SMTPFrom:         smtp.FromAddress,
+		SMTPUseTLS:       true, // Always use STARTTLS for security (required by most SMTP servers like Gmail)
+		IgnoreCertErrors: smtp.IgnoreCertErrors,
+		BaseURL:          settings.BaseURL,
+		EmailSubject:     settings.EmailSubject,
+		CompanyName:      settings.CompanyName,
 	}
 
 	return config, &settings, nil
@@ -178,30 +180,26 @@ func sendEmailWithFormat(config *ELearningConfig, to, subject, body string, isHT
 	}
 
 	serverAddr := fmt.Sprintf("%s:%d", config.SMTPHost, config.SMTPPort)
-	log.Infof("Connecting to SMTP server: %s (TLS: %t)", serverAddr, config.SMTPUseTLS)
+	log.Infof("Connecting to SMTP server: %s (TLS: %t, IgnoreCertErrors: %t)", serverAddr, config.SMTPUseTLS, config.IgnoreCertErrors)
 
 	var c *smtp.Client
 	var err error
 
-	if config.SMTPUseTLS {
-		c, err = smtp.Dial(serverAddr)
-		if err != nil {
-			return fmt.Errorf("failed to connect to SMTP server: %v", err)
-		}
+	c, err = smtp.Dial(serverAddr)
+	if err != nil {
+		return fmt.Errorf("failed to connect to SMTP server: %v", err)
+	}
 
+	if config.SMTPUseTLS {
 		if ok, _ := c.Extension("STARTTLS"); ok {
 			tlsConfig := &tls.Config{
-				ServerName: config.SMTPHost,
+				ServerName:         config.SMTPHost,
+				InsecureSkipVerify: config.IgnoreCertErrors,
 			}
 			if err = c.StartTLS(tlsConfig); err != nil {
 				c.Close()
 				return fmt.Errorf("failed to start TLS: %v", err)
 			}
-		}
-	} else {
-		c, err = smtp.Dial(serverAddr)
-		if err != nil {
-			return fmt.Errorf("failed to connect to SMTP server: %v", err)
 		}
 	}
 	defer c.Close()
@@ -420,32 +418,27 @@ func sendEmail(config *ELearningConfig, to, subject, body string) error {
 
 	// Connect to SMTP server
 	serverAddr := fmt.Sprintf("%s:%d", config.SMTPHost, config.SMTPPort)
-	log.Infof("Connecting to SMTP server: %s (TLS: %t)", serverAddr, config.SMTPUseTLS)
-	
+	log.Infof("Connecting to SMTP server: %s (TLS: %t, IgnoreCertErrors: %t)", serverAddr, config.SMTPUseTLS, config.IgnoreCertErrors)
+
 	var c *smtp.Client
 	var err error
 
+	c, err = smtp.Dial(serverAddr)
+	if err != nil {
+		return fmt.Errorf("failed to connect to SMTP server: %v", err)
+	}
+
 	if config.SMTPUseTLS {
-		// For Gmail and most modern SMTP servers, use STARTTLS instead of direct TLS
-		c, err = smtp.Dial(serverAddr)
-		if err != nil {
-			return fmt.Errorf("failed to connect to SMTP server: %v", err)
-		}
-		
-		// Start TLS if supported
+		// For Gmail and most modern SMTP servers, use STARTTLS
 		if ok, _ := c.Extension("STARTTLS"); ok {
 			tlsConfig := &tls.Config{
-				ServerName: config.SMTPHost,
+				ServerName:         config.SMTPHost,
+				InsecureSkipVerify: config.IgnoreCertErrors,
 			}
 			if err = c.StartTLS(tlsConfig); err != nil {
 				c.Close()
 				return fmt.Errorf("failed to start TLS: %v", err)
 			}
-		}
-	} else {
-		c, err = smtp.Dial(serverAddr)
-		if err != nil {
-			return fmt.Errorf("failed to connect to SMTP server: %v", err)
 		}
 	}
 	defer c.Close()

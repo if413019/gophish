@@ -111,6 +111,7 @@ func (as *Server) registerRoutes() {
 	root.HandleFunc("/api/user/activity", mid.Use(as.UserActivity, mid.RequireLogin))
 	root.HandleFunc("/api/user/achievements", mid.Use(as.UserAchievements, mid.RequireLogin))
 	root.HandleFunc("/api/user/courses/{id:[0-9]+}/modules/progress", mid.Use(as.UserModuleProgress, mid.RequireLogin))
+	root.HandleFunc("/api/user/courses/{id:[0-9]+}/next-module", mid.Use(as.UserGetNextModule, mid.RequireLogin))
 	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/modules/{moduleId:[0-9]+}/start", mid.Use(as.UserStartModule, mid.RequireLogin))
 	root.HandleFunc("/api/user/courses/{courseId:[0-9]+}/modules/{moduleId:[0-9]+}/complete", mid.Use(as.UserCompleteModule, mid.RequireLogin))
 	// Quiz API endpoints for users

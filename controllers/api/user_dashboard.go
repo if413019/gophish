@@ -187,8 +187,8 @@ func getUserDashboardStats(userID int64) (UserDashboardStats, error) {
 
 // getUserActiveCourses gets courses the user is enrolled in
 func getUserActiveCourses(userID int64) ([]UserCourse, error) {
-	var courses []UserCourse
-	
+	courses := []UserCourse{}
+
 	log.Infof("Getting active courses for user ID: %d", userID)
 	
 	// Get user enrollments
@@ -246,8 +246,8 @@ func getUserActiveCourses(userID int64) ([]UserCourse, error) {
 
 // getUserActivity gets recent user activity
 func getUserActivity(userID int64) ([]UserActivity, error) {
-	var activities []UserActivity
-	
+	activities := []UserActivity{}
+
 	// Get enrollment activities
 	enrollments, err := models.GetUserEnrollments(userID)
 	if err != nil {
@@ -334,14 +334,21 @@ func getUserActivity(userID int64) ([]UserActivity, error) {
 
 // getUserAchievements gets user achievements
 func getUserAchievements(userID int64) ([]UserAchievement, error) {
-	var achievements []UserAchievement
-	
+	achievements := []UserAchievement{}
+
 	// Get user stats for achievement calculation
 	stats, err := getUserDashboardStats(userID)
 	if err != nil {
 		return achievements, err
 	}
-	
+
+	// Get total courses in the system for Security Champion calculation
+	totalCoursesInSystem := getTotalCoursesCount()
+
+	// Check Perfect Reporter achievement (100% report rate)
+	totalEmailsSent, totalReported := getPhishingReportStats(userID)
+	perfectReporterUnlocked := totalEmailsSent > 0 && totalReported == totalEmailsSent
+
 	// Define phishing-focused achievements
 	achievementDefs := []UserAchievement{
 		{
@@ -363,16 +370,16 @@ func getUserAchievements(userID int64) ([]UserAchievement, error) {
 			Unlocked:    stats.ReportedCount >= 5,
 		},
 		{
-			Title:       "Victim to Victor",
-			Description: "Complete training and avoid falling for phishing twice",
+			Title:       "Perfect Reporter",
+			Description: "Report 100% of all phishing tests sent to you",
 			Icon:        "fa-trophy",
-			Unlocked:    stats.PhishedCount <= 1 && stats.CompletedCourses > 0,
+			Unlocked:    perfectReporterUnlocked,
 		},
 		{
 			Title:       "Security Champion",
-			Description: "Complete all assigned training courses",
+			Description: "Complete all available training courses",
 			Icon:        "fa-star",
-			Unlocked:    stats.CompletedCourses == stats.AssignedCourses && stats.AssignedCourses > 0,
+			Unlocked:    stats.CompletedCourses >= totalCoursesInSystem && totalCoursesInSystem > 0,
 		},
 		{
 			Title:       "Eagle Eye",
@@ -381,7 +388,7 @@ func getUserAchievements(userID int64) ([]UserAchievement, error) {
 			Unlocked:    stats.ReportedCount > 0 && stats.PhishedCount == 0,
 		},
 	}
-	
+
 	return achievementDefs, nil
 }
 
@@ -430,33 +437,77 @@ func calculatePhishingStats(userID int64) (int, int) {
 		log.Errorf("Error getting user for phishing stats: %v", err)
 		return 0, 0
 	}
-	
+
 	// Query campaign results to count phishing interactions
 	// In Gophish, results are linked by email address in the BaseRecipient
 	phishedCount := 0
 	reportedCount := 0
-	
+
 	// Count how many times user clicked links or submitted data
 	err = models.DB().Model(&models.Result{}).
 		Where("email = ? AND (status = ? OR status = ?)", user.Username, models.EventClicked, models.EventDataSubmit).
 		Count(&phishedCount).Error
-	
+
 	if err != nil {
 		log.Errorf("Error counting phished results: %v", err)
 	}
-	
+
 	// Count how many times user reported phishing emails
 	err = models.DB().Model(&models.Result{}).
 		Where("email = ? AND reported = ?", user.Username, true).
 		Count(&reportedCount).Error
-	
+
 	if err != nil {
 		log.Errorf("Error counting reported results: %v", err)
 	}
-	
+
 	log.Infof("Phishing stats for user %s (ID: %d): phished=%d, reported=%d", user.Username, userID, phishedCount, reportedCount)
-	
+
 	return phishedCount, reportedCount
+}
+
+// getTotalCoursesCount returns the total number of courses in the system
+func getTotalCoursesCount() int {
+	var count int
+	err := models.DB().Model(&models.Course{}).Count(&count).Error
+	if err != nil {
+		log.Errorf("Error counting total courses: %v", err)
+		return 0
+	}
+	return count
+}
+
+// getPhishingReportStats returns total phishing emails sent to user and how many were reported
+func getPhishingReportStats(userID int64) (int, int) {
+	// Get the user to find their email/username
+	user, err := models.GetUser(userID)
+	if err != nil {
+		log.Errorf("Error getting user for phishing report stats: %v", err)
+		return 0, 0
+	}
+
+	// Count total phishing emails sent to this user
+	var totalSent int
+	err = models.DB().Model(&models.Result{}).
+		Where("email = ?", user.Username).
+		Count(&totalSent).Error
+	if err != nil {
+		log.Errorf("Error counting total emails sent: %v", err)
+		return 0, 0
+	}
+
+	// Count how many were reported
+	var totalReported int
+	err = models.DB().Model(&models.Result{}).
+		Where("email = ? AND reported = ?", user.Username, true).
+		Count(&totalReported).Error
+	if err != nil {
+		log.Errorf("Error counting reported emails: %v", err)
+		return totalSent, 0
+	}
+
+	log.Infof("Phishing report stats for user %s: sent=%d, reported=%d", user.Username, totalSent, totalReported)
+	return totalSent, totalReported
 }
 
 // UserModuleProgress returns module progress for a user's course enrollment
@@ -803,5 +854,72 @@ func (as *Server) UserGetQuizAttempts(w http.ResponseWriter, r *http.Request) {
 		}
 		
 		JSONResponse(w, attempts, http.StatusOK)
+	}
+}
+
+// UserGetNextModule returns the next accessible uncompleted module for a course
+func (as *Server) UserGetNextModule(w http.ResponseWriter, r *http.Request) {
+	switch {
+	case r.Method == "GET":
+		vars := mux.Vars(r)
+		courseId, err := strconv.ParseInt(vars["id"], 0, 64)
+		if err != nil {
+			JSONResponse(w, models.Response{Success: false, Message: "Invalid course ID"}, http.StatusBadRequest)
+			return
+		}
+
+		user := ctx.Get(r, "user").(models.User)
+
+		// Get user enrollment for this course
+		enrollment, err := models.GetCourseEnrollment(user.Id, courseId)
+		if err != nil {
+			log.Error("Error getting user enrollment: ", err)
+			JSONResponse(w, models.Response{Success: false, Message: "Enrollment not found"}, http.StatusNotFound)
+			return
+		}
+
+		// Get course with modules
+		course, err := models.GetCourse(courseId, 1)
+		if err != nil {
+			log.Error("Error getting course: ", err)
+			JSONResponse(w, models.Response{Success: false, Message: "Course not found"}, http.StatusNotFound)
+			return
+		}
+
+		// Get module progress
+		progress, err := models.GetUserModuleProgress(enrollment.Id)
+		if err != nil {
+			log.Error("Error getting module progress: ", err)
+			JSONResponse(w, models.Response{Success: false, Message: err.Error()}, http.StatusInternalServerError)
+			return
+		}
+
+		// Build a map of completed module IDs
+		completedModules := make(map[int64]bool)
+		for _, p := range progress {
+			if p.CompletedDate != nil {
+				completedModules[p.ModuleId] = true
+			}
+		}
+
+		// Find the first uncompleted module that is accessible
+		// A module is accessible if all previous modules are completed
+		var nextModuleId int64 = 0
+		for _, module := range course.Modules {
+			if !completedModules[module.Id] {
+				nextModuleId = module.Id
+				break
+			}
+		}
+
+		// If all modules are completed, return the last module
+		if nextModuleId == 0 && len(course.Modules) > 0 {
+			nextModuleId = course.Modules[len(course.Modules)-1].Id
+		}
+
+		JSONResponse(w, map[string]interface{}{
+			"next_module_id": nextModuleId,
+			"course_id":      courseId,
+		}, http.StatusOK)
 	}
 }

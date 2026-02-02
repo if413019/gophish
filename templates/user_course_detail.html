@@ -79,7 +79,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: conic-gradient(from 0deg, #667eea 0%, #764ba2 var(--progress, 0%), #e2e8f0 var(--progress, 0%), #e2e8f0 100%);
+    background: conic-gradient(from -90deg, #667eea 0%, #764ba2 var(--progress, 0%), #e2e8f0 var(--progress, 0%), #e2e8f0 100%);
     border-radius: 50%;
 }
 
@@ -204,15 +204,12 @@
 }
 
 .module-actions {
-    position: absolute;
-    bottom: 2rem;
-    right: 2rem;
-    display: none;
-}
-
-.course-module.active .module-actions {
     display: flex;
+    justify-content: flex-end;
     gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e2e8f0;
+    background: #f8f9fa;
 }
 
 .btn-modern {
@@ -1384,16 +1381,21 @@
                                 </div>
                             </div>
                         {{ end }}
-                        
-                        <!-- Module Action Button -->
-                        <div class="module-actions">
-                            <button class="btn-modern btn-success-modern module-complete-btn" data-module-id="{{ $module.Id }}" onclick="completeModule({{ $module.Id }})">
-                                <i class="fa fa-check"></i>
-                                Mark Complete
-                            </button>
-                        </div>
             </div>
             {{ end }}
+
+            <!-- Module Actions (outside course-module, matches course_preview.html) -->
+            <div class="module-actions" id="module-actions">
+                <button class="btn-modern btn-primary-modern" id="prev-module-btn" style="display: none;">
+                    <i class="fa fa-arrow-left"></i> Previous
+                </button>
+                <button class="btn-modern btn-success-modern" id="complete-module-btn">
+                    <i class="fa fa-check"></i> Mark Complete
+                </button>
+                <button class="btn-modern btn-primary-modern" id="next-module-btn" style="display: none;">
+                    Next <i class="fa fa-arrow-right"></i>
+                </button>
+            </div>
         </div>
         
         <!-- Modules Sidebar -->
@@ -1616,14 +1618,7 @@ function loadModuleProgress() {
             
             // Enable modules based on sequential progression
             enableSequentialModules(completedIds);
-            
-            // Update button states for all modules after loading progress
-            $('.module-nav-item').each(function() {
-                var moduleId = parseInt($(this).data('module-id'));
-                var isCompleted = $(this).hasClass('completed');
-                updateModuleButton(moduleId, isCompleted);
-            });
-            
+
             // Update progress display
             var percentage = {{ len .Course.Modules }} > 0 ? Math.round((completedModules / {{ len .Course.Modules }}) * 100) : 0;
             updateProgressDisplay(percentage);
@@ -1659,31 +1654,65 @@ function enableSequentialModules(completedIds) {
 
 function updateProgressDisplay(percentage) {
     $('#courseProgressText').text(percentage + '%');
-    // Update the progress circle
-    $('#progressCircle').css('--progress', percentage + '%');
+    // Update the progress circle using native setProperty for CSS custom properties
+    var progressCircle = document.getElementById('progressCircle');
+    if (progressCircle) {
+        progressCircle.style.setProperty('--progress', percentage + '%');
+    }
 }
 
 function initializeModuleNavigation() {
+    // Module sidebar navigation
     $('.module-nav-item').on('click', function() {
         if ($(this).hasClass('locked')) {
             alert('Please complete the previous modules first.');
             return;
         }
-        
+
         var moduleId = $(this).data('module-id');
         var moduleIndex = $(this).data('index');
-        
+
         showModule(moduleId, moduleIndex);
     });
+
+    // Previous button
+    $('#prev-module-btn').on('click', function() {
+        goToPrevModule();
+    });
+
+    // Next button
+    $('#next-module-btn').on('click', function() {
+        goToNextModule();
+    });
+
+    // Complete button
+    $('#complete-module-btn').on('click', function() {
+        if (currentModuleId) {
+            completeModule(currentModuleId);
+        }
+    });
+}
+
+function goToPrevModule() {
+    if (!currentModuleId) return;
+
+    var currentNav = $('.module-nav-item[data-module-id="' + currentModuleId + '"]');
+    var prevNav = currentNav.prev('.module-nav-item:not(.locked)');
+
+    if (prevNav.length > 0) {
+        var moduleId = prevNav.data('module-id');
+        var moduleIndex = prevNav.data('index');
+        showModule(moduleId, moduleIndex);
+    }
 }
 
 function showModule(moduleId, moduleIndex) {
     currentModuleId = moduleId;
-    
+
     // Check if module is already completed
     var moduleNavItem = $('.module-nav-item[data-module-id="' + moduleId + '"]');
     var isCompleted = moduleNavItem.hasClass('completed');
-    
+
     if (!isCompleted) {
         // Start module via API only if not completed
         $.post('/api/user/courses/{{ .Course.Id }}/modules/' + moduleId + '/start')
@@ -1693,11 +1722,11 @@ function showModule(moduleId, moduleIndex) {
                 }
             });
     }
-    
+
     // Hide all modules
     $('.course-module').removeClass('active');
     $('.module-nav-item').removeClass('active');
-    
+
     // Show selected module
     var activeModule = $('.course-module[data-module-id="' + moduleId + '"]');
     activeModule.addClass('active');
@@ -1711,43 +1740,76 @@ function showModule(moduleId, moduleIndex) {
             iframe[0].contentWindow.focus();
         }, 100);
     }
-    
+
     // Update header title
     var moduleName = $('.module-nav-item[data-module-id="' + moduleId + '"] .module-title').text();
     $('#currentModuleTitle').text(moduleName);
-    
-    // Update button based on completion status
-    updateModuleButton(moduleId, isCompleted);
+
+    // Update navigation buttons
+    updateNavigationButtons(moduleId, isCompleted);
 }
 
-function updateModuleButton(moduleId, isCompleted) {
-    var completeBtn = $('.course-module[data-module-id="' + moduleId + '"] .module-complete-btn');
-    
+function updateNavigationButtons(moduleId, isCompleted) {
+    var currentNav = $('.module-nav-item[data-module-id="' + moduleId + '"]');
+    var prevNav = currentNav.prev('.module-nav-item:not(.locked)');
+    var nextNav = currentNav.next('.module-nav-item:not(.locked)');
+
+    var prevBtn = $('#prev-module-btn');
+    var nextBtn = $('#next-module-btn');
+    var completeBtn = $('#complete-module-btn');
+
+    // Show/hide previous button
+    if (prevNav.length > 0) {
+        prevBtn.show();
+    } else {
+        prevBtn.hide();
+    }
+
+    // Show/hide next button
+    if (nextNav.length > 0) {
+        nextBtn.show();
+    } else {
+        nextBtn.hide();
+    }
+
+    // Update complete button based on completion status
     if (isCompleted) {
-        // Find next module
-        var currentNav = $('.module-nav-item[data-module-id="' + moduleId + '"]');
-        var nextNav = currentNav.next('.module-nav-item:not(.locked):not(.completed)');
-        
-        if (nextNav.length > 0) {
-            completeBtn.html('<i class="fa fa-arrow-right"></i> Next Module');
-            completeBtn.removeClass('btn-success-modern').addClass('btn-primary-modern');
-            completeBtn.attr('onclick', 'goToNextModule(' + moduleId + ')');
-        } else {
-            completeBtn.html('<i class="fa fa-check-circle"></i> Course Complete');
-            completeBtn.removeClass('btn-primary-modern').addClass('btn-success-modern');
-            completeBtn.attr('onclick', '');
-            completeBtn.prop('disabled', true);
-        }
+        completeBtn.html('<i class="fa fa-check-circle"></i> Completed');
+        completeBtn.removeClass('btn-success-modern').addClass('btn-primary-modern');
+        completeBtn.prop('disabled', true);
     } else {
         completeBtn.html('<i class="fa fa-check"></i> Mark Complete');
         completeBtn.removeClass('btn-primary-modern').addClass('btn-success-modern');
-        completeBtn.attr('onclick', 'completeModule(' + moduleId + ')');
         completeBtn.prop('disabled', false);
     }
 }
 
 function showFirstAvailableModule() {
-    // Find first non-locked module and show it
+    // Check for module ID in URL query parameter
+    var urlParams = new URLSearchParams(window.location.search);
+    var requestedModuleId = urlParams.get('module');
+
+    if (requestedModuleId) {
+        // Try to show the requested module if it's accessible
+        var requestedModule = $('.module-nav-item[data-module-id="' + requestedModuleId + '"]:not(.locked)');
+        if (requestedModule.length > 0) {
+            var moduleId = requestedModule.data('module-id');
+            var moduleIndex = requestedModule.data('index');
+            showModule(moduleId, moduleIndex);
+            return;
+        }
+    }
+
+    // Fallback: find first non-locked, non-completed module
+    var firstUncompleted = $('.module-nav-item:not(.locked):not(.completed):first');
+    if (firstUncompleted.length > 0) {
+        var moduleId = firstUncompleted.data('module-id');
+        var moduleIndex = firstUncompleted.data('index');
+        showModule(moduleId, moduleIndex);
+        return;
+    }
+
+    // If all are completed, show the first available module
     var firstAvailable = $('.module-nav-item:not(.locked):first');
     if (firstAvailable.length > 0) {
         var moduleId = firstAvailable.data('module-id');
@@ -1760,17 +1822,17 @@ function completeModule(moduleId) {
     if (!confirm('Are you sure you want to mark this module as complete?')) {
         return;
     }
-    
+
     $.post('/api/user/courses/{{ .Course.Id }}/modules/' + moduleId + '/complete')
         .done(function(response) {
             if (response.success) {
-                // Reload progress
+                // Reload progress and update UI
                 loadModuleProgress();
-                
-                // Update button state after completion
+
+                // Update navigation buttons after completion
                 setTimeout(function() {
                     if (currentModuleId === moduleId) {
-                        updateModuleButton(moduleId, true);
+                        updateNavigationButtons(moduleId, true);
                     }
                 }, 500);
             } else {
@@ -1782,22 +1844,16 @@ function completeModule(moduleId) {
         });
 }
 
-function completeCurrentModule() {
-    if (currentModuleId) {
-        completeModule(currentModuleId);
-    }
-}
+function goToNextModule() {
+    if (!currentModuleId) return;
 
-function goToNextModule(fromModuleId) {
-    var moduleId = fromModuleId || currentModuleId;
-    if (moduleId) {
-        var currentNav = $('.module-nav-item[data-module-id="' + moduleId + '"]');
-        var nextNav = currentNav.next('.module-nav-item:not(.locked):not(.completed)');
-        if (nextNav.length > 0) {
-            var nextModuleId = nextNav.data('module-id');
-            var nextModuleIndex = nextNav.data('index');
-            showModule(nextModuleId, nextModuleIndex);
-        }
+    var currentNav = $('.module-nav-item[data-module-id="' + currentModuleId + '"]');
+    var nextNav = currentNav.next('.module-nav-item:not(.locked)');
+
+    if (nextNav.length > 0) {
+        var moduleId = nextNav.data('module-id');
+        var moduleIndex = nextNav.data('index');
+        showModule(moduleId, moduleIndex);
     }
 }
 

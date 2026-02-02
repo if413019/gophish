@@ -2223,6 +2223,88 @@
     color: var(--modern-text-muted);
 }
 
+/* Input group styling for settings */
+.settings-value .input-group {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+.settings-value .input-group .form-control {
+    flex: 1;
+    min-width: 0;
+    border-radius: var(--modern-radius-sm) 0 0 var(--modern-radius-sm) !important;
+    border-right: none !important;
+    height: auto;
+}
+
+.settings-value .input-group .form-control:focus {
+    border-right: none !important;
+}
+
+.settings-value .input-group-btn {
+    display: flex;
+    flex-shrink: 0;
+    align-items: stretch;
+}
+
+.settings-value .input-group-btn .btn-modern,
+.settings-value .input-group-btn .btn {
+    border-radius: 0 var(--modern-radius-sm) var(--modern-radius-sm) 0 !important;
+    white-space: nowrap;
+    height: 100%;
+    padding: 0 1.25rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    border: 2px solid transparent;
+    border-left: none;
+}
+
+/* Input group styling for form-group with button (campaigns, etc.) */
+/* Only apply to input-groups that have an input-group-btn child */
+.form-group .input-group:has(.input-group-btn) {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    flex-wrap: nowrap;
+}
+
+.form-group .input-group:has(.input-group-btn) .form-control,
+.form-group .input-group:has(.input-group-btn) .select2-container {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: calc(100% - 140px);
+    border-radius: var(--modern-radius-sm) 0 0 var(--modern-radius-sm) !important;
+    border-right: none !important;
+    height: auto;
+}
+
+.form-group .input-group:has(.input-group-btn) .select2-container .select2-selection {
+    border-radius: var(--modern-radius-sm) 0 0 var(--modern-radius-sm) !important;
+    border-right: none !important;
+}
+
+.form-group .input-group-btn {
+    display: flex;
+    flex-shrink: 0;
+    align-items: stretch;
+    min-width: fit-content;
+}
+
+.form-group .input-group-btn .btn-modern,
+.form-group .input-group-btn .btn {
+    border-radius: 0 var(--modern-radius-sm) var(--modern-radius-sm) 0 !important;
+    white-space: nowrap;
+    height: 100%;
+    padding: 0 1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    border: 2px solid transparent;
+    border-left: none;
+}
+
 .settings-divider {
     height: 1px;
     background: var(--modern-border);
